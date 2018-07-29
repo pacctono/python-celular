@@ -83,12 +83,29 @@ def fgFormateaNumero(sCad, dec=0):
 # Inicio principal
 sHoy = strftime("%Y%m%d", localtime())
 nbrArchBanco = sys.argv[1]
+(sNbrArch, sTipo) = nbrArchBanco.split('.', 1)
+(sNbrBanco, sFecha) = sNbrArch.split('_', 1)
+sBanco = 'MERCANTILF'
+if 0 == sNbrBanco.find(sBanco): bMerc = True
+else:
+  bMerc = False
+  sBanco = 'BANESCO'
+  if 0 == sNbrBanco.find(sBanco): bBan = True
+  else:
+    bBan = False
+    if 0 == sNbrBanco.find('GLOBAL'):
+      bVzla = True
+      sBanco = 'VENEZUELA'
+    else:
+      bVzla = False
+      print("Nombre de archivo pasado como parametro no cumple con los nombres de archivos esperados.")
+      sys.exit()
 f = open(nbrArchBanco, 'r')
 try:
   ln = f.readline()
-  if 'MERCANTILF' == nbrArchBanco[0:10]:	# 60,8:#Regs; 68,17:mtoTot; 93,20:CtaDebito. Detalle: 3,15:CI; 81,17:Monto; 61,20:CtaCliente
-    sNumLote = nbrArchBanco[11:26]
-    sFecha = nbrArchBanco[12:20]
+  if bMerc:	# 60,8:#Regs; 68,17:mtoTot; 93,20:CtaDebito. Detalle: 3,15:CI; 81,17:Monto; 61,20:CtaCliente
+    sNumLote = sFecha
+    sFechaValor = sFecha[1:9]
     sCodCta = '01050068121068204451'
     nLnCtrl = 1
     ln1 = (ln[0:1], ln[1:13], ln[13:28], ln[28:33], ln[33:43], ln[43:44], ln[44:59], ln[59:67], float(ln[67:84])/100, ln[84:92], ln[92:112], ln[112:119], ln[139:])	# El ultimo campo tiene 261 caracteres (todos zeros).
@@ -107,8 +124,8 @@ try:
     else: sRif = ln1[5] + '-' + ln1[6].lstrip('0')
     if not ln1[7].isdigit():
       raise ValueError("Error: Numero de registros en columna 60 de 1ra fila errada, deberia ser numerico, pero es: '" + ln1[7] + "'")
-    elif sFecha != ln1[9]:
-      raise ValueError("Error: Fecha valor errada, en col 85 de 1ra fila, deberia ser : '" + sFecha + "', pero tiene '" + ln1[9] + "'")
+    elif sFechaValor != ln1[9]:
+      raise ValueError("Error: Fecha valor errada, en col 85 de 1ra fila, deberia ser : '" + sFechaValor + "', pero tiene '" + ln1[9] + "'")
     elif sCodCta != ln1[10]:
       raise ValueError("Error: Codigo cuenta errada, en col 93 de 1ra fila, deberia ser : '" + sCodCta + "', pero tiene '" + ln1[10] + "'.")
     elif '0000000' != ln1[11]:
@@ -125,15 +142,15 @@ try:
     iCC = 6
     iMto = 7
     sLnDet = '2'
-  elif 'BANESCO' == nbrArchBanco[0:7]:	# 42,20:CtaDebito; 72,13:MntTot. Detalle: 77,10:CI; 22,11:Monto; 2,20:CtaCliente
-    sFecha = nbrArchBanco[8:16]
+  elif bBan:	# 42,20:CtaDebito; 72,13:MntTot. Detalle: 77,10:CI; 22,11:Monto; 2,20:CtaCliente
+    sFechaValor = sFecha
     sCodCta = '01340055500553285809'
     nLnCtrl = 3
     ln1 = (ln[0:3], ln[3:18], ln[18:])	# El ultimo campo tiene 16 caracteres (maximo).
     if 'HDR' != ln1[0]:
       raise ValueError("Error: La primera columna de la primera fila no tiene un 'HDR', pero contiene: '" + ln1[0] + "'.")
-    elif 'BANESCO' != ln1[1].rstrip():
-      raise ValueError("Error: La palabra 'BANESCO' deberia estar en la columna 4 de la primera fila, pero contiene: '" + ln1[1] + "'.")
+    elif sBanco != ln1[1].rstrip():
+      raise ValueError("Error: La palabra '" + sBanco + "' deberia estar en la columna 4 de la primera fila, pero contiene: '" + ln1[1] + "'.")
     elif 34 < len(ln):
       raise ValueError("Error: La longitud de la primera fila no deberia ser mayor de 34, pero es: '" + str(len(ln)) + "'.")
     ln = f.readline()
@@ -145,8 +162,8 @@ try:
     elif not ln1[3].isdigit():
       raise ValueError("Error: La columna 41 de la segunda fila deberia contener 8 digitos, pero contiene: '" + ln1[3] + "'.")
     else: sNumLote = ln1[3]
-    if sFecha != ln1[4]:
-      raise ValueError("Error: La columna 76 de la segunda fila deberia contener la fecha valor: '" + sFecha + "', pero contiene: '" + ln1[4] + "'.")
+    if sFechaValor != ln1[4]:
+      raise ValueError("Error: La columna 76 de la segunda fila deberia contener la fecha valor: '" + sFechaValor + "', pero contiene: '" + ln1[4] + "'.")
     elif not ln1[5].isdigit():
       raise ValueError("Error: La columna 84 de la segunda fila deberia contener 6 digitos (hora), pero contiene: '" + ln1[5] + "'.")
     else: sHora = ln1[5]
@@ -156,8 +173,8 @@ try:
     ln1 = (ln[0:2], ln[2:10], ln[32:42], ln[49:57], float(ln[84:99])/100, ln[103:123], ln[137:144], ln[148:156])
     if '02' != ln1[0]:
       raise ValueError("Error: La primera columna de la tercera fila no tiene un '02', pero contiene: '" + ln1[0] + "'.")
-    elif sFecha != ln1[1] or sFecha != ln1[7]:
-      raise ValueError("Error: La columna 3 o 149 de la tercera fila deberia contener la fecha valor: '" + sFecha + "', pero contiene: '" + ln1[1] + "' o '" + ln1[8] + "'.")
+    elif sFechaValor != ln1[1] or sFechaValor != ln1[7]:
+      raise ValueError("Error: La columna 3 o 149 de la tercera fila deberia contener la fecha valor: '" + sFechaValor + "', pero contiene: '" + ln1[1] + "' o '" + ln1[8] + "'.")
     elif 'J306192298' != ln1[2]:
       raise ValueError("Error: Rif en columna 2 de tercera fila errada, deberia ser 'J306192298'")
     else: sRif = ln1[2][0:1] + '-' + ln1[2][1:]
@@ -165,8 +182,8 @@ try:
       raise ValueError("Error: La columna 50 de la tercera fila deberia contener 'IPASPUDO', pero contiene: '" + ln1[3] + "'.")
     elif sCodCta != ln1[5]:
       raise ValueError("Error: Codigo cuenta errada, en col 104 de la tercera fila, deberia ser : '" + sCodCta + "', pero tiene '" + ln1[5] + "'.")
-    elif 'BANESCO' != ln1[6].rstrip():
-      raise ValueError("Error: La palabra 'BANESCO' deberia estar en la columna 138 de la tercera fila, pero contiene: '" + ln1[6] + "'.")
+    elif sBanco != ln1[6].rstrip():
+      raise ValueError("Error: La palabra '" + sBanco + "' deberia estar en la columna 138 de la tercera fila, pero contiene: '" + ln1[6] + "'.")
     if 157 < len(ln):
       raise ValueError("Error: La longitud de la tercera fila no deberia ser mayor de 157, pero es: '" + str(len(ln)) + "'.")
     fMtoTot = ln1[4]
@@ -203,10 +220,10 @@ try:
       raise ValueError("Error: La columna 33 de la ultima fila deberia contener el mismo valor del monto total de la tercera fila: " + str(fMtoTot) + ", pero contiene: '" + ln1[2] + "'.")
     elif 48 < len(ln):
       raise ValueError("Error: La longitud de la ultima fila no deberia ser mayor de 48, pero es: '" + str(len(ln)) + "'.")
-  elif 'GLOBAL' == nbrArchBanco[0:6]:	# 42,20:CtaDebito; 72,13:MntTot. Detalle: 77,10:CI; 22,11:Monto; 2,20:CtaCliente
-    sDia = nbrArchBanco[13:15]
-    sMes = nbrArchBanco[11:13]
-    sAno = nbrArchBanco[9:11]
+  elif bVzla:	# 42,20:CtaDebito; 72,13:MntTot. Detalle: 77,10:CI; 22,11:Monto; 2,20:CtaCliente
+    sDia = sFecha[6:]
+    sMes = sFecha[4:6]
+    sAno = sFecha[2:4]
     sCodCta = '01020672330000020336'
     nLnCtrl = 1
     ln1 = (ln[0:1], ln[1:9], ln[9:41], ln[41:61], ln[61:63], ln[63:65], ln[66:68], ln[69:71], float(ln[71:84])/100, ln[84:])	# El ultimo campo tiene 6 caracteres.
@@ -222,7 +239,7 @@ try:
       raise ValueError("Error: Mes errado, en col 67 de 1ra fila, deberia ser : '" + sMes + "', pero tiene '" + ln1[6] + "'.")
     elif sAno != ln1[7]:
       raise ValueError("Error: a#o errado, en col 70 de 1ra fila, deberia ser : '" + sAno + "', pero tiene '" + ln1[7] + "'.")
-    sFecha = ln[63:71]
+    sFechaValor = ln[63:71]
     fMtoTot = ln1[8]
     iMtoTot1 = 71
     iMtoTot2 = 84
@@ -252,10 +269,10 @@ for l in lista:
        raise ValueError("Error en el campo de la cedula de identidad del socio en la fila: " + str(nLn) + ", contiene: " + l[iCI])
     elif not l[iCC].isdigit():	# iCC es el indice del codigo cuenta socio, definido anteriormente.
        raise ValueError("Error en el campo del codigo de cuenta (2) del socio en la fila: " + str(nLn) + ", contiene: " + l[iCC])
-    if 'MERCANTILF' == nbrArchBanco[0:10] or 'BANESCO' == nbrArchBanco[0:7]:
+    if bMerc or bBan:
       if l[iNac] not in ('V', 'E', 'P'):
         raise ValueError("Error: La segunda columna de la fila " + str(nLn) + ", no contiene 'V', 'E' o 'P', contiene: " + l[1])
-    if 'MERCANTILF' == nbrArchBanco[0:10]:
+    if bMerc:
       if l[3] not in ('1', '3'):
         raise ValueError("Error: La forma de pago en columna 18 en la fila " + str(nLn) + ", no contiene '1' o '3', contiene: " + l[3])
       elif '000000000000' != l[4]:
@@ -279,7 +296,7 @@ for l in lista:
 # FIN for
 
 #lTot = (0, 0.00)
-if ('MERCANTILF' == nbrArchBanco[0:10] or 'BANESCO' == nbrArchBanco[0:7]) and int(nroReg) != lTot[0]:
+if (bMerc or bBan) and int(nroReg) != lTot[0]:
   print("%sError:%s El numero de registros de la primera(Mercantil)/ultima(Banesco) fila no concuerda con el numero de registros detalle" % (ROJO, FIN))
   print("%sValor entre columnas " + str(iNoReg1+1) + " y " + str(iNoReg2) + " del primer/ultimo registro:%s %s%s%s" % (AZUL, FIN, ROJO, nroReg, FIN))
   print("%sNumero total de registros de detalle:%s %s%d%s" % (AZUL, FIN, ROJO, lTot[0], FIN))
@@ -287,9 +304,11 @@ if 0.005 < abs(fMtoTot - lTot[1]):
   print("%sError:%s El monto total de la primera fila no concuerda con la suma del monto total de depositos" % (ROJO, FIN))
   print("Valor entre columnas " + str(iMtoTot1) + " y " + str(iMtoTot2) + " del primer registro: " + fgFormateaNumero(fMtoTot, 2))
   print("Monto total de depossitos en registros de detalle: " + fgFormateaNumero(lTot[1], 2))
-if 'MERCANTILF' == nbrArchBanco[0:10]: print("%sNumero de lote:%s %s%s%s" % (AZUL, FIN, CYAN, sNumLote, FIN))
-if 'MERCANTILF' == nbrArchBanco[0:10]: print("%sRif:%s %s%s%s" % (AZUL, FIN, CYAN, sRif, FIN))
-print("%sFecha valor:%s %s%s%s" % (AZUL, FIN, CYAN, sFecha, FIN))
+if bMerc or bBan: print("%sNumero de lote:%s %s%s%s" % (AZUL, FIN, CYAN, sNumLote, FIN))
+if bMerc or bBan: print("%sRif:%s %s%s%s" % (AZUL, FIN, CYAN, sRif, FIN))
+if bMerc or bBan: print("%sFecha valor:%s %s%s%s" % (AZUL, FIN, CYAN, sFechaValor[6:] + '/' +\
+                                                     sFechaValor[4:6] + '/' + sFechaValor[0:4], FIN))
+elif bVzla: print("%sFecha valor:%s %s%s%s" % (AZUL, FIN, CYAN, sFechaValor, FIN))
 print("%sCodigo de cuenta bancaria:%s %s%s%s" % (AZUL, FIN, CYAN, sCodCta, FIN))
 print("%sSe deposita a %d socios, la cantidad de %s bolivares.%s" % \
       (VERDE, lTot[0], fgFormateaNumero(lTot[1], 2), FIN))
