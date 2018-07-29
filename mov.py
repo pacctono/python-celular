@@ -295,7 +295,7 @@ while True:
     break
 
 # 0:Mov (6:retroact o 7:fijo); 1:CI; 2:Conc; 3:Saldo; 4:Cuota; 5:Ctrl (1:Crea, 2:Mod, 3:eli); 6:Tipo (1:Saldo-cuota, 2:Cuota fija).
-  lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9], linea.rstrip()[10:13], float(linea.rstrip()[28:38])/100, float(linea.rstrip()[38:46])/100, linea.rstrip()[52:53], linea.rstrip()[76:77]) for linea in f]
+  lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9], linea.rstrip()[10:13], float(linea.rstrip()[26:38])/100, float(linea.rstrip()[38:49])/100, linea.rstrip()[52:53], linea.rstrip()[76:77]) for linea in f]
   if f: f.close()
 
   dicc, dConc = poblarDicc(lista, dConc)
