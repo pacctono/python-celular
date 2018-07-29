@@ -293,14 +293,14 @@ while True:
     break
 
   try:
-    lista = [(linea.rstrip()[0:8], linea.rstrip()[9:12], float(linea.rstrip()[12:20])/100, float(linea.rstrip()[20:])/100) for linea in f]
+    lista = [(linea.rstrip()[0:8], linea.rstrip()[9:12], float(linea.rstrip()[12:22])/100, float(linea.rstrip()[22:])/100) for linea in f]
   except:
     nL = 0
     f.seek(0, 0)
     for linea in f:
-      if not (linea.rstrip()[0:8].isdigit()) or not (linea.rstrip()[9:12].isdigit()) or not (linea.rstrip()[12:20].isdigit()) or not (linea.rstrip()[20:].isdigit()):
+      if not (linea.rstrip()[0:8].isdigit()) or not (linea.rstrip()[9:12].isdigit()) or not (linea.rstrip()[12:22].isdigit()) or not (linea.rstrip()[22:].isdigit()):
         print("%sLinea %d con caracteres extra#os: %s%s" % (ROJO, nL, linea.rstrip(), FIN))
-        print("%sCI:%s; CLV:%s; MtoFijo:%s; MtoVar:%s%s" % (ROJO, linea.rstrip()[0:8], linea.rstrip()[9:12], linea.rstrip()[12:20], linea.rstrip()[20:], FIN))
+        print("%sCI:%s; CLV:%s; MtoFijo:%s; MtoVar:%s%s" % (ROJO, linea.rstrip()[0:8], linea.rstrip()[9:12], linea.rstrip()[12:22], linea.rstrip()[22:], FIN))
         sys.exit()
       nL += 1
 # Fin del 'else', del 'for' y del 'except'.
