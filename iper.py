@@ -1,65 +1,160 @@
 #!/usr/bin/python
+#-*-coding:utf8;-*-
+#qpy:3
+#qpy:console
 import sys
 import io
+try:
+  from lib import DIR
+  bMovil = True
+except:
+  DIR = './'
+  bMovil = False
+if bMovil:
+  from os import listdir
+  from os.path import isfile, join
+else:
+  from os.path import abspath
 
-class color:
-	PURPLE   = '\033[95m'
-	HEADER   = '\033[95m'
-	CYAN     = '\033[96m'
-	DARKCYAN = '\033[36m'
-	BLUE     = '\033[94m'
-	OKBLUE   = '\033[94m'
-	GREEN    = '\033[92m'
-	OKGREEN  = '\033[92m'
-	YELLOW   = '\033[93m'
-	WARNING  = '\033[93m'
-	RED      = '\033[91m'
-	BOLD     = '\033[1m'
-	UNDERLINE = '\033[4m'
-	END      = '\033[0m'
-	FAIL     = '\033[91m'
-AMARI = color.YELLOW	# Primer titulo.
-CYAN  = color.CYAN	# Identificacion del socio.
-AZUL  = color.BLUE	# Identificacion de los datos.
-PURPURA = color.PURPLE	# Linea final (total de prestamos).
-VERDE = color.GREEN	# Linea final (totales).
-ROJO  = color.RED	# Error
-FIN   = color.END
+if bMovil:
+  import fnmatch
+  import sl4a
+  import libES, libConst
 
-f = io.open(sys.argv[1], mode='r', encoding='latin-1')
-lista = [(linea.rstrip()[0:10], linea.rstrip()[11:83], linea.rstrip()[42:44], linea.rstrip()[45:65], linea.rstrip()[83:85], linea.rstrip()[86:106]) for linea in f]
-dicc = {}
-lConc = []
-i = 0
-for l in lista:
-  if not dicc.has_key(l[0]):
-    dicc[l[0]] = (l[0], l[1], l[2], l[3], l[4], l[5])
-    lConc.insert(i, l[0])
-    i += 1
-#
-lConc.sort()
-iL = 0		# Numero de linea leida.
-#print(lConc)
-nC = 0		# Numero de linea corta.
-nL = 0		# Numero de linea larga.
-for v in lConc:
-  if '' == v or '' == v.strip() or None == v or not v: continue
-  iL += 1
-  try:
-    if dicc[v][2].isdigit() and dicc[v][3].isdigit():	# Linea corta
-      if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
-      nC += 1
-    elif dicc[v][4].isdigit() and dicc[v][5].isdigit():	# Linea larga
-      if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5]))
-      nL += 1
-    else:
-      print("%sERROR: (%d{%d/%d})%s;%d:%25.25s; Nucleo: {%s|%s}; Cuenta: {%s|%s}" % (ROJO, iL, nC, nL, FIN, len(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][4], dicc[v][3], dicc[v][5]))
-      break
-  except:
-    print(ROJO + 'PROBABLEMENTE HAY UN ERROR (' + str(iL) + '{' + str(nC) + '/' + str(nL) + '}' + ': ' + v + '|' + dicc[v][1] + '|' + dicc[v][2] + '|' + dicc[v][3] + '|' + dicc[v][4] + '|' + dicc[v][5] + '|' + ') CON EL ARCHIVO: ' + sys.argv[1] + FIN)
+  CO    = libConst
+  ES    = libES
+  droid = sl4a.Android()
+
+  AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
+  CYAN  = CO.color.CYAN		# Identificacion del socio.
+  AZUL  = CO.color.BLUE		# Identificacion de los datos.
+  VERDE = CO.color.GREEN	# Linea final (totales).
+  PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
+  NEGRITA = CO.color.BOLD	# Negrita
+  ROJO  = CO.color.RED		# Linea de error.
+  SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
+  FIN   = CO.color.END
+else:
+  AMARI = '\033[93m'	# Primer titulo.
+  CYAN  = '\033[96m'	# Identificacion del socio.
+  AZUL  = '\033[94m'	# Identificacion de los datos.
+  PURPURA = '\033[95m'	# Linea final (total de prestamos).
+  VERDE = '\033[92m'	# Linea final (totales).
+  ROJO  = '\033[91m'	# Linea de error.
+  SUBRAYADO = '\033[4m'
+  FIN   = '\033[0m'
+
+if not bMovil:
+  def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
+    'Abre para leer, el archivo cuyo nombre es el valor de aNb'
+    global DIR
+    aNb = DIR + aNb
+    try:
+      f = io.open(aNb, mode=modo, encoding=codigo)
+      if (bImprimir): print(aNb + " archivo abierto.")
+      return f
+    except:
+      if (bImprimir):
+        print(color.YELLOW + "ERROR ABRIENDO: " + color.END + aNb)
+        print(color.YELLOW + "os.path.abspath(aNb): " + color.END + abspath(aNb))
+      return False
+  # FIN funcion abre
+else:
+  def cargarNombres(nombArch='IDAT*.TXT'):
+    rutaDatos = DIR
+
+    lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and fnmatch.fnmatch(f, nombArch)]
+    lFiles.sort()
+
+    if not lFiles:
+      ES.alerta(droid, nombArch, "No hubo coincidencias!")
+      return None
+    return lFiles
+  # FIN funcion cargarNombres
+  def buscarArchivo(lFiles):
+    if None == lFiles or 1 > len(lFiles): return None
+    if 1 == len(lFiles): return(lFiles[0])
+    indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', 'Seleccione nombre', lFiles)
+    if None == indice or 0 > indice: return None
+    return(lFiles[indice])
+  # FIN funcion buscarArchivo
+def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
+  global bMovil
+
+  if bMovil: return ES.colorLinea(bImpar, sColor, sOtroColor)
+  if bImpar: sColor = CYAN
+  return sColor, not bImpar
+# FIN funcion colorLinea
+
+sCed = ''
+if bMovil:
+  lFiles = cargarNombres('[Ii][Pp][Ee][Rr]*.[Tt][Xx][Tt]')
+  if not lFiles: sys.exit()
+else:
+  if 1 < len(sys.argv):
+    nombArch = sys.argv[1]
+    if 2 < len(sys.argv) and sys.argv[2].isdigit():
+      sCed = sys.argv[2]
+  else:
+    print("%sNo paso el nombre del archivo como parametro.%s" % (ROJO, FIN))
+    sys.exit()
+
+while True:
+  if bMovil:
+    nombArch = buscarArchivo(lFiles)
+    if None == nombArch: break
+    f = ES.abrir(nombArch, 'r')
+    iCed = ES.entradaNumero(droid, "Cedula de identidad", "Cedula de identidad del socio", sCed)
+    if None == iCed or 0 == iCed: sCed = ''
+    else: sCed = str(iCed)
+  else:
+    try:
+      f = abre(nombArch, 'r', 'latin-1')
+    except:
+      f = False
+  if not f:
+    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN, nombArch, ROJO, FIN))
     break
-#
-if 0 < nC: print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
-else: print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5]))
-print("%s%d lineas; %d lineas cortas y %d lineas largas%s" % (VERDE, iL, nC, nL, FIN))
-f.close()
+
+  lista = [(linea.rstrip()[0:10], linea.rstrip()[11:83], linea.rstrip()[42:44], linea.rstrip()[45:65], linea.rstrip()[83:85], linea.rstrip()[86:106]) for linea in f]
+  dicc = {}
+  lConc = []
+  i = 0
+  for l in lista:
+    if not dicc.has_key(l[0]):
+      dicc[l[0]] = (l[0], l[1], l[2], l[3], l[4], l[5])
+      lConc.insert(i, l[0])
+      i += 1
+
+  lConc.sort()
+  iL = 0		# Numero de linea leida.
+  nC = 0		# Numero de linea corta.
+  nL = 0		# Numero de linea larga.
+  for v in lConc:
+    if '' == v or '' == v.strip() or None == v or not v: continue
+    iL += 1
+    try:
+      if dicc[v][2].isdigit() and dicc[v][3].isdigit():	# Linea corta
+        if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
+        nC += 1
+      elif dicc[v][4].isdigit() and dicc[v][5].isdigit():	# Linea larga
+        if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5]))
+        nL += 1
+      else:
+        print("%sERROR: (%d{%d/%d})%s;%d:%25.25s; Nucleo: {%s|%s}; Cuenta: {%s|%s}" % (ROJO, iL, nC, nL, FIN, len(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][4], dicc[v][3], dicc[v][5]))
+        break
+    except:
+      print(ROJO + 'PROBABLEMENTE HAY UN ERROR (' + str(iL) + '{' + str(nC) + '/' + str(nL) + '}' + ': ' + v + '|' + dicc[v][1] + '|' + dicc[v][2] + '|' + dicc[v][3] + '|' + dicc[v][4] + '|' + dicc[v][5] + '|' + ') CON EL ARCHIVO: ' + sys.argv[1] + FIN)
+      break
+
+  if 0 < nC: print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
+  else: print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5]))
+  print("%s%d lineas; %d lineas cortas y %d lineas largas%s" % (VERDE, iL, nC, nL, FIN))
+  f.close()
+  if bMovil:
+    indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer', ['Otro archivo', 'Salir'])
+    if None == indice or 0 > indice or 1 <= indice: break
+  else:
+    break
+
+# FIN Principal

@@ -69,24 +69,24 @@ if not bMovil:
       return False
   # FIN funcion abre
 else:
-	def cargarNombres(nombArch='IDAT*.TXT'):
-		rutaDatos = DIR
+  def cargarNombres(nombArch='IDAT*.TXT'):
+    rutaDatos = DIR
 
-		lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and fnmatch.fnmatch(f, nombArch)]
-		lFiles.sort()
+    lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and fnmatch.fnmatch(f, nombArch)]
+    lFiles.sort()
 
-		if not lFiles:
-			ES.alerta(droid, nombArch, "No hubo coincidencias!")
-			return None
-		return lFiles
-	# FIN funcion cargarNombres
-	def buscarArchivo(lFiles):
-		if None == lFiles or 1 > len(lFiles): return None
-		if 1 == len(lFiles): return(lFiles[0])
-		indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', 'Seleccione nombre', lFiles)
-		if None == indice or 0 > indice: return None
-		return(lFiles[indice])
-	# FIN funcion buscarArchivo
+    if not lFiles:
+      ES.alerta(droid, nombArch, "No hubo coincidencias!")
+      return None
+    return lFiles
+  # FIN funcion cargarNombres
+  def buscarArchivo(lFiles):
+    if None == lFiles or 1 > len(lFiles): return None
+    if 1 == len(lFiles): return(lFiles[0])
+    indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', 'Seleccione nombre', lFiles)
+    if None == indice or 0 > indice: return None
+    return(lFiles[indice])
+  # FIN funcion buscarArchivo
 def poblarDicConc(co, de, cm='', nu='', no='', au=''):
   return {'cod':co, 'des':de, 'com':cm, 'nus':nu, 'nom':no, 'aut':au}	# Codigo, desc,
 # com: 2 primeros digitos comprobante, nu: cod tabla_prestamo,
