@@ -36,6 +36,7 @@ FIN   = color.END
 
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
+sHoy = strftime("%Y%m%d", localtime())
 
 def colorLinea(bImpar=True, sColor=AZUL):
   if bImpar: sColor = CYAN
@@ -81,31 +82,46 @@ def fgFormateaNumero(sCad, dec=0):
 # funcion fgFormateaNumero(sCad, dec)
 
 # Inicio principal
-sHoy = strftime("%Y%m%d", localtime())
-nbrArchBanco = sys.argv[1]
+if 1 < len(sys.argv):
+  nbrArchBanco = sys.argv[1]
+  if 2 < len(sys.argv) and sys.argv[2].isdigit():
+    sCed = sys.argv[2]
+    bCINoEncontrada = True
+  else: sCed = ''
+else:
+  print("%sNo paso el nombre del archivo como parametro.%s" % (ROJO, FIN))
+  sys.exit()
 (sNbrArch, sTipo) = nbrArchBanco.split('.', 1)
 (sNbrBanco, sFecha) = sNbrArch.split('_', 1)
+bMerc = bMProv = bBan = bVzla = False
 sBanco = 'MERCANTILF'
 if 0 == sNbrBanco.find(sBanco): bMerc = True
 else:
   bMerc = False
-  sBanco = 'BANESCO'
-  if 0 == sNbrBanco.find(sBanco): bBan = True
+  sBanco = 'MERCANTILP'
+  if 0 == sNbrBanco.find(sBanco): bMProv = True
   else:
-    bBan = False
-    if 0 == sNbrBanco.find('GLOBAL'):
-      bVzla = True
-      sBanco = 'VENEZUELA'
+    bMProv = False
+    sBanco = 'BANESCO'
+    if 0 == sNbrBanco.find(sBanco): bBan = True
     else:
-      bVzla = False
-      print("Nombre de archivo pasado como parametro no cumple con los nombres de archivos esperados.")
-      sys.exit()
+      bBan = False
+      if 0 == sNbrBanco.find('GLOBAL'):
+        bVzla = True
+        sBanco = 'VENEZUELA'
+      else:
+        bVzla = False
+        print("%sNombre de archivo pasado como parametro no cumple con los nombres de archivos esperados.%s" %
+               (ROJO, FIN))
+        sys.exit()
 f = open(nbrArchBanco, 'r')
 try:
   ln = f.readline()
-  if bMerc:	# 60,8:#Regs; 68,17:mtoTot; 93,20:CtaDebito. Detalle: 3,15:CI; 81,17:Monto; 61,20:CtaCliente
-    sNumLote = sFecha
-    sFechaValor = sFecha[1:9]
+  if bMerc or bMProv:	# 60,8:#Regs; 68,17:mtoTot; 93,20:CtaDebito. Detalle: 3,15:CI; 81,17:Monto; 61,20:CtaCliente
+    if bMerc:
+      sNumLote = sFecha
+      sFechaValor = sFecha[1:9]
+    else: sFechaValor = sFecha
     sCodCta = '01050068121068204451'
     nLnCtrl = 1
     ln1 = (ln[0:1], ln[1:13], ln[13:28], ln[28:33], ln[33:43], ln[43:44], ln[44:59], ln[59:67], float(ln[67:84])/100, ln[84:92], ln[92:112], ln[112:119], ln[139:])	# El ultimo campo tiene 261 caracteres (todos zeros).
@@ -113,12 +129,19 @@ try:
       raise ValueError("Error: La primera columna de la primera fila no tiene un '1', pero contiene: '" + ln1[0] + "'.")
     elif 'BAMRVECA' != ln1[1].strip():
       raise ValueError("Error: identifcacion del banco en 2da columna de 1ra fila errada, deberia ser 'BAMRVECA', pero contiene: '" + ln1[1] + "'.")
-    elif sNumLote != ln1[2]:
-      raise ValueError("Error: Numero de lote errado, en col 14 de 1ra fila, deberia ser : '" + sNumLote + "', pero tiene '" + ln1[2] + "'")
-    elif 'NOMIN' != ln1[3]:
-      raise ValueError("Error: Tipo de producto en columna 29 de 1ra fila errada, deberia ser 'NOMIN'")
-    elif '0000000414' != ln1[4]:
-      raise ValueError("Error: Tipo de pago en columna 34 de 1ra fila errada, deberia ser '0000000414' (Prestamo caja de ahorros)")
+    if bMerc:
+      if sNumLote != ln1[2]:
+        raise ValueError("Error: Numero de lote errado, en col 14 de 1ra fila, deberia ser : '" + sNumLote + "', pero tiene '" + ln1[2] + "'")
+      sTPro = 'NOMIN'
+      sTPag = '0000000414'
+    else:		# Proveedores
+      sNumLote = ln1[2]
+      sTPro = 'PROVE'
+      sTPag = '0000000062'
+    if sTPro != ln1[3]:
+      raise ValueError("Error: Tipo de producto en columna 29 de 1ra fila errada, deberia ser '" + sTPro + "'")
+    elif sTPag != ln1[4]:
+      raise ValueError("Error: Tipo de pago en columna 34 de 1ra fila errada, deberia ser '" + sTPag + "' (Prestamo caja de ahorros o Pago proveedores)")
     elif 'J' != ln1[5] or '306192298' != ln1[6].lstrip('0'):
       raise ValueError("Error: Rif en columna 44 de 1ra fila errada, deberia ser 'J306192298'")
     else: sRif = ln1[5] + '-' + ln1[6].lstrip('0')
@@ -139,6 +162,7 @@ try:
     lista = [(ln[0:1], ln[1:2], ln[2:17], ln[17:18], ln[18:30], ln[30:60], ln[60:80], float(ln[80:97])/100, ln[97:113], ln[113:123], ln[123:126], ln[126:186], ln[186:201], ln[201:251], ln[285:365], ln[365:]) for ln in f]	# El ultimo campo tiene 35 car's.
     iNac = 1
     iCI = 2
+    iNbr = 11
     iCC = 6
     iMto = 7
     sLnDet = '2'
@@ -192,10 +216,10 @@ try:
 # Linea de detalle y ultima
     iNac = 3
     iCI = 4
+    iNbr = 5
     iCC = 2
     iMto = 1
     sLnDet = '03'
-    index = 0
     lista = []
     for ln in f:
       if sLnDet == ln[0:2]:
@@ -203,7 +227,6 @@ try:
 #        lista.append((ln[0:2], float(ln[32:47])/100, ln[50:70], ln[94:95], ln[95:104], ln[111:171], ln[171:]))	# El ultimo campo tiene 215 car's.
 #        lista += [(ln[0:2], float(ln[32:47])/100, ln[50:70], ln[94:95], ln[95:104], ln[111:171], ln[171:])]	# El ultimo campo tiene 215 car's.
         lista[len(lista):] = [(ln[0:2], float(ln[32:47])/100, ln[50:70], ln[94:95], ln[95:104], ln[111:171], ln[171:])]	# El ultimo campo tiene 215 car's.
-        index += 1
       elif '06' == ln[0:2]: ln1 = (ln[0:2], ln[16:17], ln[29:32], float(ln[32:47])/100)
       else: raise ValueError("Error: La primera columna de la fila tiene un identificador errado, contiene: '" + ln[0] + "'.")
     if '06' != ln1[0]:
@@ -245,6 +268,7 @@ try:
     iMtoTot2 = 84
     lista = [(ln[0:1], ln[1:21], float(ln[21:32])/100, ln[32:36], ln[36:76], ln[76:86], ln[86:]) for ln in f]	# El ultimo campo tiene 8 car's.
     iCI = 5
+    iNbr = 4
     iCC = 1
     iMto = 2
     sLnDet = '1'
@@ -270,21 +294,28 @@ for l in lista:
     elif not l[iCC].isdigit():	# iCC es el indice del codigo cuenta socio, definido anteriormente.
        raise ValueError("Error en el campo del codigo de cuenta (2) del socio en la fila: " + str(nLn) + ", contiene: " + l[iCC])
     if bMerc or bBan:
-      if l[iNac] not in ('V', 'E', 'P'):
-        raise ValueError("Error: La segunda columna de la fila " + str(nLn) + ", no contiene 'V', 'E' o 'P', contiene: " + l[1])
-    if bMerc:
+      if l[iNac] not in ('J', 'G', 'V', 'E', 'P'):
+        raise ValueError("Error: La segunda columna de la fila " + str(nLn) + ", no contiene 'J', 'G', 'V', 'E' o 'P', contiene: " + l[1])
+    if bMerc or bMProv:
       if l[3] not in ('1', '3'):
         raise ValueError("Error: La forma de pago en columna 18 en la fila " + str(nLn) + ", no contiene '1' o '3', contiene: " + l[3])
       elif '000000000000' != l[4]:
         raise ValueError("Error: En columna 19 de la fila " + str(nLn) + " deberia ser '000000000000', pero tiene '" + l[4] + "'")
-      elif '0000000414' != l[9]:
-        raise ValueError("Error: Tipo de pago en columna 114 en la fila " + str(nLn) + ", deberia ser '0000000414' (Prestamo caja de ahorros), pero contiene: " + l[9])
+      elif sTPag != l[9]:
+        raise ValueError("Error: Tipo de pago en columna 114 en la fila " + str(nLn) + ", deberia ser '" + sTPag + "' (Prestamo caja de ahorros o Pago a proveedores), pero contiene: " + l[9])
       elif '000' != l[10]:
-        raise ValueError("Error: Tipo de pago en columna 124 en la fila " + str(nLn) + ", deberia ser '000', pero contiene: " + l[10])
+        raise ValueError("Error: En la columna 124 en la fila " + str(nLn) + ", deberia ser '000', pero contiene: '" + l[10] + "'")
       elif '000000000000000' != l[12]:
-        raise ValueError("Error: Tipo de pago en columna 124 en la fila " + str(nLn) + ", deberia ser '000000000000000', pero contiene: " + l[12])
+        if bMerc: raise ValueError("Error: En la columna 187 en la fila " + str(nLn) + ", deberia ser '000000000000000', pero contiene: '" + l[12] + "'")
 
     lTot = (lTot[0]+1, lTot[1]+l[iMto])	# iMto es el indice del monto, definido anteriormente.
+    if '' != sCed and bCINoEncontrada:
+      if sCed.lstrip('0') == l[iCI].lstrip('0'):
+        print("%sCedula de identidad:%s %s%s%s" % (CYAN, FIN, AZUL, fgFormateaNumero(sCed), FIN))
+        print("%sNombre:%s %s%s%s" % (CYAN, FIN, AZUL, l[iNbr], FIN))
+        print("%sCuenta:%s %s%s%s" % (CYAN, FIN, AZUL, l[iCC], FIN))
+        print("%sMonto:%s %s%s%s" % (CYAN, FIN, AZUL, fgFormateaNumero(l[iMto], 2), FIN))
+        bCINoEncontrada = False
   except ValueError as er:
     print(er)
     sys.exit()
@@ -293,10 +324,12 @@ for l in lista:
     print(l)
     print(er)
     sys.exit()
+if '' != sCed and bCINoEncontrada:
+  print("%sLa cedula de identidad:%s %s%s%s no fue encontrada." % (ROJO, FIN, AZUL, fgFormateaNumero(sCed), FIN))
 # FIN for
 
 #lTot = (0, 0.00)
-if (bMerc or bBan) and int(nroReg) != lTot[0]:
+if (bMerc or bMProv or bBan) and int(nroReg) != lTot[0]:
   print("%sError:%s El numero de registros de la primera(Mercantil)/ultima(Banesco) fila no concuerda con el numero de registros detalle" % (ROJO, FIN))
   print("%sValor entre columnas " + str(iNoReg1+1) + " y " + str(iNoReg2) + " del primer/ultimo registro:%s %s%s%s" % (AZUL, FIN, ROJO, nroReg, FIN))
   print("%sNumero total de registros de detalle:%s %s%d%s" % (AZUL, FIN, ROJO, lTot[0], FIN))
@@ -304,9 +337,9 @@ if 0.005 < abs(fMtoTot - lTot[1]):
   print("%sError:%s El monto total de la primera fila no concuerda con la suma del monto total de depositos" % (ROJO, FIN))
   print("Valor entre columnas " + str(iMtoTot1) + " y " + str(iMtoTot2) + " del primer registro: " + fgFormateaNumero(fMtoTot, 2))
   print("Monto total de depossitos en registros de detalle: " + fgFormateaNumero(lTot[1], 2))
-if bMerc or bBan: print("%sNumero de lote:%s %s%s%s" % (AZUL, FIN, CYAN, sNumLote, FIN))
-if bMerc or bBan: print("%sRif:%s %s%s%s" % (AZUL, FIN, CYAN, sRif, FIN))
-if bMerc or bBan: print("%sFecha valor:%s %s%s%s" % (AZUL, FIN, CYAN, sFechaValor[6:] + '/' +\
+if bMerc or bMProv or bBan: print("%sNumero de lote:%s %s%s%s" % (AZUL, FIN, CYAN, sNumLote, FIN))
+if bMerc or bMProv or bBan: print("%sRif:%s %s%s%s" % (AZUL, FIN, CYAN, sRif, FIN))
+if bMerc or bMProv or bBan: print("%sFecha valor:%s %s%s%s" % (AZUL, FIN, CYAN, sFechaValor[6:] + '/' +\
                                                      sFechaValor[4:6] + '/' + sFechaValor[0:4], FIN))
 elif bVzla: print("%sFecha valor:%s %s%s%s" % (AZUL, FIN, CYAN, sFechaValor, FIN))
 print("%sCodigo de cuenta bancaria:%s %s%s%s" % (AZUL, FIN, CYAN, sCodCta, FIN))

@@ -1,12 +1,14 @@
 #!/usr/bin/python
 import sys
 import re
+import os
 try:
   import MySQLdb
   bMySQL = True
 except:
   bMySQL = False
 
+DIR = '../'
 class color:
 	PURPLE   = '\033[95m'
 	HEADER   = '\033[95m'
@@ -33,8 +35,47 @@ FIN   = color.END
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
 
+def abrir(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
+  'Abre para leer, el archivo cuyo nombre es el valor de aNb'
+  global DIR
+  aNb = DIR + aNb
+  try:
+#    f = open(aNb, mode=modo, encoding=codigo)
+    f = open(aNb, mode=modo)
+    if (bImprimir): print(aNb + " archivo abierto.")
+    return f
+  except:
+    if (bImprimir):
+      print(color.YELLOW + "ERROR ABRIENDO: " + color.END + aNb)
+      print(color.YELLOW + "os.path.abspath(aNb): " + color.END + os.path.abspath(aNb))
+    return False
+# funcion abrir
+def poblarDicConc(co, de, cm='', nu='', no='', au=''):
+  return {'cod':co, 'des':de, 'com':cm, 'nus':nu, 'nom':no, 'aut':au}	# Codigo, desc,
+		# com: 2 primeros digitos comprobante, nu: cod tabla_prestamo,
+		# no: es concepto de nomina (S/N), au: automatico (S/N).
+# funcion poblarDic
 def creaDicConceptos():
-  if not bMySQL: return {}
+  if not bMySQL:
+    try:
+#      f = abrir("conceptos.txt", bImprimir = True)
+      f = abrir("conceptos.txt")
+      if not f:
+        print('Problemas para abrir el archivo\n')
+        return {}
+      dConc = {}
+      for linea in f:
+        try:
+          k, v,  cm, nu, no, au = linea.rstrip().split(';')
+          dConc[k] = poblarDicConc(k, v,  cm, nu, no, au)
+        except:
+          print('Problemas para leer el archivo\n')
+          continue
+      else: f.close()
+      return dConc
+    except:
+      print('Problemas con el archivo\n')
+      return {}
 # Open database connection
   db = MySQLdb.connect("localhost","ipaspudo","qazwsxedc","ipaspudo" )
 # prepare a cursor object using cursor() method
