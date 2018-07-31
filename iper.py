@@ -10,13 +10,10 @@ try:
 except:
   DIR = './'
   bMovil = False
+
 if bMovil:
   from os import listdir
   from os.path import isfile, join
-else:
-  from os.path import abspath
-
-if bMovil:
   import fnmatch
   import sl4a
   import libES, libConst
@@ -35,6 +32,8 @@ if bMovil:
   SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
   FIN   = CO.color.END
 else:
+  from os.path import abspath
+
   AMARI = '\033[93m'	# Primer titulo.
   CYAN  = '\033[96m'	# Identificacion del socio.
   AZUL  = '\033[94m'	# Identificacion de los datos.
@@ -60,7 +59,7 @@ if not bMovil:
       return False
   # FIN funcion abre
 else:
-  def cargarNombres(nombArch='IDAT*.TXT'):
+  def cargarNombres(nombArch='IPER*.TXT'):
     rutaDatos = DIR
 
     lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and fnmatch.fnmatch(f, nombArch)]
@@ -86,7 +85,7 @@ def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
   return sColor, not bImpar
 # FIN funcion colorLinea
 
-sCed = ''
+sCed = None
 if bMovil:
   lFiles = cargarNombres('[Ii][Pp][Ee][Rr]*.[Tt][Xx][Tt]')
   if not lFiles: sys.exit()
@@ -103,9 +102,9 @@ while True:
   if bMovil:
     nombArch = buscarArchivo(lFiles)
     if None == nombArch: break
-    f = ES.abrir(nombArch, 'r')
+    f = ES.abrir(nombArch, 'r', 'latin-1')
     iCed = ES.entradaNumero(droid, "Cedula de identidad", "Cedula de identidad del socio", sCed)
-    if None == iCed or 0 == iCed: sCed = ''
+    if None == iCed or 0 == iCed: sCed = None
     else: sCed = str(iCed)
   else:
     try:
@@ -116,42 +115,75 @@ while True:
     print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN, nombArch, ROJO, FIN))
     break
 
-  lista = [(linea.rstrip()[0:10], linea.rstrip()[11:83], linea.rstrip()[42:44], linea.rstrip()[45:65], linea.rstrip()[83:85], linea.rstrip()[86:106]) for linea in f]
-  dicc = {}
-  lConc = []
-  i = 0
-  for l in lista:
-    if not dicc.has_key(l[0]):
-      dicc[l[0]] = (l[0], l[1], l[2], l[3], l[4], l[5])
-      lConc.insert(i, l[0])
-      i += 1
+# List comprehensions:
+# Cedula; Nombre (corto=11:40/largo=11:83); Nucleo (42:44/83:85) y Cuenta bancaria (45:65/86:106).
+#  lista = [(linea.rstrip()[0:10], linea.rstrip()[11:83], linea.rstrip()[42:44], \
+#          linea.rstrip()[45:65], linea.rstrip()[83:85], linea.rstrip()[86:106]) for linea in f]
+#  dicc = {}
+#  lCed = []
+#  i = 0
+#  for l in lista:
+#    if not dicc.has_key(l[0]):
+#    if l[0] not in dicc:
+#      dicc[l[0]] = (l[0], l[1], l[2], l[3], l[4], l[5])
+#      lCed.append(l[0])
+#      lCed.insert(i, l[0])
+#      i += 1
+# dict comprehensions:
+# Cedula; Nombre (corto=11:40/largo=11:83); Nucleo (42:44/83:85) y Cuenta bancaria (45:65/86:106).
+  dicc = {linea.rstrip()[0:10]:(linea.rstrip()[0:10], linea.rstrip()[11:83], linea.rstrip()[42:44], \
+          linea.rstrip()[45:65], linea.rstrip()[83:85], linea.rstrip()[86:106]) for linea in f}
+  if bMovil: lCed = [k for k in dicc]   # dicc.keys no funciona en celular.
+  else: lCed = dicc.keys()              # Ambos funcionan en PC. Solo para mostrar ambas maneras.
+  lCed.sort()
 
-  lConc.sort()
   iL = 0		# Numero de linea leida.
   nC = 0		# Numero de linea corta.
   nL = 0		# Numero de linea larga.
-  for v in lConc:
-    if '' == v or '' == v.strip() or None == v or not v: continue
+  bImpar = False
+  for v in lCed:
     iL += 1
+    if '' == v or '' == v.strip() or None == v or not v or not v.lstrip('0').isdigit():
+      print('Linea: ' + str(iL) + ', v: ' + v)
+      break
     try:
       if dicc[v][2].isdigit() and dicc[v][3].isdigit():	# Linea corta
-        if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
+        if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % \
+                (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
         nC += 1
       elif dicc[v][4].isdigit() and dicc[v][5].isdigit():	# Linea larga
-        if 0 == (iL%100): print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5]))
+        if sCed:
+          if sCed.lstrip('0') == v.lstrip('0'):
+            sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+            print("%s%5d: %8d %30.30s Nuc==>> %s Cta==>> %s%s" % \
+                  (sColor, iL, int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5], FIN))
+        elif 0 == (iL%500):
+          sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+          print("%s%5d: %8d %30.30s Nuc==>> %s Cta==>> %s%s" % \
+                (sColor, iL, int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5], FIN))
         nL += 1
       else:
-        print("%sERROR: (%d{%d/%d})%s;%d:%25.25s; Nucleo: {%s|%s}; Cuenta: {%s|%s}" % (ROJO, iL, nC, nL, FIN, len(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][4], dicc[v][3], dicc[v][5]))
+        print("%sERROR: (Linea:%d{Corta:%d/Larga:%d})%s;%s(%d):%25.25s\nNucleo: {Corta:%s|Larga:%s}; Cuenta: {Corta:%s|Larga:%s}" % \
+                (ROJO, iL, nC, nL, FIN, dicc[v][0], len(dicc[v][0]), dicc[v][1], dicc[v][2], \
+                dicc[v][4], dicc[v][3], dicc[v][5]))
         break
     except:
-      print(ROJO + 'PROBABLEMENTE HAY UN ERROR (' + str(iL) + '{' + str(nC) + '/' + str(nL) + '}' + ': ' + v + '|' + dicc[v][1] + '|' + dicc[v][2] + '|' + dicc[v][3] + '|' + dicc[v][4] + '|' + dicc[v][5] + '|' + ') CON EL ARCHIVO: ' + sys.argv[1] + FIN)
+      print(ROJO + 'PROBABLEMENTE HAY UN ERROR (Linea:' + str(iL) + '{Corta:' + str(nC) + \
+              '/Larga:' + str(nL) + '}' + ': ' + v + '|' + dicc[v][1] + '|' + \
+              dicc[v][2] + '|' + dicc[v][3] + '|' + dicc[v][4] + '|' + \
+              dicc[v][5] + '|' + ') CON EL ARCHIVO: ' + nombArch + FIN)
       break
 
-  if 0 < nC: print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
-  else: print("%8d %30.30s Nuc==>> %s Cta==>> %s" % (int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5]))
+  if 0 < nC: print("%5d: %8d %30.30s Nuc==>> %s Cta==>> %s" % \
+                 (iL, int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
+  else:
+    sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+    print("%s%5d: %8d %30.30s Nuc==>> %s Cta==>> %s%s" % \
+           (sColor, iL, int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5], FIN))
   print("%s%d lineas; %d lineas cortas y %d lineas largas%s" % (VERDE, iL, nC, nL, FIN))
   f.close()
   if bMovil:
+    ES.imprime('')
     indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer', ['Otro archivo', 'Salir'])
     if None == indice or 0 > indice or 1 <= indice: break
   else:
