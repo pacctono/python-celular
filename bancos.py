@@ -14,15 +14,6 @@ except:
 if bMovil:
   from os import listdir
   from os.path import isfile, join
-else:
-  from os.path import abspath
-try:
-  import MySQLdb
-  bMySQL = True
-except:
-  bMySQL = False
-
-if bMovil:
   import fnmatch
   import sl4a
   import libES, libConst
@@ -41,6 +32,8 @@ if bMovil:
   SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
   FIN   = CO.color.END
 else:
+  from os.path import abspath
+
   AMARI = '\033[93m'	# Primer titulo.
   CYAN  = '\033[96m'	# Identificacion del socio.
   AZUL  = '\033[94m'	# Identificacion de los datos.
@@ -49,6 +42,17 @@ else:
   ROJO  = '\033[91m'	# Linea de error.
   SUBRAYADO = '\033[4m'
   FIN   = '\033[0m'
+
+try:
+  import MySQLdb
+  bMySQL = True
+except:
+  try:
+    import mysql.connector
+    MySQLdb = mysql.connector
+    bMySQL  = True
+  except:
+    bMySQL = False
 
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
@@ -284,9 +288,9 @@ def fgFormateaNumero(sCad, dec=0):
   except:
     return None
 
-  x = sCad.split('.');		# Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
-  x0 = x[0];				# x1 es la parte entera
-  if 1 < len(x):
+  x = sCad.split('.') # Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
+  x0 = x[0]           # x0 es la parte entera
+  if 1 < len(x):      # x es un arreglo. 'len' retorna la longitud del arreglo.
     x2 = x[1]
   if 0 < dec: x2 = ',' + x2.ljust(dec, '0')
   else: x2 = ''

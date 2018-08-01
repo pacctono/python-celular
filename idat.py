@@ -4,24 +4,17 @@
 #qpy:console
 import sys
 import re
+
 try:
   from lib import DIR
   bMovil = True
 except:
   DIR = './'
   bMovil = False
+
 if bMovil:
   from os import listdir
   from os.path import isfile, join
-else:
-  from os.path import abspath
-try:
-  import MySQLdb
-  bMySQL = True
-except:
-  bMySQL = False
-
-if bMovil:
   import fnmatch
   import sl4a
   import libES, libConst
@@ -40,6 +33,8 @@ if bMovil:
   SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
   FIN   = CO.color.END
 else:
+  from os.path import abspath
+
   AMARI = '\033[93m'	# Primer titulo.
   CYAN  = '\033[96m'	# Identificacion del socio.
   AZUL  = '\033[94m'	# Identificacion de los datos.
@@ -48,6 +43,17 @@ else:
   ROJO  = '\033[91m'	# Linea de error.
   SUBRAYADO = '\033[4m'
   FIN   = '\033[0m'
+
+try:
+  import MySQLdb
+  bMySQL = True
+except:
+  try:
+    import mysql.connector
+    MySQLdb = mysql.connector
+    bMySQL  = True
+  except:
+    bMySQL = False
 
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
@@ -120,7 +126,8 @@ def creaDicConceptos():
       if not bMovil: print('Problemas con el archivo\n')
       return {}
 # Open database connection
-  db = MySQLdb.connect("localhost","ipaspudo","qazwsxedc","ipaspudo" )
+  db = MySQLdb.connect(host="localhost",user="ipaspudo",
+                        password="qazwsxedc",database="ipaspudo" )
 # prepare a cursor object using cursor() method
   cursor = db.cursor()
 # Prepare SQL query to SELECT records from the database.

@@ -134,6 +134,9 @@ while True:
   dicc = {linea.rstrip()[0:10]:(linea.rstrip()[0:10], linea.rstrip()[11:83], linea.rstrip()[42:44], \
           linea.rstrip()[45:65], linea.rstrip()[83:85], linea.rstrip()[86:106]) for linea in f}
   if bMovil: lCed = [k for k in dicc]   # dicc.keys no funciona en celular.
+# el metodo 'items' de diccionarios devuelve un 'view object' del tipo "dict_items" que contiene una lista de key-value.
+# el metodo 'keys' de diccionarios devuelve un 'view object' del tipo "dict_keys" que contiene una lista de keys.
+# el metodo 'values' de diccionarios devuelve un 'view object' del tipo "dict_values" que contiene una lista de values.
   else: lCed = dicc.keys()              # Ambos funcionan en PC. Solo para mostrar ambas maneras.
   lCed.sort()
 
