@@ -25,7 +25,7 @@ SUBRAYA = CO.color.UNDERLINE
 FIN   = CO.color.END
 
 lSitios = ["IPASPUDO", "Portatil", "Casa", "Otro", "Salir"]
-lIPs    = ["10.0.0.100", "10.0.0.103", "192.168.1.200", "192.168.0.105"]
+lIPs    = ["10.0.0.100", "10.0.0.103", "192.168.1.200", ""]
 IPDIR = "10.0.0.100"
 lDATA = [
 		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
@@ -63,13 +63,15 @@ ind = ES.entradaConLista(droid, 'Busqueda del servidor', 'Seleccione servidor', 
 if (ind >= len(lSitios)) or (ind < 0) or (ind == (len(lSitios)-1)) or (None == ind):	# Se asegura de tener el indice correcto.
 	ES.muestraFin()
 	sys.exit()
-print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], lIPs[ind]))
-dirIP   = lIPs[ind]													# Si el indice es correcto, obtener la direccion IP.
-miDirIP = obtenerIP(dirIP)											# Esta rutina fue la unica que encontre para mi IP.
+IPServ = lIPs[ind]
+if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
+	IPServ = ES.entradaNombre(droid, 'IP del servidor', 'Introduzca IP del servidor', '192.168.0.')
+print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], IPServ))
+miDirIP = obtenerIP(IPServ)											# Esta rutina fue la unica que encontre para mi IP.
 print("Mi direccion IP es: %s" % miDirIP)
 try:
-	if dirIP[0:dirIP.rindex('.')] != miDirIP[0:miDirIP.rindex('.')]:	# Las tres primeras partes de ambos IPv4 deben ser iguales.
-		print("El servidor seleccionado %s es errado." % dirIP)
+	if IPServ[0:IPServ.rindex('.')] != miDirIP[0:miDirIP.rindex('.')]:	# Las tres primeras partes de ambos IPv4 deben ser iguales.
+		print("El servidor seleccionado %s es errado." % IPServ)
 		ES.muestraFin()
 		sys.exit()
 except ValueError:						# La funcion rindex (busca indece desde el final de la cadena), no consigue el '.'.
@@ -81,7 +83,7 @@ except ValueError:						# La funcion rindex (busca indece desde el final de la c
 # ademas de la informacion del sistema, tambien se guardara la fecha de descarga de cada archivo.
 dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibir el nuevo.
 
-URL = "http://" + dirIP + "/" + 'movil/'
+URL = "http://" + IPServ + "/" + 'movil/'
 bImpar  = True
 lBancosHoy = None
 dHoy = strftime("%d/%m/%Y", localtime())

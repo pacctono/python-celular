@@ -54,8 +54,8 @@ if not bMovil:
       return f
     except:
       if (bImprimir):
-        print(color.YELLOW + "ERROR ABRIENDO: " + color.END + aNb)
-        print(color.YELLOW + "os.path.abspath(aNb): " + color.END + abspath(aNb))
+        print(AMARI + "ERROR ABRIENDO: " + FIN + aNb)
+        print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
       return False
   # FIN funcion abre
 else:

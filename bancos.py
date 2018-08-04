@@ -43,17 +43,6 @@ else:
   SUBRAYADO = '\033[4m'
   FIN   = '\033[0m'
 
-try:
-  import MySQLdb
-  bMySQL = True
-except:
-  try:
-    import mysql.connector
-    MySQLdb = mysql.connector
-    bMySQL  = True
-  except:
-    bMySQL = False
-
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
 
