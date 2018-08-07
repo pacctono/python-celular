@@ -47,6 +47,9 @@ patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotant
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
 
 sHoy     = strftime("%Y%m%d", localtime())
+sHoyAno  = strftime("%Y", localtime())
+sHoyMes  = strftime("%m", localtime())
+sHoyDia  = strftime("%d", localtime())
 sRif     = 'J306192298'
 sEmpresa = 'IPASPUDO'
 
@@ -72,22 +75,29 @@ if bMovil:
 def prepara(nbrArchBanco):
   global sBanco
 
-  (sNbrArch, sTipo) = nbrArchBanco.split('.', 1)
-  (sNbrBanco, sFecha) = sNbrArch.split('_', 1)
+  try:
+    (sNbrArch, sTipo) = nbrArchBanco.split('.', 1)
+  except:
+    sNbrArch = nbrArchBanco
+  try:
+    (sNbrBanco, sFecha) = sNbrArch.split('_', 1)
+  except:
+    sNbrBanco = sNbrArch
+    sFecha    = sHoy
   bMerc = bMProv = bBan = bVzla = False
   sBanco = 'MERCANTILF'
-  if 0 == sNbrBanco.find(sBanco): bMerc = True
+  if 0 == sNbrBanco.find(sBanco, 0, len(sBanco)): bMerc = True
   else:
     bMerc = False
     sBanco = 'MERCANTILP'
-    if 0 == sNbrBanco.find(sBanco): bMProv = True
+    if 0 == sNbrBanco.find(sBanco, 0, len(sBanco)): bMProv = True
     else:
       bMProv = False
       sBanco = 'BANESCO'
-      if 0 == sNbrBanco.find(sBanco): bBan = True
+      if 0 == sNbrBanco.find(sBanco, 0, len(sBanco)): bBan = True
       else:
         bBan = False
-        if 0 == sNbrBanco.find('GLOBAL'):
+        if 0 == sNbrBanco.find('GLOBAL', 0, len(sBanco)):
           bVzla = True
           sBanco = 'VENEZUELA'
         else:
@@ -229,22 +239,30 @@ def vzla(f, sFecha, sCodCta):
     sMes = sFecha[4:6]
     sAno = sFecha[2:4]
     ln = f.readline()
-    ln1 = (ln[0:1], ln[1:9], ln[9:41], ln[41:61], ln[61:63], ln[63:65], ln[66:68], ln[69:71], float(ln[71:84])/100, ln[84:])	# El ultimo campo tiene 6 caracteres.
+    ln1 = (ln[0:1], ln[1:9], ln[9:41], ln[41:61], ln[61:63], ln[63:65], ln[66:68],
+            ln[69:71], float(ln[71:84])/100, ln[84:])	# El ultimo campo tiene 6 caracteres.
     if 'H' != ln1[0]:
-      raise ValueError(ROJO + "Error:" + FIN + " La primera columna de la primera fila no tiene una 'H', pero contiene: '" + ln1[0] + "'.")
+      raise ValueError(ROJO + "Error:" + FIN + " La primera columna de la primera fila no tiene una 'H', pero contiene: '" +
+                        ln1[0] + "'.")
     elif sEmpresa != ln1[1].strip():
-      raise ValueError(ROJO + "Error:" + FIN + " La 2da columna de 1ra fila deberia contener '" + sEmpresa + "'; pero contiene: '" + ln1[1] + "'.")
+      raise ValueError(ROJO + "Error:" + FIN + " La 2da columna de 1ra fila deberia contener '" +
+                        sEmpresa + "'; pero contiene: '" + ln1[1] + "'.")
     elif sCodCta != ln1[3]:
-      raise ValueError(ROJO + "Error:" + FIN + " Codigo cuenta errada, en col 42 de 1ra fila, deberia ser : '" + sCodCta + "', pero tiene '" + ln1[3] + "'.")
+      raise ValueError(ROJO + "Error:" + FIN + " Codigo cuenta errada, en col 42 de 1ra fila, deberia ser : '" +
+                        sCodCta + "', pero tiene '" + ln1[3] + "'.")
     elif sDia != ln1[5]:
-      raise ValueError(ROJO + "Error:" + FIN + " dia errado, en col 64 de 1ra fila, deberia ser : '" + sDia + "', pero tiene '" + ln1[5] + "'.")
+      raise ValueError(ROJO + "Error:" + FIN + " dia errado, en col 64 de 1ra fila, deberia ser : '" +
+                        sDia + "', pero tiene '" + ln1[5] + "'.")
     elif sMes != ln1[6]:
-      raise ValueError(ROJO + "Error:" + FIN + " Mes errado, en col 67 de 1ra fila, deberia ser : '" + sMes + "', pero tiene '" + ln1[6] + "'.")
+      raise ValueError(ROJO + "Error:" + FIN + " Mes errado, en col 67 de 1ra fila, deberia ser : '" +
+                        sMes + "', pero tiene '" + ln1[6] + "'.")
     elif sAno != ln1[7]:
-      raise ValueError(ROJO + "Error:" + FIN + " a#o errado, en col 70 de 1ra fila, deberia ser : '" + sAno + "', pero tiene '" + ln1[7] + "'.")
+      raise ValueError(ROJO + "Error:" + FIN + " a#o errado, en col 70 de 1ra fila, deberia ser : '" +
+                        sAno + "', pero tiene '" + ln1[7] + "'.")
     sFechaValor = ln[63:71]
     fMtoTot = ln1[8]
-    lista = [(ln[0:1], ln[1:21], float(ln[21:32])/100, ln[32:36], ln[36:76], ln[76:86], ln[86:]) for ln in f]	# El ultimo campo tiene 8 car's.
+    lista = [(ln[0:1], ln[1:21], float(ln[21:32])/100, ln[32:36], ln[36:76], ln[76:86], ln[86:])
+              for ln in f]	# El ultimo campo tiene 8 car's.
     return lista, 0, '', sFechaValor, '', 0, fMtoTot
   except ValueError as er:
     print(er)
