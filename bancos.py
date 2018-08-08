@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #-*-coding:utf8;-*-
 #qpy:3
 #qpy:console
+from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 import re
 from time import time, localtime, strftime
@@ -13,7 +14,7 @@ except:
   bMovil = False
 if bMovil:
   from os import listdir
-  from os.path import isfile, join
+  from os.path import isfile, join, basename
   import fnmatch
   import sl4a
   import libES, libConst
@@ -32,7 +33,7 @@ if bMovil:
   SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
   FIN   = CO.color.END
 else:
-  from os.path import abspath
+  from os.path import abspath, basename
 
   AMARI = '\033[93m'	# Primer titulo.
   CYAN  = '\033[96m'	# Identificacion del socio.
@@ -251,13 +252,13 @@ def vzla(f, sFecha, sCodCta):
       raise ValueError(ROJO + "Error:" + FIN + " Codigo cuenta errada, en col 42 de 1ra fila, deberia ser : '" +
                         sCodCta + "', pero tiene '" + ln1[3] + "'.")
     elif sDia != ln1[5]:
-      raise ValueError(ROJO + "Error:" + FIN + " dia errado, en col 64 de 1ra fila, deberia ser : '" +
+      print(ROJO + "Error:" + FIN + " dia errado, en col 64 de 1ra fila, deberia ser : '" +
                         sDia + "', pero tiene '" + ln1[5] + "'.")
     elif sMes != ln1[6]:
-      raise ValueError(ROJO + "Error:" + FIN + " Mes errado, en col 67 de 1ra fila, deberia ser : '" +
+      print(ROJO + "Error:" + FIN + " Mes errado, en col 67 de 1ra fila, deberia ser : '" +
                         sMes + "', pero tiene '" + ln1[6] + "'.")
     elif sAno != ln1[7]:
-      raise ValueError(ROJO + "Error:" + FIN + " a#o errado, en col 70 de 1ra fila, deberia ser : '" +
+      print(ROJO + "Error:" + FIN + " a#o errado, en col 70 de 1ra fila, deberia ser : '" +
                         sAno + "', pero tiene '" + ln1[7] + "'.")
     sFechaValor = ln[63:71]
     fMtoTot = ln1[8]
@@ -399,7 +400,8 @@ if bMovil:
   if not lFiles: sys.exit()
 else:
   if 1 < len(sys.argv):
-    nbrArchBanco = sys.argv[1]
+    nbrArchBancoCompleto = sys.argv[1]
+    nbrArchBanco = basename(nbrArchBancoCompleto)
     if 2 < len(sys.argv) and sys.argv[2].isdigit():
       sCed = sys.argv[2]
   else:
@@ -414,9 +416,9 @@ while True:
     if None == iCed or 0 == iCed: sCed = ''
     else: sCed = str(iCed)
   else:
-    try: f = open(nbrArchBanco, 'r')
+    try: f = open(nbrArchBancoCompleto, 'r')
     except:
-      print("%sEl archivo%s '%s' %sno existe.%s" % (ROJO, FIN, nbrArchBanco, ROJO, FIN))
+      print("%sEl archivo%s '%s' %sno existe.%s" % (ROJO, FIN, nbrArchBancoCompleto, ROJO, FIN))
       break
 
   (sFecha, bMerc, bMProv, bBan, bVzla) = prepara(nbrArchBanco)

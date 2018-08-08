@@ -2,6 +2,7 @@
 #-*-coding:utf8;-*-
 #qpy:3
 #qpy:console
+from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 import io
 try:
@@ -13,7 +14,7 @@ except:
 
 if bMovil:
   from os import listdir
-  from os.path import isfile, join
+  from os.path import isfile, join, basename
   import fnmatch
   import sl4a
   import libES, libConst
@@ -32,7 +33,7 @@ if bMovil:
   SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
   FIN   = CO.color.END
 else:
-  from os.path import abspath
+  from os.path import abspath, basename
 
   AMARI = '\033[93m'	# Primer titulo.
   CYAN  = '\033[96m'	# Identificacion del socio.
@@ -47,7 +48,7 @@ if not bMovil:
   def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
     'Abre para leer, el archivo cuyo nombre es el valor de aNb'
     global DIR
-    aNb = DIR + aNb
+    if basename(aNb) == aNb: aNb = DIR + aNb
     try:
       f = io.open(aNb, mode=modo, encoding=codigo)
       if (bImprimir): print(aNb + " archivo abierto.")
@@ -91,7 +92,8 @@ if bMovil:
   if not lFiles: sys.exit()
 else:
   if 1 < len(sys.argv):
-    nombArch = sys.argv[1]
+    nombArchCompleto = sys.argv[1]
+    nombArch = basename(nombArchCompleto)
     if 2 < len(sys.argv) and sys.argv[2].isdigit():
       sCed = sys.argv[2]
   else:
@@ -108,11 +110,11 @@ while True:
     else: sCed = str(iCed)
   else:
     try:
-      f = abre(nombArch, 'r', 'latin-1')
+      f = abre(nombArchCompleto, 'r', 'latin-1')
     except:
       f = False
   if not f:
-    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN, nombArch, ROJO, FIN))
+    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN, nombArchCompleto, ROJO, FIN))
     break
 
 # List comprehensions:
@@ -137,7 +139,7 @@ while True:
 # el metodo 'items' de diccionarios devuelve un 'view object' del tipo "dict_items" que contiene una lista de key-value.
 # el metodo 'keys' de diccionarios devuelve un 'view object' del tipo "dict_keys" que contiene una lista de keys.
 # el metodo 'values' de diccionarios devuelve un 'view object' del tipo "dict_values" que contiene una lista de values.
-  else: lCed = dicc.keys()              # Ambos funcionan en PC. Solo para mostrar ambas maneras.
+  else: lCed = list(dicc.keys())        # Ambos funcionan en PC. Solo para mostrar ambas maneras.
   lCed.sort()
 
   iL = 0		# Numero de linea leida.

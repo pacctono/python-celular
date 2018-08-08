@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #-*-coding:utf8;-*-
 #qpy:3
 #qpy:console
+from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 import re
 
@@ -14,7 +15,7 @@ except:
 
 if bMovil:
   from os import listdir
-  from os.path import isfile, join
+  from os.path import isfile, join, basename
   import fnmatch
   import sl4a
   import libES, libConst
@@ -33,7 +34,7 @@ if bMovil:
   SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
   FIN   = CO.color.END
 else:
-  from os.path import abspath
+  from os.path import abspath, basename
 
   AMARI = '\033[93m'	# Primer titulo.
   CYAN  = '\033[96m'	# Identificacion del socio.
@@ -44,16 +45,10 @@ else:
   SUBRAYADO = '\033[4m'
   FIN   = '\033[0m'
 
-try:
-  import MySQLdb
-  bMySQL = True
-except:
-  try:
-    import mysql.connector
-    MySQLdb = mysql.connector
-    bMySQL  = True
-  except:
-    bMySQL = False
+import libMySQL
+bMySQL = libMySQL.bMySQL
+from config import HOST, USUARIO, PASSWD, BDEDATOS
+oMySQL = libMySQL.cMySQL(HOST, USUARIO, PASSWD, BDEDATOS)
 
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
@@ -125,27 +120,29 @@ def creaDicConceptos():
     except:
       if not bMovil: print('Problemas con el archivo\n')
       return {}
-# Open database connection
-  db = MySQLdb.connect(host="localhost",user="ipaspudo",
-                        password="qazwsxedc",database="ipaspudo" )
-# prepare a cursor object using cursor() method
-  cursor = db.cursor()
-# Prepare SQL query to SELECT records from the database.
-  sql = "SELECT codigo, descripcion, tx_comprobante, nu_sinca, id_nomina, id_automatico \
-         FROM conceptos"
-  try:
-# Execute the SQL command
-    cursor.execute(sql)
-# Fetch all the rows in a list of lists.
-    results = cursor.fetchall()
-    dConc = {}
-    for row in results:
-# Crear diccionari de conceptos.
-      dConc[row[0]] = poblarDicConc(row[0], row[1], row[2], row[3], row[4], row[5])
-  except:
-    print("Imposible crear diccionario de conceptos")
+# Abre la conexion con la base de datos.
+  if oMySQL.conectar():
+# Prepara un cursor.
+    cursor = oMySQL.abreCursor()
+# Prepara una consulta SQL para SELECT registros desde la base de datos.
+    sql = '''SELECT codigo, descripcion, tx_comprobante, nu_sinca, 
+                  id_nomina, id_automatico 
+           FROM conceptos'''
+    try:
+# Ejecuta el comando SQL.
+      cursor.execute(sql)
+# Alimneta todas las filas en una lista de listas.
+      resultados = cursor.fetchall()
+      dConc = {}
+      for fila in resultados:
+# Crea diccionario de conceptos.
+        dConc[fila[0]] = poblarDicConc(fila[0], fila[1], fila[2], fila[3],
+                                       fila[4], fila[5])
+    except:
+      print("Imposible crear diccionario de conceptos")
 # disconnect from server
-  db.close()
+    oMySQL.cierraCursor(cursor)
+    oMySQL.cierraConexion()
   return dConc
 # FIN funcion creaDicConceptos
 def poblarDicc(lidat, dConc):
@@ -275,7 +272,8 @@ if bMovil:
   if not lFiles: sys.exit()
 else:
   if 1 < len(sys.argv):
-    nombArch = sys.argv[1]
+    nombArchCompleto = sys.argv[1]
+    nombArch = basename(nombArchCompleto)
     if 2 < len(sys.argv) and sys.argv[2].isdigit():
       sCed = sys.argv[2]
   else:
@@ -292,11 +290,12 @@ while True:
     else: sCed = str(iCed)
   else:
     try:
-      f = open(nombArch, 'r')
+      f = open(nombArchCompleto, 'r')
     except:
       f = False
   if not f:
-    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN, nombArch, ROJO, FIN))
+    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN,
+                                                nombArchCompleto, ROJO, FIN))
     break
 
   try:
