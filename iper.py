@@ -6,43 +6,35 @@ from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 import io
 try:
-  from lib import DIR
-  bMovil = True
+  from lib import DIR, LINEA, bMovil
 except:
   DIR = './'
   bMovil = False
 
 if bMovil:
+  try:
+    import androidhelper as android
+  except:
+    import android
+  droid = android.Android()
   from os import listdir
   from os.path import isfile, join, basename
   import fnmatch
-  import sl4a
-  import libES, libConst
-
-  CO    = libConst
-  ES    = libES
-  droid = sl4a.Android()
-
-  AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
-  CYAN  = CO.color.CYAN		# Identificacion del socio.
-  AZUL  = CO.color.BLUE		# Identificacion de los datos.
-  VERDE = CO.color.GREEN	# Linea final (totales).
-  PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
-  NEGRITA = CO.color.BOLD	# Negrita
-  ROJO  = CO.color.RED		# Linea de error.
-  SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
-  FIN   = CO.color.END
 else:
   from os.path import abspath, basename
 
-  AMARI = '\033[93m'	# Primer titulo.
-  CYAN  = '\033[96m'	# Identificacion del socio.
-  AZUL  = '\033[94m'	# Identificacion de los datos.
-  PURPURA = '\033[95m'	# Linea final (total de prestamos).
-  VERDE = '\033[92m'	# Linea final (totales).
-  ROJO  = '\033[91m'	# Linea de error.
-  SUBRAYADO = '\033[4m'
-  FIN   = '\033[0m'
+from lib import ES, Const
+CO    = Const
+ES    = ES
+AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
+CYAN  = CO.color.CYAN		# Identificacion del socio.
+AZUL  = CO.color.BLUE		# Identificacion de los datos.
+VERDE = CO.color.GREEN	# Linea final (totales).
+PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
+NEGRITA = CO.color.BOLD	# Negrita
+ROJO  = CO.color.RED		# Linea de error.
+SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
+FIN   = CO.color.END
 
 if not bMovil:
   def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
@@ -139,7 +131,7 @@ while True:
 # el metodo 'items' de diccionarios devuelve un 'view object' del tipo "dict_items" que contiene una lista de key-value.
 # el metodo 'keys' de diccionarios devuelve un 'view object' del tipo "dict_keys" que contiene una lista de keys.
 # el metodo 'values' de diccionarios devuelve un 'view object' del tipo "dict_values" que contiene una lista de values.
-  else: lCed = list(dicc.keys())        # Ambos funcionan en PC. Solo para mostrar ambas maneras.
+  else: lCed = list(dicc.keys())        # Ambos funcionan en PC. Solo para mostrar ambas maneras. Tambien, en 3.5: [*dicc] porque dict devuelve keys cuando iterate.
   lCed.sort()
 
   iL = 0		# Numero de linea leida.

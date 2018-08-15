@@ -7,42 +7,34 @@ import sys
 import re
 from time import time, localtime, strftime
 try:
-  from lib import DIR
-  bMovil = True
+  from lib import DIR, LINEA, bMovil
 except:
   DIR = './'
   bMovil = False
 if bMovil:
+  try:
+    import androidhelper as android
+  except:
+    import android
+  droid = android.Android()
   from os import listdir
   from os.path import isfile, join, basename
   import fnmatch
-  import sl4a
-  import libES, libConst
-
-  CO    = libConst
-  ES    = libES
-  droid = sl4a.Android()
-
-  AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
-  CYAN  = CO.color.CYAN		# Identificacion del socio.
-  AZUL  = CO.color.BLUE		# Identificacion de los datos.
-  VERDE = CO.color.GREEN	# Linea final (totales).
-  PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
-  NEGRITA = CO.color.BOLD	# Negrita
-  ROJO  = CO.color.RED		# Linea de error.
-  SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
-  FIN   = CO.color.END
 else:
   from os.path import abspath, basename
 
-  AMARI = '\033[93m'	# Primer titulo.
-  CYAN  = '\033[96m'	# Identificacion del socio.
-  AZUL  = '\033[94m'	# Identificacion de los datos.
-  PURPURA = '\033[95m'	# Linea final (total de prestamos).
-  VERDE = '\033[92m'	# Linea final (totales).
-  ROJO  = '\033[91m'	# Linea de error.
-  SUBRAYADO = '\033[4m'
-  FIN   = '\033[0m'
+from lib import ES, Const
+CO    = Const
+ES    = ES
+AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
+CYAN  = CO.color.CYAN		# Identificacion del socio.
+AZUL  = CO.color.BLUE		# Identificacion de los datos.
+VERDE = CO.color.GREEN	# Linea final (totales).
+PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
+NEGRITA = CO.color.BOLD	# Negrita
+ROJO  = CO.color.RED		# Linea de error.
+SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
+FIN   = CO.color.END
 
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
@@ -276,47 +268,6 @@ def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
   if bImpar: sColor = CYAN
   return sColor, not bImpar
 # FIN funcion colorLinea
-def fgFormateaNumero(sCad, dec=0):
-  global bMovil
-
-  if bMovil: return ES.fgFormateaNumero(sCad, dec)
-  if (not isinstance(sCad, str) and not isinstance(sCad, float) and not isinstance(sCad, int)) and \
-     ((None != dec) and not isinstance(dec, int)): return None
-
-  if isinstance(sCad, float) or isinstance(sCad, int): sCad = str(sCad)
-#  print('fn entrada: ', sCad)
-  try:
-    fCad = float(sCad)
-    fCad = round(fCad, dec)
-    signo = ''
-    if 0 > fCad:
-      signo = '-'
-      fCad  = -fCad
-    sCad = str(fCad)
-  except:
-    return None
-
-  x = sCad.split('.') # Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
-  x0 = x[0]           # x0 es la parte entera
-  if 1 < len(x):      # x es un arreglo. 'len' retorna la longitud del arreglo.
-    x2 = x[1]
-  if 0 < dec: x2 = ',' + x2.ljust(dec, '0')
-  else: x2 = ''
-  dec = dec + 1			# Crece en 1 al agregar la coma "," decimal.
-  if dec < len(x2): x2 = x2[0:dec]
-
-  x1 = ''
-  x = re.findall(pat, x0)
-  for i in range(0, len(x)):
-    if 4 <= len(x0):
-      x1 = '.' + x0[-3:] + x1
-      x0 = x0[0:-3]
-    else:
-      x1 = x0 + x1
-#  print('fn salida: ', signo + x1 + x2)
-
-  return signo + x1 + x2	#parte entera (x1) con '.' intercalado cada 3 dec + parte decimal con ',' adelante.
-# FIN funcion fgFormateaNumero(sCad, dec)
 def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
   global sCed
 
@@ -352,10 +303,10 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
         try: bCINoEncontrada
         except NameError: bCINoEncontrada = True
         if sCed.lstrip('0') == l[iCI].lstrip('0'):
-          st = "%sCedula de identidad:%s %s%s%s" % (CYAN, FIN, AZUL, fgFormateaNumero(sCed), FIN)
+          st = "%sCedula de identidad:%s %s%s%s" % (CYAN, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
           st = "%sNombre:%s %s%s%s" % (CYAN, FIN, AZUL, l[iNbr], FIN)
           st = "%sCuenta:%s %s%s%s" % (CYAN, FIN, AZUL, l[iCC][0:4]+'-'+l[iCC][4:8]+'-'+l[iCC][8:10]+'-'+l[iCC][10:], FIN)
-          st = "%sMonto:%s %s%s%s" % (CYAN, FIN, AZUL, fgFormateaNumero(l[iMto], 2), FIN)
+          st = "%sMonto:%s %s%s%s" % (CYAN, FIN, AZUL, ES.fgFormateaNumero(l[iMto], 2), FIN)
           bCINoEncontrada = False
     except ValueError as er:
       print(er)
@@ -367,7 +318,7 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
       sys.exit()
 # FIN for
   if '' != sCed and bCINoEncontrada:
-    st = "%sLa cedula de identidad:%s %s%s%s no fue encontrada." % (ROJO, FIN, AZUL, fgFormateaNumero(sCed), FIN)
+    st = "%sLa cedula de identidad:%s %s%s%s no fue encontrada." % (ROJO, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
   return lTot, st
 # FIN funcion calcTotal
 def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2, sNumLote, sRif, sFechaValor, sCodCta):
@@ -380,8 +331,8 @@ def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2, sNu
     st += "%sNumero total de registros de detalle:%s %s%d%s.\n" % (AZUL, FIN, ROJO, lTot[0], FIN)
   if 0.005 < abs(fMtoTot - lTot[1]):
     st += "%sError:%s El monto total de la primera fila no concuerda con la suma del monto total de depositos.\n" % (ROJO, FIN)
-    st += "Valor entre columnas " + str(iMtoTot1) + " y " + str(iMtoTot2) + " del primer registro: " + fgFormateaNumero(fMtoTot, 2) + '.\n'
-    st += "Monto total de depositos en registros de detalle: " + fgFormateaNumero(lTot[1], 2) + '.\n'
+    st += "Valor entre columnas " + str(iMtoTot1) + " y " + str(iMtoTot2) + " del primer registro: " + ES.fgFormateaNumero(fMtoTot, 2) + '.\n'
+    st += "Monto total de depositos en registros de detalle: " + ES.fgFormateaNumero(lTot[1], 2) + '.\n'
   if bMerc or bMProv or bBan: st += "%sNumero de lote:%s %s%s%s\n" % (AZUL, FIN, CYAN, sNumLote, FIN)
   if bMerc or bMProv or bBan: st += "%sRif:%s %s%s%s\n" % (AZUL, FIN, CYAN, sRif[0:1]+'-'+sRif[1:], FIN)
   if bMerc or bMProv or bBan: st += "%sFecha valor:%s %s%s%s\n" % (AZUL, FIN, CYAN, sFechaValor[6:] + '/' +\
@@ -389,7 +340,7 @@ def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2, sNu
   elif bVzla: st += "%sFecha valor:%s %s%s%s\n" % (AZUL, FIN, CYAN, sFechaValor, FIN)
   st += "%sCodigo de cuenta bancaria:%s %s%s%s.\n" % (AZUL, FIN, CYAN, sCodCta[0:4]+'-'+sCodCta[4:8]+'-'+sCodCta[8:10]+'-'+sCodCta[10:], FIN)
   st += "%sSe deposita a %d socios, la cantidad de %s bolivares.%s\n" % \
-        (VERDE, lTot[0], fgFormateaNumero(lTot[1], 2), FIN)
+        (VERDE, lTot[0], ES.fgFormateaNumero(lTot[1], 2), FIN)
   return st
 # FIN funcion cargarFilas
 

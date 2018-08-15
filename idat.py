@@ -7,48 +7,39 @@ import sys
 import re
 
 try:
-  from lib import DIR
-  bMovil = True
+  from lib import DIR, LINEA, bMovil
 except:
   DIR = './'
   bMovil = False
 
 if bMovil:
+  try:
+    import androidhelper as android
+  except:
+    import android
+  droid = android.Android()
   from os import listdir
   from os.path import isfile, join, basename
   import fnmatch
-  import sl4a
-  import libES, libConst
-
-  CO    = libConst
-  ES    = libES
-  droid = sl4a.Android()
-
-  AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
-  CYAN  = CO.color.CYAN		# Identificacion del socio.
-  AZUL  = CO.color.BLUE		# Identificacion de los datos.
-  VERDE = CO.color.GREEN	# Linea final (totales).
-  PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
-  NEGRITA = CO.color.BOLD	# Negrita
-  ROJO  = CO.color.RED		# Linea de error.
-  SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
-  FIN   = CO.color.END
 else:
   from os.path import abspath, basename
 
-  AMARI = '\033[93m'	# Primer titulo.
-  CYAN  = '\033[96m'	# Identificacion del socio.
-  AZUL  = '\033[94m'	# Identificacion de los datos.
-  PURPURA = '\033[95m'	# Linea final (total de prestamos).
-  VERDE = '\033[92m'	# Linea final (totales).
-  ROJO  = '\033[91m'	# Linea de error.
-  SUBRAYADO = '\033[4m'
-  FIN   = '\033[0m'
+from lib import ES, Const
+CO    = Const
+ES    = ES
+AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
+CYAN  = CO.color.CYAN		# Identificacion del socio.
+AZUL  = CO.color.BLUE		# Identificacion de los datos.
+VERDE = CO.color.GREEN	# Linea final (totales).
+PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
+NEGRITA = CO.color.BOLD	# Negrita
+ROJO  = CO.color.RED		# Linea de error.
+SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
+FIN   = CO.color.END
 
-import libMySQL
-bMySQL = libMySQL.bMySQL
-from config import HOST, USUARIO, PASSWD, BDEDATOS
-oMySQL = libMySQL.cMySQL(HOST, USUARIO, PASSWD, BDEDATOS)
+from lib import MySQL
+bMySQL = MySQL.bMySQL
+oMySQL = MySQL.cMySQL()
 
 patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
@@ -192,47 +183,6 @@ def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
   if bImpar: sColor = CYAN
   return sColor, not bImpar
 # FIN funcion colorLinea
-def fgFormateaNumero(sCad, dec=0):
-  global bMovil
-
-  if bMovil: return ES.fgFormateaNumero(sCad, dec)
-  if (not isinstance(sCad, str) and not isinstance(sCad, float) and not isinstance(sCad, int)) and \
-     ((None != dec) and not isinstance(dec, int)): return None
-
-  if isinstance(sCad, float) or isinstance(sCad, int): sCad = str(sCad)
-#  print('fn entrada: ', sCad)
-  try:
-    fCad = float(sCad)
-    fCad = round(fCad, dec)
-    signo = ''
-    if 0 > fCad:
-      signo = '-'
-      fCad  = -fCad
-    sCad = str(fCad)
-  except:
-    return None
-
-  x = sCad.split('.');		# Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
-  x0 = x[0];				# x1 es la parte entera
-  if 1 < len(x):
-    x2 = x[1]
-  if 0 < dec: x2 = ',' + x2.ljust(dec, '0')
-  else: x2 = ''
-  dec = dec + 1			# Crece en 1 al agregar la coma "," decimal.
-  if dec < len(x2): x2 = x2[0:dec]
-
-  x1 = ''
-  x = re.findall(pat, x0)
-  for i in range(0, len(x)):
-    if 4 <= len(x0):
-      x1 = '.' + x0[-3:] + x1
-      x0 = x0[0:-3]
-    else:
-      x1 = x0 + x1
-#  print('fn salida: ', signo + x1 + x2)
-
-  return signo + x1 + x2	#parte entera (x1) con '.' intercalado cada 3 dec + parte decimal con ',' adelante.
-# FIN funcion fgFormateaNumero(sCad, dec)
 def mostrarConceptos(dicc, dConc):
   lconc = []
   i = 0
@@ -258,9 +208,9 @@ def mostrarConceptos(dicc, dConc):
        fPorc = 100.00*dicc[v][3]/dicc['TOT'][3]
        st += "%s%s%3s %-20.20s %6.6s %15.15s %15.15s %15.15s %6.6s%s\n" %\
   				(subrayar, sColor, v, dConc.get(v, {'des':'NO TENGO DESCRIPCION'})['des'], \
-  				fgFormateaNumero(dicc[v][0]), fgFormateaNumero(dicc[v][1], 2), \
-  				fgFormateaNumero(dicc[v][2], 2), fgFormateaNumero(dicc[v][3], 2),\
-  				fgFormateaNumero(fPorc, 2), FIN)
+  				ES.fgFormateaNumero(dicc[v][0]), ES.fgFormateaNumero(dicc[v][1], 2), \
+  				ES.fgFormateaNumero(dicc[v][2], 2), ES.fgFormateaNumero(dicc[v][3], 2),\
+  				ES.fgFormateaNumero(fPorc, 2), FIN)
   return st
 # FIN funcion mostrarConceptos
 
@@ -319,12 +269,12 @@ while True:
     bCINoEncontrada = True
     for l in lista:
       if sCed.lstrip('0') == l[0].lstrip('0'):
-        if bCINoEncontrada: st += "\n%sCI:%s %s%s%s" % (CYAN, FIN, AZUL, fgFormateaNumero(sCed), FIN)
+        if bCINoEncontrada: st += "\n%sCI:%s %s%s%s" % (CYAN, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
         st += "\n%sCLV:%s %s%s-%-20.20s%s " % (CYAN, FIN, AZUL, l[1], dConc.get(l[1], {'des':'NO TENGO DESCRIPCION'})['des'], FIN)
         st += "%sFijo:%s %s%s%s; Var:%s %s%s%s" %\
-              (CYAN, FIN, AZUL, fgFormateaNumero(l[2], 2), CYAN, FIN, AZUL, fgFormateaNumero(l[3], 2), FIN)
+              (CYAN, FIN, AZUL, ES.fgFormateaNumero(l[2], 2), CYAN, FIN, AZUL, ES.fgFormateaNumero(l[3], 2), FIN)
         bCINoEncontrada = False
-  if '' != sCed and bCINoEncontrada: st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % (ROJO, FIN, AZUL, fgFormateaNumero(sCed), FIN)
+  if '' != sCed and bCINoEncontrada: st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % (ROJO, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
   else: st += '\n'
 
   if bMovil:

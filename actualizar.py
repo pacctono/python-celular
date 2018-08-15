@@ -1,18 +1,32 @@
+#!/usr/bin/python3
 #-*-coding:utf8;-*-
 #qpy:3
 #qpy:console
+from __future__ import print_function # Para poder usar 'print' de version 3.
 try:
-  import androidhelper as android
+  from lib import DIR, LINEA, bMovil
 except:
-  import android
-import socket, sys
-import libConst, libES
-from urllib.request import urlopen
-from time import time, localtime, strftime
+  DIR = './'
+  bMovil = False
 
-droid = android.Android()
-ES    = libES
-CO    = libConst
+if bMovil:
+  try:
+    import androidhelper as android
+  except:
+    import android
+import socket, sys
+from lib import Const, ES
+from urllib.request import urlopen
+from time import time, localtime, strftime, ctime
+from os import stat
+from os.path import exists as existe
+from stat import *
+from datetime import datetime
+
+if bMovil: droid = android.Android()
+else: droid = None
+ES    = ES
+CO    = Const
 
 AMARI = CO.color.YELLOW			# Primer titulo. Identifica la fecha de actualizacion de los datos.
 CYAN  = CO.color.CYAN			# Identificacion del socio.
@@ -60,7 +74,7 @@ def obtenerIP(servidor):		# Es la unica rutina que consegui para obtener mi IP.
 ES.muestraInicio("IPASPUDO: J-30619229-8.")
 
 ind = ES.entradaConLista(droid, 'Busqueda del servidor', 'Seleccione servidor', lSitios)		# Busca el servidor.
-if (ind >= len(lSitios)) or (ind < 0) or (ind == (len(lSitios)-1)) or (None == ind):	# Se asegura de tener el indice correcto.
+if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or (0 > ind):	# Se asegura de tener el indice correcto.
 	ES.muestraFin()
 	sys.exit()
 IPServ = lIPs[ind]
@@ -86,10 +100,14 @@ dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibi
 URL = "http://" + IPServ + "/" + 'movil/'
 bImpar  = True
 lBancosHoy = None
-dHoy = strftime("%d/%m/%Y", localtime())
+dHoy = strftime("%Y%m%d", localtime())
 for DATA in lDATA:
 	sColor, bImpar = ES.colorLinea(bImpar, VERDE, AZUL)
-	print("%sLeyendo%s %s remoto..." % (sColor, FIN, DATA))
+	if existe(DATA):	# existe importado de os.path.exists.
+		mt = stat(ES.DIR + DATA).st_mtime
+	else: mt = -1
+	print("%sLeyendo%s %s remoto. Local modificado: %s" %
+						(sColor, FIN, DATA, mt))
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.
@@ -105,11 +123,15 @@ for DATA in lDATA:
 				for l in lControl:
 					ll = l.strip().split(';')
 					if 1 < len(ll) and 'Sinca' == ll[0]:
-						lll = ll[1].strip().split(':', 1)
-						sFecControl = lll[1].strip()
-						if 1 < len(lll): sControl = "%sControl al: %s%s." % (PURPURA, FIN, sFecControl)
-						llll = sFecControl.strip().split(' ')
-						if (1 < len(llll)) and (dHoy == llll[0]): bOtroDia = False
+						fechaControl = datetime.strptime(ll[1],
+								'ACTUALIZADO Al: %d/%m/%Y %H:%M:%S')
+#						lll = ll[1].strip().split(':', 1)
+#						sFecControl = lll[1].strip()
+#						if 1 < len(lll): sControl = "%sControl al: %s%s." % (PURPURA, FIN, sFecControl)
+#						llll = sFecControl.strip().split(' ')
+#						if (1 < len(llll)) and (dHoy == llll[0]): bOtroDia = False
+						sControl = "%sControl al: %s%s." % (PURPURA, FIN, fechaControl)
+						if (dHoy == fechaControl.strftime('%Y%m%d')): bOtroDia = False
 						else: bOtroDia = True
 						break
 					# if 1 < len(ll) and 'Sinca' == ll[0]
