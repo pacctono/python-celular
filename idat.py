@@ -176,13 +176,6 @@ def poblarDicc(lidat, dConc):
       sys.exit()
   return dicc, dConc
 # FIN funcion poblarDicc
-def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
-  global bMovil
-
-  if bMovil: return ES.colorLinea(bImpar, sColor, sOtroColor)
-  if bImpar: sColor = CYAN
-  return sColor, not bImpar
-# FIN funcion colorLinea
 def mostrarConceptos(dicc, dConc):
   lconc = []
   i = 0
@@ -204,7 +197,7 @@ def mostrarConceptos(dicc, dConc):
        else: subrayar = ''
        if ('TOT' == v): sColor = VERDE
        elif v in ('AHO', 'OTR', 'PRE', 'PR0', 'PR1'): sColor = PURPURA
-       else: sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+       else: sColor, bImpar = ES.colorLinea(bImpar, AZUL, CYAN)
        fPorc = 100.00*dicc[v][3]/dicc['TOT'][3]
        st += "%s%s%3s %-20.20s %6.6s %15.15s %15.15s %15.15s %6.6s%s\n" %\
   				(subrayar, sColor, v, dConc.get(v, {'des':'NO TENGO DESCRIPCION'})['des'], \

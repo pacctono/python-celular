@@ -70,13 +70,6 @@ else:
     if None == indice or 0 > indice: return None
     return(lFiles[indice])
   # FIN funcion buscarArchivo
-def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
-  global bMovil
-
-  if bMovil: return ES.colorLinea(bImpar, sColor, sOtroColor)
-  if bImpar: sColor = CYAN
-  return sColor, not bImpar
-# FIN funcion colorLinea
 
 sCed = None
 if bMovil:
@@ -151,11 +144,11 @@ while True:
       elif dicc[v][4].isdigit() and dicc[v][5].isdigit():	# Linea larga
         if sCed:
           if sCed.lstrip('0') == v.lstrip('0'):
-            sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+            sColor, bImpar = ES.colorLinea(bImpar, AZUL, CYAN)
             print("%s%5d: %8d %30.30s Nuc==>> %s Cta==>> %s%s" % \
                   (sColor, iL, int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5], FIN))
         elif 0 == (iL%500):
-          sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+          sColor, bImpar = ES.colorLinea(bImpar, AZUL, CYAN)
           print("%s%5d: %8d %30.30s Nuc==>> %s Cta==>> %s%s" % \
                 (sColor, iL, int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5], FIN))
         nL += 1
@@ -174,7 +167,7 @@ while True:
   if 0 < nC: print("%5d: %8d %30.30s Nuc==>> %s Cta==>> %s" % \
                  (iL, int(dicc[v][0]), dicc[v][1], dicc[v][2], dicc[v][3]))
   else:
-    sColor, bImpar = colorLinea(bImpar, AZUL, CYAN)
+    sColor, bImpar = ES.colorLinea(bImpar, AZUL, CYAN)
     print("%s%5d: %8d %30.30s Nuc==>> %s Cta==>> %s%s" % \
            (sColor, iL, int(dicc[v][0]), dicc[v][1], dicc[v][4], dicc[v][5], FIN))
   print("%s%d lineas; %d lineas cortas y %d lineas largas%s" % (VERDE, iL, nC, nL, FIN))

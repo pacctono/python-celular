@@ -261,13 +261,6 @@ def vzla(f, sFecha, sCodCta):
     print(er)
     sys.exit()
 # FIN funcion vzla
-def colorLinea(bImpar=True, sColor=AZUL, sOtroColor=None):
-  global bMovil
-
-  if bMovil: return ES.colorLinea(bImpar, sColor, sOtroColor)
-  if bImpar: sColor = CYAN
-  return sColor, not bImpar
-# FIN funcion colorLinea
 def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
   global sCed
 
