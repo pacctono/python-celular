@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 #-*-coding:utf8;-*-
 #qpy:3
 #qpy:console
@@ -11,7 +11,7 @@ except:
   DIR = './'
   bMovil = False
 if bMovil:
-      try:
+  try:
     import androidhelper as android
   except:
     import android
@@ -83,31 +83,30 @@ def poblarDicConc(co, de, cm='', nu='', no='', au=''):
 # no: es concepto de nomina (S/N), au: automatico (S/N).
 # FIN funcion poblarDic
 def creaDicConceptos():
+  dConc = {}
   if not bMySQL:
     try:
       if bMovil:
         dConcepto = ES.cargaDicc("conceptos.txt")
-        dConc = {}
         for k,v in dConcepto.items():
        	  dConc[k] = poblarDicConc(k, v)
       else:
 #        f = abre("conceptos.txt", bImprimir = True)
         f = abre("conceptos.txt")
         if not f:
-          print('Problemas para abrir el archivo\n')
+          print('Problemas para abrir el archivo de texto.\n')
           return {}
-        dConc = {}
         for linea in f:
           try:
             k, v,  cm, nu, no, au = linea.rstrip().split(';')
             dConc[k] = poblarDicConc(k, v,  cm, nu, no, au)
           except:
-            print('Problemas para leer el archivo\n')
+            print('Problemas para leer el archivo.\n')
             continue
         else: f.close()
       return dConc
     except:
-      if not bMovil: print('Problemas con el archivo\n')
+      if not bMovil: print('Problemas con el archivo.\n')
       return {}
 # Abre la conexion con la base de datos.
   if oMySQL.conectar():
@@ -122,16 +121,16 @@ def creaDicConceptos():
       cursor.execute(sql)
 # Alimneta todas las filas en una lista de listas.
       resultados = cursor.fetchall()
-      dConc = {}
       for fila in resultados:
 # Crea diccionario de conceptos.
         dConc[fila[0]] = poblarDicConc(fila[0], fila[1], fila[2], fila[3],
                                        fila[4], fila[5])
     except:
-      print("Imposible crear diccionario de conceptos")
+      print("Imposible crear diccionario de conceptos.")
 # disconnect from server
     oMySQL.cierraCursor(cursor)
     oMySQL.cierraConexion()
+  else: print("No se pudo conectar a la Base de Datos.")
   return dConc
 # FIN funcion creaDicConceptos
 def poblarDicc(lidat, dConc):
