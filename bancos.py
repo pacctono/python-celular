@@ -36,8 +36,8 @@ ROJO  = CO.color.RED		# Linea de error.
 SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
 FIN   = CO.color.END
 
-patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
-pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
+patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
+pat = re.compile(r"\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
 
 sHoy     = strftime("%Y%m%d", localtime())
 sHoyAno  = strftime("%Y", localtime())
@@ -69,7 +69,7 @@ def prepara(nbrArchBanco):
   global sBanco
 
   try:
-    (sNbrArch, sTipo) = nbrArchBanco.split('.', 1)
+    sNbrArch = nbrArchBanco.split('.', 1)
   except:
     sNbrArch = nbrArchBanco
   try:

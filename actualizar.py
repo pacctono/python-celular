@@ -20,7 +20,7 @@ from urllib.request import urlopen
 from time import time, localtime, strftime, ctime
 from os import stat
 from os.path import exists as existe
-from stat import *
+#from stat import *
 from datetime import datetime
 
 if bMovil: droid = android.Android()

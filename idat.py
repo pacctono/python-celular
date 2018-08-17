@@ -41,8 +41,8 @@ from lib import MySQL
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()
 
-patron = re.compile("\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
-pat = re.compile("\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
+patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
+pat = re.compile(r"\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
 
 if not bMovil:
   def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
