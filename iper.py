@@ -23,9 +23,7 @@ if bMovil:
 else:
   from os.path import abspath, basename
 
-from lib import ES, Const
-CO    = Const
-ES    = ES
+from lib import ES, Const as CO
 AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
 CYAN  = CO.color.CYAN		# Identificacion del socio.
 AZUL  = CO.color.BLUE		# Identificacion de los datos.
@@ -39,8 +37,7 @@ FIN   = CO.color.END
 if not bMovil:
   def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
     'Abre para leer, el archivo cuyo nombre es el valor de aNb'
-    global DIR
-    if basename(aNb) == aNb: aNb = DIR + aNb
+
     try:
       f = io.open(aNb, mode=modo, encoding=codigo)
       if (bImprimir): print(aNb + " archivo abierto.")

@@ -24,9 +24,7 @@ if bMovil:
 else:
   from os.path import abspath, basename
 
-from lib import ES, Const
-CO    = Const
-ES    = ES
+from lib import ES, Const as CO
 AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
 CYAN  = CO.color.CYAN		# Identificacion del socio.
 AZUL  = CO.color.BLUE		# Identificacion de los datos.
@@ -47,8 +45,7 @@ pat = re.compile(r"\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec a
 if not bMovil:
   def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
     'Abre para leer, el archivo cuyo nombre es el valor de aNb'
-    global DIR
-    aNb = DIR + aNb
+
     try:
 #      f = open(aNb, mode=modo, encoding=codigo)
       f = open(aNb, mode=modo)

@@ -23,9 +23,7 @@ if bMovil:
 else:
   from os.path import abspath, basename
 
-from lib import ES, Const
-CO    = Const
-ES    = ES
+from lib import ES, Const as CO
 AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
 CYAN  = CO.color.CYAN		# Identificacion del socio.
 AZUL  = CO.color.BLUE		# Identificacion de los datos.
@@ -69,7 +67,7 @@ def prepara(nbrArchBanco):
   global sBanco
 
   try:
-    sNbrArch = nbrArchBanco.split('.', 1)
+    (sNbrArch, sTipo) = nbrArchBanco.split('.', 1)
   except:
     sNbrArch = nbrArchBanco
   try:

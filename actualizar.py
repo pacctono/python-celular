@@ -14,19 +14,17 @@ if bMovil:
     import androidhelper as android
   except:
     import android
+  droid = android.Android()
+else: droid = None
+
 import socket, sys
-from lib import Const, ES
+from lib import ES, Const as CO
 from urllib.request import urlopen
 from time import time, localtime, strftime, ctime
 from os import stat
 from os.path import exists as existe
 #from stat import *
 from datetime import datetime
-
-if bMovil: droid = android.Android()
-else: droid = None
-ES    = ES
-CO    = Const
 
 AMARI = CO.color.YELLOW			# Primer titulo. Identifica la fecha de actualizacion de los datos.
 CYAN  = CO.color.CYAN			# Identificacion del socio.
@@ -40,7 +38,6 @@ FIN   = CO.color.END
 
 lSitios = ["IPASPUDO", "Portatil", "Casa", "Otro", "Salir"]
 lIPs    = ["10.0.0.100", "10.0.0.103", "192.168.1.200", ""]
-IPDIR = "10.0.0.100"
 lDATA = [
 		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
 		 'bancos.txt',
@@ -103,8 +100,8 @@ lBancosHoy = None
 dHoy = strftime("%Y%m%d", localtime())
 for DATA in lDATA:
 	sColor, bImpar = ES.colorLinea(bImpar, VERDE, AZUL)
-	if existe(DATA):	# existe importado de os.path.exists.
-		mt = stat(ES.DIR + DATA).st_mtime
+	if existe(DIR + DATA):	# existe importado de os.path.exists.
+		mt = stat(DIR + DATA).st_mtime
 	else: mt = -1
 	print("%sLeyendo%s %s remoto. Local modificado: %s" %
 						(sColor, FIN, DATA, mt))
@@ -143,13 +140,15 @@ for DATA in lDATA:
 						ES.muestraFin()
 						sys.exit()
 				# FIN if bOtroDia
+				dControl = {linea.strip().split(';')[1]:linea.strip().split(';')[0] for linea in lControl if linea.strip().split(';')[0].isdigit()}
+				print(dControl)
 			# FIN if 0 < len(lControl)
 			else:
 				ES.muestraFin()
 				sys.exit()
 		# Fin if 'control.txt' == DATA
 		try:
-			f = open(ES.DIR + DATA, "w")
+			f = open(DIR + DATA, "w")
 			bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 		except:
 			print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, DATA, ROJO, FIN))
@@ -186,7 +185,7 @@ for k in dFecha.keys():					# Llaves recibidas en el nuevo control.txt.
 		dControl.pop(k)					# Solo quedara en dControl, las fechas de descarga de los archivos.
 sfControl = 'control.txt'
 try:
-	fc = open(ES.DIR + sfControl, "a")	# Se prepara para agregar, las fechas de descarga de cada archivo.
+	fc = open(DIR + sfControl, "a")	# Se prepara para agregar, las fechas de descarga de cada archivo.
 except:
 	print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, sfControl, ROJO, FIN))
 #	continue
@@ -213,7 +212,7 @@ if lBancosHoy and (0 < len(lBancosHoy)):
 			bLeido = False
 		if bLeido:														# Si no hubo error de lectura desde el servidor.
 			try:
-				f = open(ES.DIR + DATA, "w")
+				f = open(DIR + DATA, "w")
 				bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 			except:
 				print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, DATA, ROJO, FIN))
