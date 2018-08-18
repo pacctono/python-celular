@@ -49,6 +49,10 @@ def abrirErr(aNb, bImprimir = False):
     if (bImprimir): print("[ES]ERROR ABRIENDO: " + aNb)
     return False
 # funcion abrirErr
+def esEntero(v):
+    v = str(v).strip()
+    return v=='0' or (v if v.find('..') > -1 else v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
+# Funcion esEntero
 def fgFormateaNumero(sCad, dec=0):
   if (not isinstance(sCad, str) and not isinstance(sCad, float) and not isinstance(sCad, int)) and \
      ((None != dec) and not isinstance(dec, int)): return None

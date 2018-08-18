@@ -22,7 +22,7 @@ from lib import ES, Const as CO
 from urllib.request import urlopen
 from time import time, localtime, strftime, ctime
 from os import stat
-from os.path import exists as existe
+#from os.path import exists as existe
 #from stat import *
 from datetime import datetime
 
@@ -98,13 +98,26 @@ URL = "http://" + IPServ + "/" + 'movil/'
 bImpar  = True
 lBancosHoy = None
 dHoy = strftime("%Y%m%d", localtime())
+try:
+	f = open(DIR + 'control.txt', "r")
+	data = f.read()
+	lControl = [linea.strip().split(';') for linea in data.rstrip().split('\n')]
+except:
+	lControl = [['-1', nombArch] for nombArch in lDATA]
+dControl = {linea[1].strip():[linea[0].strip(), linea[0].strip()] for linea in lControl if ES.esEntero(linea[0].strip())}
+lBancosHoy = None		# La lista de bancos de hoy esta vacia al principio.
 for DATA in lDATA:
+	if 'control.txt' != DATA:
+		(timeAnterior, timeNuevo) = dControl.get(DATA, ['-1', '-1'])
+	else: timeAnterior = timeNuevo = 0
+	segsDiferencia = int(timeNuevo) - int(timeAnterior)
 	sColor, bImpar = ES.colorLinea(bImpar, VERDE, AZUL)
-	if existe(DIR + DATA):	# existe importado de os.path.exists.
-		mt = stat(DIR + DATA).st_mtime
-	else: mt = -1
-	print("%sLeyendo%s %s remoto. Local modificado: %s" %
-						(sColor, FIN, DATA, mt))
+	print("%sLeyendo%s %s remoto. Local modificado en: %d seg posteriores" %
+						(sColor, FIN, DATA, segsDiferencia))
+	if 'control.txt' != DATA and 0 >= segsDiferencia:
+		print("%s, %slocal; ya esta actualizado con%s %d cars! El %s" % \
+				(DATA, sColor, FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
+		continue
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.
@@ -113,20 +126,14 @@ for DATA in lDATA:
 		bLeido = False
 	if bLeido:														# Si no hubo error de lectura desde el servidor.
 		if 'control.txt' == DATA:
-			lControl = data.rstrip().split('\n')
+			lControl = [linea.strip().split(';') for linea in data.rstrip().split('\n')]
 			if 0 < len(lControl):
 				sControl = ''
 				bOtroDia = False
 				for l in lControl:
-					ll = l.strip().split(';')
-					if 1 < len(ll) and 'Sinca' == ll[0]:
-						fechaControl = datetime.strptime(ll[1],
+					if 'Sinca' == l[0]:
+						fechaControl = datetime.strptime(l[1],
 								'ACTUALIZADO Al: %d/%m/%Y %H:%M:%S')
-#						lll = ll[1].strip().split(':', 1)
-#						sFecControl = lll[1].strip()
-#						if 1 < len(lll): sControl = "%sControl al: %s%s." % (PURPURA, FIN, sFecControl)
-#						llll = sFecControl.strip().split(' ')
-#						if (1 < len(llll)) and (dHoy == llll[0]): bOtroDia = False
 						sControl = "%sControl al: %s%s." % (PURPURA, FIN, fechaControl)
 						if (dHoy == fechaControl.strftime('%Y%m%d')): bOtroDia = False
 						else: bOtroDia = True
@@ -140,8 +147,10 @@ for DATA in lDATA:
 						ES.muestraFin()
 						sys.exit()
 				# FIN if bOtroDia
-				dControl = {linea.strip().split(';')[1]:linea.strip().split(';')[0] for linea in lControl if linea.strip().split(';')[0].isdigit()}
-				print(dControl)
+				for linea in lControl:
+					if ES.esEntero(linea[0]):
+						if linea[1] in dControl: dControl[linea[1]] = [dControl[linea[1]][0], linea[0]]
+						else: dControl[linea[1]] = ['-1', linea[0]]
 			# FIN if 0 < len(lControl)
 			else:
 				ES.muestraFin()
@@ -158,8 +167,6 @@ for DATA in lDATA:
 			try:
 				f.write(data)
 				bEscrito = True										# No hubo error escribiendo en el archivo local.
-				if ('control.txt' != DATA) and ('archsBanco.txt' != DATA):
-					dControl[DATA] = strftime("%d/%m/%Y %H:%M:%S", localtime())
 			except:
 				print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (ROJO, FIN, DATA))
 				bEscrito = False
@@ -169,34 +176,33 @@ for DATA in lDATA:
 				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % (DATA, CYAN, FIN, ES.cLineas(DATA)))
 				else: print("%s %sactualizado con%s %d!" % (DATA, sColor, FIN, ES.cLineas(DATA)))
 				if 'archsBanco.txt' == DATA: lBancosHoy = data.rstrip().split('\n')
-				else: lBancosHoy = None
 			# Fin if bEscrito
 		# Fin if bAbierto
 	# Fin if bLeido
-	elif 'control.txt' == DATA:
+	elif 'control.txt' == DATA:		# El primer archivo a leer, no se pudo descargar.
 		print("%sPARECIERA QUE EXISTE ALGUN PROBLEMA CON INTERNET O LOS ARCHIVOS NO EXISTEN.%s" % (ROJO, FIN))
 		ES.muestraFin()
 		sys.exit()
 # Fin for
 
-dFecha = ES.cargaDicc("control.txt")	# Nuevo control con solo los valores recibidos del servidor.
-for k in dFecha.keys():					# Llaves recibidas en el nuevo control.txt.
-	if k in dControl:					# Elimina las llaves recibidas, del diccionario anterior.
-		dControl.pop(k)					# Solo quedara en dControl, las fechas de descarga de los archivos.
-sfControl = 'control.txt'
-try:
-	fc = open(DIR + sfControl, "a")	# Se prepara para agregar, las fechas de descarga de cada archivo.
-except:
-	print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, sfControl, ROJO, FIN))
+#dFecha = ES.cargaDicc("control.txt")	# Nuevo control con solo los valores recibidos del servidor.
+#for k in dFecha.keys():					# Llaves recibidas en el nuevo control.txt.
+#	if k in dControl:					# Elimina las llaves recibidas, del diccionario anterior.
+#		dControl.pop(k)					# Solo quedara en dControl, las fechas de descarga de los archivos.
+#sfControl = 'control.txt'
+#try:
+#	fc = open(DIR + sfControl, "a")	# Se prepara para agregar, las fechas de descarga de cada archivo.
+#except:
+#	print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, sfControl, ROJO, FIN))
 #	continue
-try:
-	if fc:
-		for k,v in dControl.items():	# Cada llave, valor de las fechas de descarga de los archivos.
-			fc.write(k + ';' + v + '\n')# Agrega a 'fc' la fecha de cada archivo descargado.
-except:
-	print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (ROJO, FIN, sfControl))
-finally:
-	fc.close()
+#try:
+#	if fc:
+#		for k,v in dControl.items():	# Cada llave, valor de las fechas de descarga de los archivos.
+#			fc.write(k + ';' + v + '\n')# Agrega a 'fc' la fecha de cada archivo descargado.
+#except:
+#	print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (ROJO, FIN, sfControl))
+#finally:
+#	fc.close()
 
 #print(lBancosHoy)
 if lBancosHoy and (0 < len(lBancosHoy)):
