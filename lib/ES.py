@@ -23,19 +23,25 @@ ROJO  = CO.color.RED			# Error.
 FIN  = CO.color.END
 
 patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
-pat = re.compile(r"\d{1,3}")	        # Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
+pat = re.compile(r"\d{1,3}")	        # Expresion regular: 1 o mas dig (\d+) y tres dig al final (\d{3}).
 
 par = lambda x: (0 == (x%2))	# Es un numero par.
 def abrir(aNb, modo='r', codigo = 'UTF-8', bImprimir = False):
   'Abre para leer, el archivo cuyo nombre es el valor de aNb'
+  import io
+  from os.path import abspath, basename
   global DIR
-  aNb = DIR + aNb
+
+  if basename(aNb) == aNb: aNb = DIR + aNb
   try:
-    f = open(aNb, mode=modo, encoding=codigo)
+    if bMovil: f = open(aNb, mode=modo, encoding=codigo)
+    else: f = io.open(aNb, mode=modo, encoding=codigo)
     if (bImprimir): print('[ES]' + aNb + " archivo abierto.")
     return f
   except:
-    if (bImprimir): print("[ES]ERROR ABRIENDO: " + aNb)
+    if (bImprimir):
+      print(AMARI + "[ES]ERROR ABRIENDO: " + FIN + aNb)
+      print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
     return False
 # funcion abrir
 def abrirErr(aNb, bImprimir = False):
@@ -54,42 +60,48 @@ def esEntero(v):
     return v=='0' or (v if v.find('..') > -1 else v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
 # Funcion esEntero
 def fgFormateaNumero(sCad, dec=0):
-  if (not isinstance(sCad, str) and not isinstance(sCad, float) and not isinstance(sCad, int)) and \
-     ((None != dec) and not isinstance(dec, int)): return None
+  if (not isinstance(sCad, str) and not isinstance(sCad, float) and \
+      not isinstance(sCad, int)) and ((None != dec) and not dec.isinteger()):
+    return None
+  if None == dec: dec = 0
   if isinstance(sCad, str): sCad = sCad.strip(' \t\n\r')
 
   if isinstance(sCad, float) or isinstance(sCad, int): sCad = str(sCad)
   try:
     fCad = float(sCad)
     fCad = round(fCad, dec)
-    signo = ''
-    if 0 > fCad:
-      signo = '-'
-      fCad  = -fCad
+#    signo = ''
+#    if 0 > fCad:
+#      signo = '-'
+#      fCad  = -fCad
     sCad = str(fCad)
   except:
     return None
 
   x = sCad.split('.')		# Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
-  x0 = x[0]				# x1 es la parte entera
-  if 1 < len(x):
-    x2 = x[1]
-  if 0 < dec: x2 = ',' + x2.ljust(dec, '0')
+  x0 = int(x[0])	      # x0 es la parte entera
+  if 1 < len(x):        # Esta y las prox 6 lineas parecen innecesarias por 'round' arriba.
+    x2 = x[1]           # x2 es la parte decimal.
+  if 0 < dec:
+    x2 = ',' + x2.ljust(dec, '0')
+    dec += 1			      # Crece en 1 al agregar la coma "," decimal.
   else: x2 = ''
-  dec = dec + 1			# Crece en 1 al agregar la coma "," decimal.
   if dec < len(x2): x2 = x2[0:dec]
 
-  x1 = ''
-  x = re.findall(pat, x0)
-  for i in range(0, len(x)):
-    if 4 <= len(x0):
-      x1 = '.' + x0[-3:] + x1
-      x0 = x0[0:-3]
-    else:
-      x1 = x0 + x1
+# Agrupa de 3 en 3 y separa con ',', luego la remplaza con '.'.
+  x1 = "{:,}".format(x0).replace(',','.')
+#  x1 = ''
+#  x = re.findall(pat, x0)
+#  for i in range(0, len(x)):
+#    if 4 <= len(x0):
+#      x1 = '.' + x0[-3:] + x1
+#      x0 = x0[0:-3]
+#    else:
+#      x1 = x0 + x1
 #  print('fn: ', signo + x1 + x2)
 
-  return signo + x1 + x2	#parte entera (x1) con '.' intercalado cada 3 dec + parte decimal con ',' adelante.
+# parte entera (x1) con '.' intercalado cada 3 dec + parte decimal con ',' adelante.
+  return x1 + x2
 # funcion fgFormateaNumero(sCad, dec)
 def fgEliminarPuntos(sCadena, sP='.'):
   lCadDig = sCadena.rstrip().split(sP)

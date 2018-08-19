@@ -22,7 +22,7 @@ if bMovil:
 else:
   from os.path import abspath, basename
 
-from lib import ES, Const as CO
+from lib import Conceptos as CC, ES, Const as CO
 AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
 CYAN  = CO.color.CYAN		# Identificacion del socio.
 AZUL  = CO.color.BLUE		# Identificacion de los datos.
@@ -40,22 +40,7 @@ oMySQL = MySQL.cMySQL()
 patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile(r"\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
 
-if not bMovil:
-  def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
-    'Abre para leer, el archivo cuyo nombre es el valor de aNb'
-
-    try:
-#      f = open(aNb, mode=modo, encoding=codigo)
-      f = open(aNb, mode=modo)
-      if (bImprimir): print(aNb + " archivo abierto.")
-      return f
-    except:
-      if (bImprimir):
-        print(AMARI + "ERROR ABRIENDO: " + FIN + aNb)
-        print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
-      return False
-  # FIN funcion abre
-else:
+if bMovil:
 	def cargarNombres(nombArch='IPAS*.TXT'):
 		rutaDatos = DIR
 
@@ -74,62 +59,6 @@ else:
 		if None == indice or 0 > indice: return None
 		return(lFiles[indice])
 	# FIN funcion buscarArchivo
-def poblarDicConc(co, de, cm='', nu='', no='', au=''):
-  return {'cod':co, 'des':de, 'com':cm, 'nus':nu, 'nom':no, 'aut':au}	# Codigo, desc,
-# com: 2 primeros digitos comprobante, nu: cod tabla_prestamo,
-# no: es concepto de nomina (S/N), au: automatico (S/N).
-# FIN funcion poblarDic
-def creaDicConceptos():
-  dConc = {}
-  if not bMySQL:
-    try:
-      if bMovil:
-        dConcepto = ES.cargaDicc("conceptos.txt")
-        for k,v in dConcepto.items():
-       	  dConc[k] = poblarDicConc(k, v)
-      else:
-#        f = abre("conceptos.txt", bImprimir = True)
-        f = abre("conceptos.txt")
-        if not f:
-          print('Problemas para abrir el archivo de texto.\n')
-          return {}
-        for linea in f:
-          try:
-            k, v,  cm, nu, no, au = linea.rstrip().split(';')
-            dConc[k] = poblarDicConc(k, v,  cm, nu, no, au)
-          except:
-            print('Problemas para leer el archivo.\n')
-            continue
-        else: f.close()
-      return dConc
-    except:
-      if not bMovil: print('Problemas con el archivo.\n')
-      return {}
-# Abre la conexion con la base de datos.
-  if oMySQL.conectar():
-# Prepara un cursor.
-    cursor = oMySQL.abreCursor()
-# Prepara una consulta SQL para SELECT registros desde la base de datos.
-    sql = '''SELECT codigo, descripcion, tx_comprobante, nu_sinca, 
-                  id_nomina, id_automatico 
-           FROM conceptos'''
-    try:
-# Ejecuta el comando SQL.
-      cursor.execute(sql)
-# Alimneta todas las filas en una lista de listas.
-      resultados = cursor.fetchall()
-      for fila in resultados:
-# Crea diccionario de conceptos.
-        dConc[fila[0]] = poblarDicConc(fila[0], fila[1], fila[2], fila[3],
-                                       fila[4], fila[5])
-    except:
-      print("Imposible crear diccionario de conceptos.")
-# disconnect from server
-    oMySQL.cierraCursor(cursor)
-    oMySQL.cierraConexion()
-  else: print("No se pudo conectar a la Base de Datos.")
-  return dConc
-# FIN funcion creaDicConceptos
 def poblarDicc(lidat, dConc):
   dicc = {}
   dicc['AHO']  = (0, 0.00, 0.00)
@@ -204,7 +133,7 @@ def mostrarConceptos(dicc, dConc):
 # FIN funcion mostrarConceptos
 
 # Inicio principal
-dConc = creaDicConceptos()
+dConc = CC.creaDicConceptos()
 sCed = ''
 if bMovil:
   lFiles = cargarNombres('[Ii][Pp][Aa][Ss]0*.[Tt][Xx][Tt]')

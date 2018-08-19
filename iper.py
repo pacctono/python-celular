@@ -34,21 +34,7 @@ ROJO  = CO.color.RED		# Linea de error.
 SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
 FIN   = CO.color.END
 
-if not bMovil:
-  def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
-    'Abre para leer, el archivo cuyo nombre es el valor de aNb'
-
-    try:
-      f = io.open(aNb, mode=modo, encoding=codigo)
-      if (bImprimir): print(aNb + " archivo abierto.")
-      return f
-    except:
-      if (bImprimir):
-        print(AMARI + "ERROR ABRIENDO: " + FIN + aNb)
-        print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
-      return False
-  # FIN funcion abre
-else:
+if bMovil:
   def cargarNombres(nombArch='IPER*.TXT'):
     rutaDatos = DIR
 
@@ -92,7 +78,8 @@ while True:
     else: sCed = str(iCed)
   else:
     try:
-      f = abre(nombArchCompleto, 'r', 'latin-1')
+      f = ES.abrir(nombArchCompleto, 'r', 'latin-1', True)
+#      f = abre(nombArchCompleto, 'r', 'latin-1')
     except:
       f = False
   if not f:
