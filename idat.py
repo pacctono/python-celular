@@ -25,15 +25,6 @@ else:
   from os.path import abspath, basename
 
 from lib import Conceptos as CC, ES, Const as CO
-AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN		# Identificacion del socio.
-AZUL  = CO.color.BLUE		# Identificacion de los datos.
-VERDE = CO.color.GREEN	# Linea final (totales).
-PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
-NEGRITA = CO.color.BOLD	# Negrita
-ROJO  = CO.color.RED		# Linea de error.
-SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
-FIN   = CO.color.END
 
 from lib import MySQL
 bMySQL = MySQL.bMySQL
@@ -46,7 +37,8 @@ if bMovil:
   def cargarNombres(nombArch='IDAT*.TXT'):
     rutaDatos = DIR
 
-    lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and fnmatch.fnmatch(f, nombArch)]
+    lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and \
+                                                fnmatch.fnmatch(f, nombArch)]
     lFiles.sort()
 
     if not lFiles:
@@ -57,7 +49,8 @@ if bMovil:
   def buscarArchivo(lFiles):
     if None == lFiles or 1 > len(lFiles): return None
     if 1 == len(lFiles): return(lFiles[0])
-    indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', 'Seleccione nombre', lFiles)
+    indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS',
+                                                  'Seleccione nombre', lFiles)
     if None == indice or 0 > indice: return None
     return(lFiles[indice])
   # FIN funcion buscarArchivo
@@ -79,21 +72,28 @@ def poblarDicc(lidat, dConc):
     try:
 #    if not dicc.has_key(l[1]): dicc[l[1]] = (0, 0.00, 0.00, 0.00)
       if l[1] not in dicc: dicc[l[1]] = (0, 0.00, 0.00, 0.00)
-      dicc[l[1]] = (dicc[l[1]][0]+1, dicc[l[1]][1]+l[2], dicc[l[1]][2]+l[3], dicc[l[1]][3]+l[2]+l[3])
-      dicc['TOT'] = (dicc['TOT'][0]+1, dicc['TOT'][1]+l[2], dicc['TOT'][2]+l[3], dicc['TOT'][3]+l[2]+l[3])
+      dicc[l[1]] = (dicc[l[1]][0]+1, dicc[l[1]][1]+l[2],
+                                  dicc[l[1]][2]+l[3], dicc[l[1]][3]+l[2]+l[3])
+      dicc['TOT'] = (dicc['TOT'][0]+1, dicc['TOT'][1]+l[2],
+                                dicc['TOT'][2]+l[3], dicc['TOT'][3]+l[2]+l[3])
       if l[1] in ('511', '562'):	# Ahorro patronal y ahorro personal
-         dicc['AHO'] = (dicc['AHO'][0]+1, dicc['AHO'][1]+l[2], dicc['AHO'][2]+l[3], dicc['AHO'][3]+l[2]+l[3])
+         dicc['AHO'] = (dicc['AHO'][0]+1, dicc['AHO'][1]+l[2],
+                                dicc['AHO'][2]+l[3], dicc['AHO'][3]+l[2]+l[3])
       if dConc.get(l[1], {'com':''})['com'] and \
          dConc.get(l[1], {'com':''})['com'].isdigit() and \
          '94' == dConc.get(l[1], {'com':''})['com']:
-         dicc['PR0'] = (dicc['PR0'][0]+1, dicc['PR0'][1]+l[2], dicc['PR0'][2]+l[3], dicc['PR0'][3]+l[2]+l[3])
+         dicc['PR0'] = (dicc['PR0'][0]+1, dicc['PR0'][1]+l[2],
+                                dicc['PR0'][2]+l[3], dicc['PR0'][3]+l[2]+l[3])
       if dConc.get(l[1], {'nus':''})['nus'] and \
          dConc.get(l[1], {'nus':''})['nus'].isdigit():
-         dicc['PR1'] = (dicc['PR1'][0]+1, dicc['PR1'][1]+l[2], dicc['PR1'][2]+l[3], dicc['PR1'][3]+l[2]+l[3])
+         dicc['PR1'] = (dicc['PR1'][0]+1, dicc['PR1'][1]+l[2],
+                                dicc['PR1'][2]+l[3], dicc['PR1'][3]+l[2]+l[3])
       if l[1] not in ('511','561', '562', '563', '570'):
-         dicc['PRE'] = (dicc['PRE'][0]+1, dicc['PRE'][1]+l[2], dicc['PRE'][2]+l[3], dicc['PRE'][3]+l[2]+l[3])
+         dicc['PRE'] = (dicc['PRE'][0]+1, dicc['PRE'][1]+l[2],
+                                dicc['PRE'][2]+l[3], dicc['PRE'][3]+l[2]+l[3])
       if l[1] in ('561', '563', '570'):	# Cuota mensual, ServiFun y Fondo.
-         dicc['OTR'] = (dicc['OTR'][0]+1, dicc['OTR'][1]+l[2], dicc['OTR'][2]+l[3], dicc['OTR'][3]+l[2]+l[3])
+         dicc['OTR'] = (dicc['OTR'][0]+1, dicc['OTR'][1]+l[2],
+                                dicc['OTR'][2]+l[3], dicc['OTR'][3]+l[2]+l[3])
     except:
       print(l)
       print(dConc[l[1]])
@@ -112,23 +112,28 @@ def mostrarConceptos(dicc, dConc):
   lconc.sort()
   bImpar  = True
   st = "%s%s%3s %-20.20s %6.6s %15.15s %15.15s %15.15s %6.6s%s\n" % \
-  		(SUBRAYADO, AMARI, 'CLV', 'DESCRIPCION', '#SOCI', 'VALOR FIJO', 'VALOR VARIABLE', 'TOTALES', 'PORCEN', FIN)
+  		(CO.SUBRAYADO, CO.AMARI, 'CLV', 'DESCRIPCION', '#SOCI', 'VALOR FIJO',
+                                'VALOR VARIABLE', 'TOTALES', 'PORCEN', CO.FIN)
   for v in lconc:
-     if not ((0.00 == dicc[v][1]) and (0.00 == dicc[v][2]) and (0.00 == dicc[v][3])):
+     if not ((0.00 == dicc[v][1]) and (0.00 == dicc[v][2]) and \
+                                                        (0.00 == dicc[v][3])):
        if 'AHO' == v and dicc['AHO'][3] == dicc['TOT'][3]: continue
        if v.isdigit():
          if iMax > v: subrayar = ''
-         else: subrayar = SUBRAYADO
+         else: subrayar = CO.SUBRAYADO
        else: subrayar = ''
-       if ('TOT' == v): sColor = VERDE
-       elif v in ('AHO', 'OTR', 'PRE', 'PR0', 'PR1'): sColor = PURPURA
-       else: sColor, bImpar = ES.colorLinea(bImpar, AZUL, CYAN)
+       if ('TOT' == v): sColor = CO.VERDE
+       elif v in ('AHO', 'OTR', 'PRE', 'PR0', 'PR1'): sColor = CO.PURPURA
+       else: sColor, bImpar = ES.colorLinea(bImpar, CO.AZUL, CO.CYAN)
        fPorc = 100.00*dicc[v][3]/dicc['TOT'][3]
        st += "%s%s%3s %-20.20s %6.6s %15.15s %15.15s %15.15s %6.6s%s\n" %\
-  				(subrayar, sColor, v, dConc.get(v, {'des':'NO TENGO DESCRIPCION'})['des'], \
-  				ES.fgFormateaNumero(dicc[v][0]), ES.fgFormateaNumero(dicc[v][1], 2), \
-  				ES.fgFormateaNumero(dicc[v][2], 2), ES.fgFormateaNumero(dicc[v][3], 2),\
-  				ES.fgFormateaNumero(fPorc, 2), FIN)
+  				(subrayar, sColor, v, dConc.get(v,
+            {'des':'NO TENGO DESCRIPCION'})['des'],
+  				  ES.fgFormateaNumero(dicc[v][0]),
+            ES.fgFormateaNumero(dicc[v][1], 2), 
+  				  ES.fgFormateaNumero(dicc[v][2], 2),
+            ES.fgFormateaNumero(dicc[v][3], 2),
+  				  ES.fgFormateaNumero(fPorc, 2), CO.FIN)
   return st
 # FIN funcion mostrarConceptos
 
@@ -145,7 +150,8 @@ else:
     if 2 < len(sys.argv) and sys.argv[2].isdigit():
       sCed = sys.argv[2]
   else:
-    print("%sNo paso el nombre del archivo como parametro.%s" % (ROJO, FIN))
+    print("%sNo paso el nombre del archivo como parametro.%s" % (CO.ROJO,
+                                                                      CO.FIN))
     sys.exit()
 
 while True:
@@ -153,7 +159,8 @@ while True:
     nombArch = buscarArchivo(lFiles)
     if None == nombArch: break
     f = ES.abrir(nombArch, 'r')
-    iCed = ES.entradaNumero(droid, "Cedula de identidad", "Cedula de identidad del socio", sCed)
+    iCed = ES.entradaNumero(droid, "Cedula de identidad",
+                                        "Cedula de identidad del socio", sCed)
     if None == iCed or 0 == iCed: sCed = ''
     else: sCed = str(iCed)
   else:
@@ -162,19 +169,27 @@ while True:
     except:
       f = False
   if not f:
-    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN,
-                                                nombArchCompleto, ROJO, FIN))
+    print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
+                                            nombArchCompleto, CO.ROJO, CO.FIN))
     break
 
   try:
-    lista = [(linea.rstrip()[0:8], linea.rstrip()[9:12], float(linea.rstrip()[12:22])/100, float(linea.rstrip()[22:])/100) for linea in f]
+    lista = [(linea.rstrip()[0:8], linea.rstrip()[9:12],
+              float(linea.rstrip()[12:22])/100,
+              float(linea.rstrip()[22:])/100) for linea in f]
   except:
     nL = 0
     f.seek(0, 0)
     for linea in f:
-      if not (linea.rstrip()[0:8].isdigit()) or not (linea.rstrip()[9:12].isdigit()) or not (linea.rstrip()[12:22].isdigit()) or not (linea.rstrip()[22:].isdigit()):
-        print("%sLinea %d con caracteres extra#os: %s%s" % (ROJO, nL, linea.rstrip(), FIN))
-        print("%sCI:%s; CLV:%s; MtoFijo:%s; MtoVar:%s%s" % (ROJO, linea.rstrip()[0:8], linea.rstrip()[9:12], linea.rstrip()[12:22], linea.rstrip()[22:], FIN))
+      if not (linea.rstrip()[0:8].isdigit()) or \
+        not (linea.rstrip()[9:12].isdigit()) or \
+        not (linea.rstrip()[12:22].isdigit()) or \
+        not (linea.rstrip()[22:].isdigit()):
+        print("%sLinea %d con caracteres extra#os: %s%s" % (CO.ROJO, nL, 
+                                                      linea.rstrip(), CO.FIN))
+        print("%sCI:%s; CLV:%s; MtoFijo:%s; MtoVar:%s%s" % (CO.ROJO, 
+                          linea.rstrip()[0:8], linea.rstrip()[9:12], 
+                          linea.rstrip()[12:22], linea.rstrip()[22:], CO.FIN))
         sys.exit()
       nL += 1
 # Fin del 'else', del 'for' y del 'except'.
@@ -187,20 +202,27 @@ while True:
     bCINoEncontrada = True
     for l in lista:
       if sCed.lstrip('0') == l[0].lstrip('0'):
-        if bCINoEncontrada: st += "\n%sCI:%s %s%s%s" % (CYAN, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
-        st += "\n%sCLV:%s %s%s-%-20.20s%s " % (CYAN, FIN, AZUL, l[1], dConc.get(l[1], {'des':'NO TENGO DESCRIPCION'})['des'], FIN)
-        st += "%sFijo:%s %s%s%s; Var:%s %s%s%s" %\
-              (CYAN, FIN, AZUL, ES.fgFormateaNumero(l[2], 2), CYAN, FIN, AZUL, ES.fgFormateaNumero(l[3], 2), FIN)
+        if bCINoEncontrada: st += "\n%sCI:%s %s%s%s" % (CO.CYAN, CO.FIN,
+                                  CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
+        st += "\n%sCLV:%s %s%s-%-20.20s%s " % (CO.CYAN, CO.FIN, CO.AZUL, l[1],
+              dConc.get(l[1], {'des':'NO TENGO DESCRIPCION'})['des'], CO.FIN)
+        st += "%sFijo:%s %s%s%s; Var:%s %s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL,
+                      ES.fgFormateaNumero(l[2], 2), CO.CYAN, CO.FIN, CO.AZUL,
+                      ES.fgFormateaNumero(l[3], 2), CO.FIN)
         bCINoEncontrada = False
-  if '' != sCed and bCINoEncontrada: st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % (ROJO, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
+  if '' != sCed and bCINoEncontrada:
+    st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % \
+                (CO.ROJO, CO.FIN, CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
   else: st += '\n'
 
   if bMovil:
-    st += NEGRITA + 'TOTALES EN ' + nombArch + ': ' + ES.fgFormateaNumero(dicc['TOT'][0]) + ' regs; Bs. ' +\
-		ES.fgFormateaNumero(dicc['TOT'][3], 2) + FIN
+    st += CO.NEGRITA + 'TOTALES EN ' + nombArch + ': ' + \
+                        ES.fgFormateaNumero(dicc['TOT'][0]) + ' regs; Bs. ' + \
+		                    ES.fgFormateaNumero(dicc['TOT'][3], 2) + CO.FIN
     ES.imprime(st.rstrip(' \t\n\r'))
 
-    indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer', ['Otro archivo', 'Salir'])
+    indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer',
+                                                    ['Otro archivo', 'Salir'])
     if None == indice or 0 > indice or 1 <= indice: break
   else:
     print(st.rstrip(' \t\n\r'))

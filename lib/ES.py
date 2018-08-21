@@ -57,7 +57,8 @@ def abrirErr(aNb, bImprimir = False):
 # funcion abrirErr
 def esEntero(v):
     v = str(v).strip()
-    return v=='0' or (v if v.find('..') > -1 else v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
+    return v=='0' or (v if v.find('..') > -1 else \
+                            v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
 # Funcion esEntero
 def fgFormateaNumero(sCad, dec=0):
   if (not isinstance(sCad, str) and not isinstance(sCad, float) and \
@@ -133,8 +134,9 @@ def mostrarValor(droid, valor):
   sValor = repr(valor)
   return alerta(droid, 'EL VALOR SUMINISTRADO', sValor)
 # funcion mostrarValor
-def entradaNumero(droid, titulo = 'Entrada de un valor numerico', mensaje = 'Introduzca numero',
-                  porDefecto='-1', bEntero=True, bZero=False, bNegativo=False):
+def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
+                  mensaje = 'Introduzca numero', porDefecto='-1', bEntero=True,
+                  bZero=False, bNegativo=False):
   '''Permite la entrada manual de un valor numerico.
      bEntero=True: Solo se permite numero entero.
      bZero=True: Permite el valor zero.
@@ -162,8 +164,8 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico', mensaje = 'Int
       return None
   else: return float(resultado)
 # funcion entradaNumero
-def entradaNombre(droid, titulo = 'Entrada de datos', mensaje = 'Introduzca texto',
-                  porDefecto = ''):
+def entradaNombre(droid, titulo = 'Entrada de datos',
+                  mensaje = 'Introduzca texto', porDefecto = ''):
   '''Permite la entrada manual de texto.'''
 
   if droid:
@@ -175,8 +177,8 @@ def entradaNombre(droid, titulo = 'Entrada de datos', mensaje = 'Introduzca text
     resultado = input(mensaje + ': ')
   return resultado
 # funcion entradaNombre
-def entradaContrasena(droid, titulo = 'Contrasena', mensaje = 'Introduzca contrasena',
-                      porDefecto = ''):
+def entradaContrasena(droid, titulo = 'Contrasena',
+                      mensaje = 'Introduzca contrasena', porDefecto = ''):
   '''Permite la entrada manual de texto.'''
 
   if droid:
@@ -196,13 +198,14 @@ def entradaFecha(droid, ano, mes, dia):
     resultado = droid.dialogGetResponse().result
     droid.dialogDismiss()
   else:
-    import datetime    
+#    import datetime    
     while True:    
       try:
         fecha = input('Introduzca la fecha en formato DD-MM-YYYY:' )
-        fech1 = datetime.datetime.strptime(fecha, "%d-%m-%y")
+#        fech1 = datetime.datetime.strptime(fecha, "%d-%m-%y")
         dia, mes, ano = map(int, fecha.split('-'))
-        resultado = str(ano).rjust(4, '0') + str(mes).rjust(2, '0') + str(dia).rjust(2, '0')
+        resultado = str(ano).rjust(4, '0') + str(mes).rjust(2, '0') + \
+                                                        str(dia).rjust(2, '0')
         break
       except:
         print('Oh! Oh! Fecha Errada.')
@@ -243,18 +246,23 @@ def entradaConLista(droid, titulo, mensaje, lista):
   if None == indice or 0 > indice or (len(lista) <= indice): return None
   else: return indice
 # funcion entradaConLista
-def entradaNumeroConLista(droid, titulo, mensaje, lista, bEntero=True, bZero=False, bNegativo=False):
-  '''Muestra una Lista para escoger un valor. El ultimo sirve para la entrada manual (entradaNumero).
-     bEntero, bZero=True, bNegativo: Son usados por la funcion entradaManual.'''
+def entradaNumeroConLista(droid, titulo, mensaje, lista, bEntero=True,
+                          bZero=False, bNegativo=False):
+  '''Muestra una Lista para escoger un valor. El ultimo sirve para la entrada
+     manual (entradaNumero). bEntero, bZero=True, bNegativo: Son usados por la
+     funcion entradaManual.'''
 
   indice  = entradaConLista(droid, titulo, mensaje, lista)
   if None == indice: return None
   iUltimo = len(lista) - 1
   if iUltimo == indice:
     porDefecto = str(lista[iUltimo-1])
-    rValor = entradaNumero(droid, titulo, mensaje, porDefecto, bEntero, bZero, bNegativo)
-    while None == rValor: rValor = entradaNumero(droid, titulo + ' Error!', 'Debe introducir un valor valido', porDefecto, \
-    													bEntero, bZero, bNegativo)
+    rValor = entradaNumero(droid, titulo, mensaje, porDefecto, bEntero, bZero,
+                                                                    bNegativo)
+    while None == rValor:
+      rValor = entradaNumero(droid, titulo + ' Error!',
+                'Debe introducir un valor valido', porDefecto, bEntero, bZero,
+                bNegativo)
     return rValor
   else:
     return float(lista[indice])
@@ -287,7 +295,8 @@ def cargaLista(aNb):
   else: return []
 # funcion cargaLista
 def cargaDicc(aNb):
-  'Abre para leer, el archivo cuyo nombre es el valor de aNb y crea un diccionario'
+  '''Abre para leer, el archivo cuyo nombre es el valor de aNb y crea un
+     diccionario'''
   f = abrir(aNb)
   dicc = {}
   if not f: return dicc
@@ -301,7 +310,8 @@ def cargaDicc(aNb):
   return dicc
 # funcion cargaDicc
 def cargaDiccLista(aNb):
-  'Abre para leer, el archivo cuyo nombre es el valor de aNb y crea un diccionario, cuya data es una lista'
+  '''Abre para leer, el archivo cuyo nombre es el valor de aNb y crea un
+     diccionario, cuya data es una lista'''
   f = abrir(aNb)
   dicc = {}
   if not f: return dicc
@@ -316,7 +326,7 @@ def cargaDiccLista(aNb):
 # funcion cargaDiccLista
 def llenarCadena(nCar, sCad='-+'):
   sCadena = ''
-  for i in range(nCar): sCadena += sCad
+  for _ in range(nCar): sCadena += sCad
   return sCadena
 # funcion llenarCadena(nCar, sCad='-+')
 def imprime(st):
@@ -351,7 +361,8 @@ def muestraInicio(sEmp):
   print(sLinea)
 # funcion muestraInicio
 def muestraFin():
-  print(AMARI + 'PC 2015 y posterior' + FIN + ' ' + strftime("%d/%m/%Y %H:%M:%S", localtime()))
+  print(AMARI + 'PC 2015 y posterior' + FIN + ' ' + \
+                                    strftime("%d/%m/%Y %H:%M:%S", localtime()))
   print("-+-+-+-+-+-+-+-+-+-+")
   print("Listo!")
 # funcion muestraFin

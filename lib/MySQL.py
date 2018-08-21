@@ -3,7 +3,8 @@
 #qpy:3
 #qpy:console
 from __future__ import print_function   # Para poder usar 'print' de version 3.
-if __name__ == '__main__' or 0 > __name__.find('lib'): from config import HOST, USUARIO, PASSWD, BDEDATOS
+if __name__ == '__main__' or 0 > __name__.find('lib'):
+  from config import HOST, USUARIO, PASSWD, BDEDATOS
 else: from lib.config import HOST, USUARIO, PASSWD, BDEDATOS
 
 try:
@@ -21,7 +22,8 @@ except:
     bMySQL = False
 
 class cMySQL(object):
-  def __init__(self, servidor=HOST, usuario=USUARIO, passwd=PASSWD, bDeDatos=BDEDATOS):
+  def __init__(self, servidor=HOST, usuario=USUARIO, passwd=PASSWD,
+                      bDeDatos=BDEDATOS):
     self.servidor = servidor
     self.usuario  = usuario
     self.passwd   = passwd
@@ -32,7 +34,7 @@ class cMySQL(object):
     try:
       cursor = self.abreCursor()
       cursor.execute(
-            "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(self.bDeDatos))
+      "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(self.bDeDatos))
     except mysql.connector.Error as err:
       print("Hubo un error creando la base de datos: {}".format(err))
       return False
@@ -43,11 +45,13 @@ class cMySQL(object):
   def conectar(self):
 # Open database connection
     if not bMySQL:
-      if __name__ == "__main__": print("La libreria de MySQL no esta instalada.")
+      if __name__ == "__main__":
+        print("La libreria de MySQL no esta instalada.")
       return False
     if bMySQLdb:
       try:
-        self.cnx = MySQLdb.connect(self.servidor, self.usuario, self.passwd, self.bDeDatos)
+        self.cnx = MySQLdb.connect(self.servidor, self.usuario, self.passwd,
+                                    self.bDeDatos)
         return True
       except:
         print("Error al tratar de conectarse a MySQL usando MySQLdb.")
@@ -94,8 +98,9 @@ if __name__ == '__main__':
   if oMySQL.conectar():
     cursor = oMySQL.abreCursor()
 # Prepara la consulta SQL para SELECT registros de la base de datos.
-    sql = "SELECT codigo, descripcion, tx_comprobante, nu_sinca, id_nomina, id_automatico \
-           FROM conceptos"
+    sql = ("SELECT codigo, descripcion, tx_comprobante, nu_sinca, id_nomina, "
+                    "id_automatico "
+           "FROM conceptos")
     try:
 # Ejecuta el comando SQL.
       cursor.execute(sql)

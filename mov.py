@@ -23,15 +23,6 @@ else:
   from os.path import abspath, basename
 
 from lib import Conceptos as CC, ES, Const as CO
-AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN		# Identificacion del socio.
-AZUL  = CO.color.BLUE		# Identificacion de los datos.
-VERDE = CO.color.GREEN	# Linea final (totales).
-PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
-NEGRITA = CO.color.BOLD	# Negrita
-ROJO  = CO.color.RED		# Linea de error.
-SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
-FIN   = CO.color.END
 
 from lib import MySQL
 bMySQL = MySQL.bMySQL
@@ -44,7 +35,8 @@ if bMovil:
 	def cargarNombres(nombArch='IPAS*.TXT'):
 		rutaDatos = DIR
 
-		lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and fnmatch.fnmatch(f, nombArch)]
+		lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and \
+                                                fnmatch.fnmatch(f, nombArch)]
 
 		if not lFiles:
 			ES.alerta(droid, nombArch, "No hubo coincidencias!")
@@ -55,7 +47,8 @@ if bMovil:
 	def buscarArchivo(lFiles):
 		if None == lFiles or 1 > len(lFiles): return None
 		if 1 == len(lFiles): return(lFiles[0])
-		indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', 'Seleccione nombre', lFiles)
+		indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS',
+                                                  'Seleccione nombre', lFiles)
 		if None == indice or 0 > indice: return None
 		return(lFiles[indice])
 	# FIN funcion buscarArchivo
@@ -77,15 +70,22 @@ def poblarDicc(lidat, dConc):
     try:
       sLlave = l[2]+'-'+l[0]+'-'+l[5]+'-'+l[6]
       if sLlave not in dicc: dicc[sLlave] = (0, 0.00, 0.00)
-      dicc[sLlave] = (dicc[sLlave][0]+1, dicc[sLlave][1]+l[3], dicc[sLlave][2]+l[4])
-      if '3' != l[5]: dicc['TOT'] = (dicc['TOT'][0]+1, dicc['TOT'][1]+l[3], dicc['TOT'][2]+l[4])
+      dicc[sLlave] = (dicc[sLlave][0]+1, dicc[sLlave][1]+l[3],
+                                                        dicc[sLlave][2]+l[4])
+      if '3' != l[5]: dicc['TOT'] = (dicc['TOT'][0]+1, dicc['TOT'][1]+l[3],
+                                                        dicc['TOT'][2]+l[4])
       if l[2] in ('511', '562'):		# Ahorro patronal y ahorro personal
-        if '3' != l[5]: dicc['AHO'] = (dicc['AHO'][0]+1, dicc['AHO'][1]+l[3], dicc['AHO'][2]+l[4])
-      if '1' == l[5]: dicc['CRE'] = (dicc['CRE'][0]+1, dicc['CRE'][1]+l[3], dicc['CRE'][2]+l[4])
-      if '2' == l[5]: dicc['DMD'] = (dicc['DMD'][0]+1, dicc['DMD'][1]+l[3], dicc['DMD'][2]+l[4])
-      if '3' == l[5]: dicc['ELI'] = (dicc['ELI'][0]+1, dicc['ELI'][1]+l[3], dicc['ELI'][2]+l[4])
+        if '3' != l[5]: dicc['AHO'] = (dicc['AHO'][0]+1, dicc['AHO'][1]+l[3],
+                                                        dicc['AHO'][2]+l[4])
+      if '1' == l[5]: dicc['CRE'] = (dicc['CRE'][0]+1, dicc['CRE'][1]+l[3],
+                                                        dicc['CRE'][2]+l[4])
+      if '2' == l[5]: dicc['DMD'] = (dicc['DMD'][0]+1, dicc['DMD'][1]+l[3],
+                                                        dicc['DMD'][2]+l[4])
+      if '3' == l[5]: dicc['ELI'] = (dicc['ELI'][0]+1, dicc['ELI'][1]+l[3],
+                                                        dicc['ELI'][2]+l[4])
       if l[2] in ('561', '563', '570'):	# Cuota mensual, ServiFun, Fondo de Salud
-        if '3' != l[5]: dicc['OTR'] = (dicc['OTR'][0]+1, dicc['OTR'][1]+l[3], dicc['OTR'][2]+l[4])
+        if '3' != l[5]: dicc['OTR'] = (dicc['OTR'][0]+1, dicc['OTR'][1]+l[3],
+                                                        dicc['OTR'][2]+l[4])
     except:
       print(l)
       print(dConc[l[2]])
@@ -106,28 +106,31 @@ def mostrarConceptos(dicc, dConc):
   lconc.sort()
   bImpar  = True
   st = "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s%s\n" % \
-      (SUBRAYADO, AMARI, 'CLAVE', 'DESCRIPCION', '#MOVI', '     Saldo', '         Cuota', 'PORCEN', FIN)
+      (CO.SUBRAYADO, CO.AMARI, 'CLAVE', 'DESCRIPCION', '#MOVI', '     Saldo',
+                                            '         Cuota', 'PORCEN', CO.FIN)
   for v in lconc:
     if not ((0.00 == dicc[v][1]) and (0.00 == dicc[v][2])) or ('3' == v[6:7]):
-       if v[0:3].isdigit() and v[4:5].isdigit() and v[6:7].isdigit() and v[8:].isdigit():
-         if sMax == v: subrayar = SUBRAYADO
+       if v[0:3].isdigit() and v[4:5].isdigit() and v[6:7].isdigit() and \
+            v[8:].isdigit():
+         if sMax == v: subrayar = CO.SUBRAYADO
          else: subrayar = ''
        else: subrayar = ''
-       if ('TOT' == v): sColor = VERDE
-       elif ('AHO' == v): sColor = PURPURA
-       elif ('ELI' == v): sColor = ROJO
-       elif ('OTR' == v): sColor = PURPURA
-       else: sColor, bImpar = ES.colorLinea(bImpar, AZUL, CYAN)
+       if ('TOT' == v): sColor = CO.VERDE
+       elif ('AHO' == v): sColor = CO.PURPURA
+       elif ('ELI' == v): sColor = CO.ROJO
+       elif ('OTR' == v): sColor = CO.PURPURA
+       else: sColor, bImpar = ES.colorLinea(bImpar, CO.AZUL, CO.CYAN)
        fPorc = 100.00*dicc[v][1]/dicc['TOT'][1]
        sConc = v[0:3]
-       if '3' == v[6:7]: sObs = ROJO + 'Eli'
+       if '3' == v[6:7]: sObs = CO.ROJO + 'Eli'
        elif '2' == v[6:7]: sObs = 'Mod'
        elif '1' == v[6:7]: sObs = 'Cre'
        else: sObs = ''
-       st += "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s %s%s\n" %\
-             (subrayar, sColor, v, dConc.get(sConc, {'des':'NO TENGO DESCRIPCION'})['des'], \
-              ES.fgFormateaNumero(dicc[v][0]), ES.fgFormateaNumero(dicc[v][1], 2), \
-              ES.fgFormateaNumero(dicc[v][2], 2), ES.fgFormateaNumero(fPorc, 2), sObs, FIN)
+       st += "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s %s%s\n" % (subrayar,
+          sColor, v, dConc.get(sConc, {'des':'NO TENGO DESCRIPCION'})['des'],
+          ES.fgFormateaNumero(dicc[v][0]), ES.fgFormateaNumero(dicc[v][1], 2),
+          ES.fgFormateaNumero(dicc[v][2], 2), ES.fgFormateaNumero(fPorc, 2),
+          sObs, CO.FIN)
               
   return st
 # FIN funcion mostrarConceptos
@@ -145,7 +148,8 @@ else:
     if 2 < len(sys.argv) and sys.argv[2].isdigit():
       sCed = sys.argv[2]
   else:
-    print("%sNo paso el nombre del archivo como parametro.%s" % (ROJO, FIN))
+    print("%sNo paso el nombre del archivo como parametro.%s" % (CO.ROJO,
+                                                                      CO.FIN))
     sys.exit()
 
 while True:
@@ -153,7 +157,8 @@ while True:
     nombArch = buscarArchivo(lFiles)
     if None == nombArch: break
     f = ES.abrir(nombArch, 'r')
-    iCed = ES.entradaNumero(droid, "Cedula de identidad", "Cedula de identidad del socio", sCed)
+    iCed = ES.entradaNumero(droid, "Cedula de identidad",
+                                        "Cedula de identidad del socio", sCed)
     if None == iCed or 0 == iCed: sCed = ''
     else: sCed = str(iCed)
   else:
@@ -162,11 +167,14 @@ while True:
     except:
       f = False
   if not f:
-    print("%sNombre de archivo%s '%s' %serrado.%s" % (ROJO, FIN, nombArchCompleto, ROJO, FIN))
+    print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
+                                            nombArchCompleto, CO.ROJO, CO.FIN))
     break
 
 # 0:Mov (6:retroact o 7:fijo); 1:CI; 2:Conc; 3:Saldo; 4:Cuota; 5:Ctrl (1:Crea, 2:Mod, 3:eli); 6:Tipo (1:Saldo-cuota, 2:Cuota fija).
-  lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9], linea.rstrip()[10:13], float(linea.rstrip()[26:38])/100, float(linea.rstrip()[38:49])/100, linea.rstrip()[52:53], linea.rstrip()[76:77]) for linea in f]
+  lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9], linea.rstrip()[10:13],
+            float(linea.rstrip()[26:38])/100, float(linea.rstrip()[38:49])/100,
+            linea.rstrip()[52:53], linea.rstrip()[76:77]) for linea in f]
   if f: f.close()
 
   dicc, dConc = poblarDicc(lista, dConc)
@@ -176,19 +184,25 @@ while True:
     bCINoEncontrada = True
     for l in lista:
       if sCed.lstrip('0') == l[1].lstrip('0'):
-        if bCINoEncontrada: st += "\n%sCI:%s%s%s%s" % (CYAN, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
-        st += "\n%sCLV:%s%s%s-%-20.20s%s " % (CYAN, FIN, AZUL, l[2], dConc.get(l[2], {'des':'NO TENGO DESCRIPCION'})['des'], FIN)
+        if bCINoEncontrada: st += "\n%sCI:%s%s%s%s" % (CO.CYAN, CO.FIN,
+                                    CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
+        st += "\n%sCLV:%s%s%s-%-20.20s%s " % (CO.CYAN, CO.FIN, CO.AZUL, l[2],
+                dConc.get(l[2], {'des':'NO TENGO DESCRIPCION'})['des'], CO.FIN)
         st += "%sSdo:%s%s%s%s; Cta:%s%s%s%s" %\
-              (CYAN, FIN, AZUL, ES.fgFormateaNumero(l[3], 2), CYAN, FIN, AZUL, ES.fgFormateaNumero(l[4], 2), FIN)
-        st += "%s; Ct:%s%s%s%s; Tp:%s%s%s%s" %\
-              (CYAN, FIN, AZUL, l[5], CYAN, FIN, AZUL, l[6], FIN)
+              (CO.CYAN, CO.FIN, CO.AZUL, ES.fgFormateaNumero(l[3], 2), CO.CYAN,
+                        CO.FIN, CO.AZUL, ES.fgFormateaNumero(l[4], 2), CO.FIN)
+        st += "%s; Ct:%s%s%s%s; Tp:%s%s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL, l[5],
+                                        CO.CYAN, CO.FIN, CO.AZUL, l[6], CO.FIN)
         bCINoEncontrada = False
-  if '' != sCed and bCINoEncontrada: st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % (ROJO, FIN, AZUL, ES.fgFormateaNumero(sCed), FIN)
+  if '' != sCed and bCINoEncontrada:
+    st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % \
+                (CO.ROJO, CO.FIN, CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
   else: st += '\n'
 
   if bMovil:
     ES.imprime(st.rstrip(' \t\n\r'))
-    indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer', ['Otro archivo', 'Salir'])
+    indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer',
+                                                    ['Otro archivo', 'Salir'])
     if None == indice or 0 > indice or 1 <= indice: break
   else:
     print(st.rstrip(' \t\n\r'))

@@ -66,10 +66,22 @@ class color:
 	UNDERLINE = '\033[4m'
 	END      = '\033[0m'
 	FAIL     = '\033[91m'
+AMARI   = color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
+CYAN    = color.CYAN	# Identificacion del socio.
+AZUL    = color.BLUE	# Identificacion de los datos.
+VERDE   = color.GREEN	# Linea final (totales).
+PURPURA = color.PURPLE	# Linea final (total de prestamos).
+NEGRITA = color.BOLD	# Negrita
+SUBRAYA = color.UNDERLINE
+ROJO    = color.RED		# Linea de error.
+SUBRAYADO  = color.UNDERLINE	# Subrayado
+FIN     = color.END
 
-lMonto = ['10000', '20000', '30000', '40000', '50000', '75000', '100000', '150000', '250000', '500000', '600000', '700000',
-		  '1000000', '1500000', '2000000', 'Otro']
-lNuMes = ['12', '18', '24', '30', '36', '48', '60', '72', '84', '96', '120', '144', '150', '180', '240', '300', 'Otro']
+lMonto = ['10000', '20000', '30000', '40000', '50000', '75000', '100000',
+			'150000', '250000', '500000', '600000', '700000', '1000000',
+			'1500000', '2000000', 'Otro']
+lNuMes = ['12', '18', '24', '30', '36', '48', '60', '72', '84', '96', '120',
+			'144', '150', '180', '240', '300', 'Otro']
 lInter = ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', 'Otro']
 
 lEstado = ['HECHO', 'LISTO', 'ENTREG', 'PAGADO']	# Estado del cheque
@@ -128,20 +140,34 @@ lTH = [['', 'AHORRO SOCIOS', '511', '211010101', '', ''],
        ['', 'RETIRO PARCIAL', '', '211030101', '', '']
       ]
 
-lCB = [['Mercantil', 'AHORRO       ', '01050068140068276745', '112-02-01-02-6'],		# Mercantil
-       ['Mercantil', 'CORRIENTE    ', '01050068120068204451', '112-02-01-01-1'],		# Mercantil
-       ['Mercantil', 'AHO VEBONOS  ', '01050068127068036899', '112-02-01-02-8'],		# Mercantil
-       ['BANESCO  ', 'CTE SERVIFUN ', '01340055570553285769', '112-02-01-01-9'],		# Banesco
-       ['BANESCO  ', 'CTE OPERACION', '01340055500553285809', '112-02-01-01-9'],		# Banesco
-       ['Caribe   ', 'CORRIENTE    ', '01140521575217000264', '112-02-01-01-7'],		# Bancaribe
-       ['Venezuela', 'CORRIENTE    ', '01020672330000020336', '112-01-01-01-11'],		# Venezuela
-       ['Venezuela', 'CTE C/INTERES', '01020673110000025784', '112-01-01-01-12'],		# Venezuela
-       ['BNC      ', 'CORRIENTE    ', '01910048122148032454', '112-02-01-01-13'],		# BNC
-       ['BNC      ', 'AHORRO       ', '01910048171048003569', '112-02-01-02-13'],		# BNC
-       ['Pueblo   ', 'CORRIENTE    ', '01490025020300047193', '112-01-01-01-14'],		# Banco del Pueblo
-       ['Pueblo   ', 'AHORRO       ', '01490025050400310589', '112-01-01-02-12'],		# Banco del Pueblo
-       ['Del Sur  ', 'CORRIENTE    ', '01570029783729204036', '112-01-01-02-12'],		# Del Sur Banco Universal
-       ['Caroni   ', 'CORRIENTE    ', '01280044454401000890', '112-01-01-02-12'],		# Banco Caroni CA
+lCB = [['Mercantil', 'AHORRO       ', '01050068140068276745',
+			'112-02-01-02-6'],		# Mercantil
+       ['Mercantil', 'CORRIENTE    ', '01050068120068204451',
+			'112-02-01-01-1'],		# Mercantil
+       ['Mercantil', 'AHO VEBONOS  ', '01050068127068036899',
+	   		'112-02-01-02-8'],		# Mercantil
+       ['BANESCO  ', 'CTE SERVIFUN ', '01340055570553285769',
+	   		'112-02-01-01-9'],		# Banesco
+       ['BANESCO  ', 'CTE OPERACION', '01340055500553285809',
+	   		'112-02-01-01-9'],		# Banesco
+       ['Caribe   ', 'CORRIENTE    ', '01140521575217000264',
+	   		'112-02-01-01-7'],		# Bancaribe
+       ['Venezuela', 'CORRIENTE    ', '01020672330000020336',
+	   		'112-01-01-01-11'],		# Venezuela
+       ['Venezuela', 'CTE C/INTERES', '01020673110000025784',
+	   		'112-01-01-01-12'],		# Venezuela
+       ['BNC      ', 'CORRIENTE    ', '01910048122148032454',
+	   		'112-02-01-01-13'],		# BNC
+       ['BNC      ', 'AHORRO       ', '01910048171048003569',
+	   		'112-02-01-02-13'],		# BNC
+       ['Pueblo   ', 'CORRIENTE    ', '01490025020300047193',
+	   		'112-01-01-01-14'],		# Banco del Pueblo
+       ['Pueblo   ', 'AHORRO       ', '01490025050400310589',
+	   		'112-01-01-02-12'],		# Banco del Pueblo
+       ['Del Sur  ', 'CORRIENTE    ', '01570029783729204036',
+	   		'112-01-01-02-12'],		# Del Sur Banco Universal
+       ['Caroni   ', 'CORRIENTE    ', '01280044454401000890',
+	   		'112-01-01-02-12'],		# Banco Caroni CA
       ]
 
 def getTerminalSize():
@@ -153,7 +179,8 @@ def getTerminalSize():
 	def ioctl_GWINSZ(fd):
 		try:
 			import fcntl, termios, struct
-			cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,'1234'))
+			cr = struct.unpack('hh', fcntl.ioctl(fd,
+												termios.TIOCGWINSZ,'1234'))
 		except:
 			return None
 		return cr
@@ -198,8 +225,8 @@ def nCarJustIzq(sCadena='', nCarMostrar=0):
 	if (0 == nCarMostrar): nCarMostrar = nCarCC
 	return int((nCarMostrar - nCarCC + 1)/2) + nCarCC	# Numero de caracteres para justificar a la izquierda el campo.
 # Fin nCarIzqCampo(sCadena='', nCarMostrar=nCarLin)
-def justIzqTituloCol(sTitCol='', nCarCol=0):				# Centra el titulo de una columna en su espacio maximo.
-	nCarIzCC = nCarJustIzq(sTitCol, nCarCol)			# Numero de cars en blanco a la izquierda del titulo de la columna.
+def justIzqTituloCol(sTitCol='', nCarCol=0):			# Centra el titulo de una columna en su espacio maximo.
+#	nCarIzCC = nCarJustIzq(sTitCol, nCarCol)			# Numero de cars en blanco a la izquierda del titulo de la columna.
 	sTitCol  = sTitCol.ljust(nCarCol + 1)
 	return sTitCol
 # funcion justIzqTituloCol

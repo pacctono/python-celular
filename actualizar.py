@@ -26,16 +26,6 @@ from os import stat
 #from stat import *
 from datetime import datetime
 
-AMARI = CO.color.YELLOW			# Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN			# Identificacion del socio.
-AZUL  = CO.color.BLUE			# Identificacion de los datos.
-VERDE = CO.color.GREEN			# Linea final (totales).
-ROJO  = CO.color.RED			# Error
-PURPURA  = CO.color.PURPLE
-NEGRITA = CO.color.BOLD
-SUBRAYA = CO.color.UNDERLINE
-FIN   = CO.color.END
-
 lSitios = ["IPASPUDO", "Portatil", "Casa", "Otro", "Salir"]
 lIPs    = ["10.0.0.100", "10.0.0.103", "192.168.1.200", ""]
 lDATA = [
@@ -111,18 +101,18 @@ for DATA in lDATA:
 		(timeAnterior, timeNuevo) = dControl.get(DATA, ['-1', '-1'])
 	else: timeAnterior = timeNuevo = 0
 	segsDiferencia = int(timeNuevo) - int(timeAnterior)
-	sColor, bImpar = ES.colorLinea(bImpar, VERDE, AZUL)
+	sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
 	print("%sLeyendo%s %s remoto. Local modificado en: %d seg posteriores" %
-						(sColor, FIN, DATA, segsDiferencia))
+						(sColor, CO.FIN, DATA, segsDiferencia))
 	if 'control.txt' != DATA and 0 >= segsDiferencia:
 		print("%s, %slocal; ya esta actualizado con%s %d cars! El %s" % \
-				(DATA, sColor, FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
+				(DATA, sColor, CO.FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
 		continue
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.
 	except:
-		print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (ROJO, FIN, DATA, ROJO, FIN))
+		print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
 		bLeido = False
 	if bLeido:														# Si no hubo error de lectura desde el servidor.
 		if 'control.txt' == DATA:
@@ -134,7 +124,7 @@ for DATA in lDATA:
 					if 'Sinca' == l[0]:
 						fechaControl = datetime.strptime(l[1],
 								'ACTUALIZADO Al: %d/%m/%Y %H:%M:%S')
-						sControl = "%sControl al: %s%s." % (PURPURA, FIN, fechaControl)
+						sControl = "%sControl al: %s%s." % (CO.PURPURA, CO.FIN, fechaControl)
 						if (dHoy == fechaControl.strftime('%Y%m%d')): bOtroDia = False
 						else: bOtroDia = True
 						break
@@ -160,27 +150,27 @@ for DATA in lDATA:
 			f = open(DIR + DATA, "w")
 			bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 		except:
-			print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, DATA, ROJO, FIN))
+			print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
 			bAbierto = False
 		if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
-			print("%sEscribiendo%s %s local..." % (sColor, FIN, DATA))
+			print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
 			try:
 				f.write(data)
 				bEscrito = True										# No hubo error escribiendo en el archivo local.
 			except:
-				print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (ROJO, FIN, DATA))
+				print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN, DATA))
 				bEscrito = False
 			finally:
 				f.close()
 			if bEscrito:
-				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % (DATA, CYAN, FIN, ES.cLineas(DATA)))
-				else: print("%s %sactualizado con%s %d!" % (DATA, sColor, FIN, ES.cLineas(DATA)))
+				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % (DATA, CO.CYAN, CO.FIN, ES.cLineas(DATA)))
+				else: print("%s %sactualizado con%s %d!" % (DATA, sColor, CO.FIN, ES.cLineas(DATA)))
 				if 'archsBanco.txt' == DATA: lBancosHoy = data.rstrip().split('\n')
 			# Fin if bEscrito
 		# Fin if bAbierto
 	# Fin if bLeido
 	elif 'control.txt' == DATA:		# El primer archivo a leer, no se pudo descargar.
-		print("%sPARECIERA QUE EXISTE ALGUN PROBLEMA CON INTERNET O LOS ARCHIVOS NO EXISTEN.%s" % (ROJO, FIN))
+		print("%sPARECIERA QUE EXISTE ALGUN PROBLEMA CON INTERNET O LOS ARCHIVOS NO EXISTEN.%s" % (CO.ROJO, CO.FIN))
 		ES.muestraFin()
 		sys.exit()
 # Fin for
@@ -206,30 +196,30 @@ for DATA in lDATA:
 
 #print(lBancosHoy)
 if lBancosHoy and (0 < len(lBancosHoy)):
-	print('\n' + NEGRITA + SUBRAYA + 'Ahora procederemos a descargar los archivos de cada banco.' + FIN + '\n')
+	print('\n' + CO.NEGRITA + CO.SUBRAYA + 'Ahora procederemos a descargar los archivos de cada banco.' + CO.FIN + '\n')
 	for DATA in lBancosHoy:
-		sColor, bImpar = ES.colorLinea(bImpar, VERDE, AZUL)
-		print("%sLeyendo%s %s remoto..." % (sColor, FIN, DATA))
+		sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
+		print("%sLeyendo%s %s remoto..." % (sColor, CO.FIN, DATA))
 		try:
 			data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 			bLeido = True												# No hubo error de lectura desde el servidor.
 		except:
-			print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (ROJO, FIN, DATA, ROJO, FIN))
+			print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
 			bLeido = False
 		if bLeido:														# Si no hubo error de lectura desde el servidor.
 			try:
 				f = open(DIR + DATA, "w")
 				bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 			except:
-				print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (ROJO, FIN, DATA, ROJO, FIN))
+				print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
 				bAbierto = False
 			if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
-				print("%sEscribiendo%s %s local..." % (sColor, FIN, DATA))
+				print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
 				try:
 					f.write(data)
 					bEscrito = True										# No hubo error escribiendo en el archivo local.
 				except:
-					print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (ROJO, FIN, DATA))
+					print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN, DATA))
 					bEscrito = False
 				finally:
 					f.close()
@@ -238,6 +228,6 @@ if lBancosHoy and (0 < len(lBancosHoy)):
 	# Fin for DATA in lBancosHoy
 # Fin if
 else:
-	print('\n' + NEGRITA + SUBRAYA + 'No hay archivos de banco de hoy' + FIN + '\n')
+	print('\n' + CO.NEGRITA + CO.SUBRAYA + 'No hay archivos de banco de hoy' + CO.FIN + '\n')
 ES.muestraFin()
 # Fin del programa
