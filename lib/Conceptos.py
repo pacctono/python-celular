@@ -20,35 +20,10 @@ else:
 
 if __name__ == '__main__': import ES, Const as CO, MySQL
 else: from lib import ES, Const as CO, MySQL
-AMARI = CO.color.YELLOW	# Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN		# Identificacion del socio.
-AZUL  = CO.color.BLUE		# Identificacion de los datos.
-VERDE = CO.color.GREEN	# Linea final (totales).
-PURPURA = CO.color.PURPLE	# Linea final (total de prestamos).
-NEGRITA = CO.color.BOLD	# Negrita
-ROJO  = CO.color.RED		# Linea de error.
-SUBRAYADO  = CO.color.UNDERLINE	# Subrayado
-FIN   = CO.color.END
 
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()
 
-if not bMovil:
-  def abre(aNb, modo='r', codigo = 'latin-1', bImprimir = False):
-    'Abre para leer, el archivo cuyo nombre es el valor de aNb'
-    global DIR
-    aNb = DIR + aNb
-    try:
-#      f = open(aNb, mode=modo, encoding=codigo)
-      f = open(aNb, mode=modo)
-      if (bImprimir): print(aNb + " archivo abierto.")
-      return f
-    except:
-      if (bImprimir):
-        print(AMARI + "ERROR ABRIENDO: " + FIN + aNb)
-        print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
-      return False
-# FIN funcion abre
 def poblarDicConc(co, de, cm='', nu='', no='', au=''):
   return {'cod':co, 'des':de, 'com':cm, 'nus':nu, 'nom':no, 'aut':au}	# Codigo, desc,
 # com: 2 primeros digitos comprobante, nu: cod tabla_prestamo,
@@ -63,8 +38,7 @@ def creaDicConceptos():
         for k,v in dConcepto.items():
        	  dConc[k] = poblarDicConc(k, v)
       else:
-#        f = abre("conceptos.txt", bImprimir = True)
-        f = abre("conceptos.txt")
+        f = ES.abrir("conceptos.txt", 'r', 'latin-1', True)
         if not f:
           print('Problemas para abrir el archivo de texto.\n')
           return {}

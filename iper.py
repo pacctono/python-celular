@@ -74,7 +74,6 @@ while True:
   else:
     try:
       f = ES.abrir(nombArchCompleto, 'r', 'latin-1', True)
-#      f = abre(nombArchCompleto, 'r', 'latin-1')
     except:
       f = False
   if not f:
