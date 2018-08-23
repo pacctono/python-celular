@@ -3,7 +3,9 @@
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
 try:
-  from lib import DIR, LINEA, bMovil
+  if __name__ == '__main__' or 0 > __name__.find('lib'):
+    from . import DIR, LINEA, bMovil
+  else: from lib import DIR, LINEA, bMovil
 except:
   DIR = './'
   bMovil = False
@@ -40,7 +42,7 @@ def abrir(aNb, modo='r', codigo = 'UTF-8', bImprimir = False):
     return f
   except:
     if (bImprimir):
-      print(AMARI + "[ES]ERROR ABRIENDO: " + FIN + aNb)
+      print(AMARI + "[ES]ERROR ABRIENDO (DIR): " + FIN + aNb + ' (' + DIR + ')')
       print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
     return False
 # funcion abrir

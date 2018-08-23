@@ -1,12 +1,11 @@
 #!/usr/bin/python
-# conceptos: Modulo para leer conceptos de IPASPUDO.
+# bancos: Modulo para leer bancos de IPASPUDO.
 #-*-coding:utf8;-*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
 try:
-  if __name__ == '__main__' or 0 > __name__.find('lib'):
-    from . import DIR, bMovil
-  else: from lib import DIR, bMovil
+  if __name__ == '__main__': from . import bMovil
+  else: from lib import bMovil
 except:
   bMovil = False
 
@@ -25,23 +24,22 @@ else: from lib import ES, Const as CO, MySQL
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()
 
-def poblarDicConc(co, de, cm='', nu='', no='', au=''):
-  return {'cod':co, 'des':de, 'com':cm, 'nus':nu, 'nom':no, 'aut':au}	# Codigo, desc,
+def poblarDicBancos(co, de, act='', cta='', sdo=''):
+  return {'cod':co, 'des':de, 'act':act, 'cta':cta, 'sdo':sdo}	# Codigo, desc,
 # com: 2 primeros digitos comprobante, nu: cod tabla_prestamo,
 # no: es concepto de nomina (S/N), au: automatico (S/N).
 # FIN funcion poblarDic
-def creaDicConceptos():
-  dConcepto = {}
+def creaDicBancos():
+  dBanco = {}
+  archTexto = "bancos.txt"
   if not bMySQL:
-    if __name__ != '__main__' or bMovil: archTexto = "conceptos.txt"
-    else: archTexto = "../data/conceptos.txt"
     try:
       c = -1
-      dConc = ES.cargaDicc(archTexto)
-      for k,v in dConc.items():
+      dBanc = ES.cargaDicc(archTexto)
+      for k,v in dBanc.items():
         c = k    
-        dConcepto[k] = poblarDicConc(k, v)
-      return dConcepto
+        dBanco[k] = poblarDicBancos(k, v)
+      return dBanco
     except:
       if not bMovil:
         print('Problemas con el archivo de texto: ' + archTexto + '(' + c +
@@ -53,9 +51,8 @@ def creaDicConceptos():
     cursor = oMySQL.abreCursor()
 # Prepara una consulta SQL para SELECT registros desde la base de datos.
     sql = '''
-          SELECT codigo, descripcion, tx_comprobante, nu_sinca, id_nomina,
-                  id_automatico 
-          FROM conceptos
+          SELECT nu_banco, tx_descripcion, id_activo, tx_cuenta, nu_saldo_final
+          FROM bancos
           '''
     try:
 # Ejecuta el comando SQL.
@@ -63,18 +60,18 @@ def creaDicConceptos():
 # Alimneta todas las filas en una lista de listas.
       resultados = cursor.fetchall()
       for fila in resultados:
-# Crea diccionario de conceptos.
-        dConcepto[fila[0]] = poblarDicConc(fila[0], fila[1], fila[2],
-                                        fila[3], fila[4], fila[5])
+# Crea diccionario de bancos.
+        dBanco[str(fila[0])] = poblarDicBancos(str(fila[0]), fila[1],
+                                                  fila[2], fila[3], fila[4])
     except:
-      print("Imposible crear diccionario de conceptos.")
+      print("Imposible crear diccionario de bancos.")
 # disconnect from server
     oMySQL.cierraCursor(cursor)
     oMySQL.cierraConexion()
   else: print("No se pudo conectar a la Base de Datos.")
-  return dConcepto
-# FIN funcion creaDicConceptos
+  return dBanco
+# FIN funcion creaDicBancos
 
 if __name__ == '__main__':
-  dConcepto = creaDicConceptos()
-  print('dConcepto[511]: ', dConcepto['511'])
+  dBanco = creaDicBancos()
+  print('dBanco[1]: ', dBanco['1'])

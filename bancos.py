@@ -225,7 +225,7 @@ def banesco(f, sFecha, sCodCta):
       raise ValueError(CO.ROJO + "Error:" + CO.FIN + " La columna 3 o 149 "
                         "de la tercera fila deberia contener la fecha valor: "
                         "'" + sFechaValor + "', pero contiene: '" + ln1[1] +
-                        "' o '" + ln1[8] + "'.")
+                        "' y '" + ln1[7] + "'.")
     elif sRif != ln1[2]:
       raise ValueError(CO.ROJO + "Error:" + CO.FIN + " Rif en columna 2 de "
                         "tercera fila errada, deberia ser '" + sRif + "'")

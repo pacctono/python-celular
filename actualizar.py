@@ -60,13 +60,16 @@ def obtenerIP(servidor):		# Es la unica rutina que consegui para obtener mi IP.
 
 ES.muestraInicio("IPASPUDO: J-30619229-8.")
 
-ind = ES.entradaConLista(droid, 'Busqueda del servidor', 'Seleccione servidor', lSitios)		# Busca el servidor.
-if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or (0 > ind):	# Se asegura de tener el indice correcto.
+ind = ES.entradaConLista(droid, 'Busqueda del servidor', 'Seleccione servidor',
+										lSitios)		# Busca el servidor.
+if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or \
+					(0 > ind):	# Se asegura de tener el indice correcto.
 	ES.muestraFin()
 	sys.exit()
 IPServ = lIPs[ind]
 if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
-	IPServ = ES.entradaNombre(droid, 'IP del servidor', 'Introduzca IP del servidor', '192.168.0.')
+	IPServ = ES.entradaNombre(droid, 'IP del servidor',
+								'Introduzca IP del servidor', '192.168.0.')
 print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], IPServ))
 miDirIP = obtenerIP(IPServ)											# Esta rutina fue la unica que encontre para mi IP.
 print("Mi direccion IP es: %s" % miDirIP)
@@ -91,10 +94,12 @@ dHoy = strftime("%Y%m%d", localtime())
 try:
 	f = open(DIR + 'control.txt', "r")
 	data = f.read()
-	lControl = [linea.strip().split(';') for linea in data.rstrip().split('\n')]
+	lControl = [linea.strip().split(';')
+									for linea in data.rstrip().split('\n')]
 except:
 	lControl = [['-1', nombArch] for nombArch in lDATA]
-dControl = {linea[1].strip():[linea[0].strip(), linea[0].strip()] for linea in lControl if ES.esEntero(linea[0].strip())}
+dControl = {linea[1].strip():[linea[0].strip(), linea[0].strip()]
+					for linea in lControl if ES.esEntero(linea[0].strip())}
 lBancosHoy = None		# La lista de bancos de hoy esta vacia al principio.
 for DATA in lDATA:
 	if 'control.txt' != DATA:
@@ -105,18 +110,20 @@ for DATA in lDATA:
 	print("%sLeyendo%s %s remoto. Local modificado en: %d seg posteriores" %
 						(sColor, CO.FIN, DATA, segsDiferencia))
 	if 'control.txt' != DATA and 0 >= segsDiferencia:
-		print("%s, %slocal; ya esta actualizado con%s %d cars! El %s" % \
-				(DATA, sColor, CO.FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
+		print("%s, %slocal; ya esta actualizado con%s %d cars! El %s" % (DATA,
+				sColor, CO.FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
 		continue
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.
 	except:
-		print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
+		print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA,
+															CO.ROJO, CO.FIN))
 		bLeido = False
 	if bLeido:														# Si no hubo error de lectura desde el servidor.
 		if 'control.txt' == DATA:
-			lControl = [linea.strip().split(';') for linea in data.rstrip().split('\n')]
+			lControl = [linea.strip().split(';')
+									for linea in data.rstrip().split('\n')]
 			if 0 < len(lControl):
 				sControl = ''
 				bOtroDia = False
@@ -124,22 +131,27 @@ for DATA in lDATA:
 					if 'Sinca' == l[0]:
 						fechaControl = datetime.strptime(l[1],
 								'ACTUALIZADO Al: %d/%m/%Y %H:%M:%S')
-						sControl = "%sControl al: %s%s." % (CO.PURPURA, CO.FIN, fechaControl)
-						if (dHoy == fechaControl.strftime('%Y%m%d')): bOtroDia = False
+						sControl = "%sControl al: %s%s." % (CO.PURPURA, CO.FIN,
+																fechaControl)
+						if (dHoy == fechaControl.strftime('%Y%m%d')):
+							bOtroDia = False
 						else: bOtroDia = True
 						break
 					# if 1 < len(ll) and 'Sinca' == ll[0]
 				# for l in lControl
 				if bOtroDia:
 					ES.imprime(sControl)
-					ind = ES.entradaConLista(droid, 'Continuar', 'Seleccione', ['Si', 'No'])		# Continuar.
+					ind = ES.entradaConLista(droid, 'Continuar', 'Seleccione',
+												['Si', 'No'])		# Continuar.
 					if (2 <= ind) or (0 > ind) or (1 == ind) or (None == ind):	# Se asegura de tener el indice correcto.
 						ES.muestraFin()
 						sys.exit()
 				# FIN if bOtroDia
 				for linea in lControl:
 					if ES.esEntero(linea[0]):
-						if linea[1] in dControl: dControl[linea[1]] = [dControl[linea[1]][0], linea[0]]
+						if linea[1] in dControl:
+							dControl[linea[1]] = [dControl[linea[1]][0],
+																	linea[0]]
 						else: dControl[linea[1]] = ['-1', linea[0]]
 			# FIN if 0 < len(lControl)
 			else:
@@ -150,7 +162,8 @@ for DATA in lDATA:
 			f = open(DIR + DATA, "w")
 			bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 		except:
-			print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
+			print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % \
+									(CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
 			bAbierto = False
 		if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
 			print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
@@ -158,19 +171,24 @@ for DATA in lDATA:
 				f.write(data)
 				bEscrito = True										# No hubo error escribiendo en el archivo local.
 			except:
-				print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN, DATA))
+				print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN,
+																		DATA))
 				bEscrito = False
 			finally:
 				f.close()
 			if bEscrito:
-				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % (DATA, CO.CYAN, CO.FIN, ES.cLineas(DATA)))
-				else: print("%s %sactualizado con%s %d!" % (DATA, sColor, CO.FIN, ES.cLineas(DATA)))
-				if 'archsBanco.txt' == DATA: lBancosHoy = data.rstrip().split('\n')
+				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % \
+									(DATA, CO.CYAN, CO.FIN, ES.cLineas(DATA)))
+				else: print("%s %sactualizado con%s %d!" % (DATA, sColor,
+													CO.FIN, ES.cLineas(DATA)))
+				if 'archsBanco.txt' == DATA:
+					lBancosHoy = data.rstrip().split('\n')
 			# Fin if bEscrito
 		# Fin if bAbierto
 	# Fin if bLeido
 	elif 'control.txt' == DATA:		# El primer archivo a leer, no se pudo descargar.
-		print("%sPARECIERA QUE EXISTE ALGUN PROBLEMA CON INTERNET O LOS ARCHIVOS NO EXISTEN.%s" % (CO.ROJO, CO.FIN))
+		print(("%sPARECIERA QUE EXISTE ALGUN PROBLEMA CON INTERNET O LOS "
+				"ARCHIVOS NO EXISTEN.%s") % (CO.ROJO, CO.FIN))
 		ES.muestraFin()
 		sys.exit()
 # Fin for
@@ -196,7 +214,9 @@ for DATA in lDATA:
 
 #print(lBancosHoy)
 if lBancosHoy and (0 < len(lBancosHoy)):
-	print('\n' + CO.NEGRITA + CO.SUBRAYA + 'Ahora procederemos a descargar los archivos de cada banco.' + CO.FIN + '\n')
+	print('\n' + CO.NEGRITA + CO.SUBRAYA +
+			'Ahora procederemos a descargar los archivos de cada banco.' +
+			CO.FIN + '\n')
 	for DATA in lBancosHoy:
 		sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
 		print("%sLeyendo%s %s remoto..." % (sColor, CO.FIN, DATA))
@@ -204,14 +224,16 @@ if lBancosHoy and (0 < len(lBancosHoy)):
 			data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 			bLeido = True												# No hubo error de lectura desde el servidor.
 		except:
-			print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
+			print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA,
+															CO.ROJO, CO.FIN))
 			bLeido = False
 		if bLeido:														# Si no hubo error de lectura desde el servidor.
 			try:
 				f = open(DIR + DATA, "w")
 				bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 			except:
-				print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % (CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
+				print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % \
+									(CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
 				bAbierto = False
 			if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
 				print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
@@ -219,7 +241,8 @@ if lBancosHoy and (0 < len(lBancosHoy)):
 					f.write(data)
 					bEscrito = True										# No hubo error escribiendo en el archivo local.
 				except:
-					print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN, DATA))
+					print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO,
+																CO.FIN, DATA))
 					bEscrito = False
 				finally:
 					f.close()
@@ -228,6 +251,7 @@ if lBancosHoy and (0 < len(lBancosHoy)):
 	# Fin for DATA in lBancosHoy
 # Fin if
 else:
-	print('\n' + CO.NEGRITA + CO.SUBRAYA + 'No hay archivos de banco de hoy' + CO.FIN + '\n')
+	print('\n' + CO.NEGRITA + CO.SUBRAYA + 'No hay archivos de banco de hoy' +
+																CO.FIN + '\n')
 ES.muestraFin()
 # Fin del programa

@@ -4,9 +4,9 @@
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
 try:
-  from lib import DIR, LINEA, bMovil
+  if __name__ == '__main__': from . import bMovil
+  else: from lib import bMovil
 except:
-  DIR = './'
   bMovil = False
 
 if bMovil:
@@ -50,6 +50,8 @@ def creaDicPersonas():
       return {}
 # Abre la conexion con la base de datos.
   if oMySQL.conectar():
+# Prepara un cursor.
+    cursor = oMySQL.abreCursor()
 # Prepara una consulta SQL para SELECT registros desde la base de datos.
     sql = '''
           SELECT s.Cedula AS ci, s.Nombre as nb, SUBSTRING(s.Nucleo, 1, 1)
@@ -74,8 +76,6 @@ def creaDicPersonas():
                     (SELECT s.Cedula FROM socios s WHERE s.Cedula = p.Cedula)
 			    ORDER BY 1
           '''
-# Prepara un cursor.
-    cursor = oMySQL.abreCursor()
     try:
 # Ejecuta el comando SQL.
       cursor.execute(sql)
@@ -83,8 +83,8 @@ def creaDicPersonas():
       resultados = cursor.fetchall()
       for fila in resultados:
 # Crea diccionario de conceptos.
-        dPersona[int(fila[0])] = poblarDicPersona(int(fila[0]), fila[1],
-                                            fila[2], fila[3], fila[4], fila[5])
+        dPersona[str(int(fila[0]))] = poblarDicPersona(str(int(fila[0])),
+                                  fila[1], fila[2], fila[3], fila[4], fila[5])
     except:
       print("Imposible crear diccionario de personas.")
 # disconnect from server
@@ -96,10 +96,10 @@ def creaDicPersonas():
 
 if __name__ == '__main__':
   dPersona = creaDicPersonas()
-  print(dPersona[3874555]['ci'], dPersona[3874555]['nb'],
-        dPersona[3874555]['fnac'], sep=';')   # Prof. Orlando De La Cruz
-  print(dPersona[4299801]['ci'], dPersona[4299801]['nu'],
-        dPersona[4299801]['fnac'], dPersona[4299801]['dsp'],
-        dPersona[4299801]['ex'], sep=';')
-  print(dPersona[4299956]['nu'], dPersona[4299956]['dsp'],
-        dPersona[4299956]['ex'], sep=';')     # RUIZ MORENO CARMEN DEL VALLE
+  print(dPersona['3874555']['ci'], dPersona['3874555']['nb'],
+        dPersona['3874555']['fnac'], sep=';')   # Prof. Orlando De La Cruz
+  print(dPersona['4299801']['ci'], dPersona['4299801']['nu'],
+        dPersona['4299801']['fnac'], dPersona['4299801']['dsp'],
+        dPersona['4299801']['ex'], sep=';')
+  print(dPersona['4299956']['nu'], dPersona['4299956']['dsp'],
+        dPersona['4299956']['ex'], sep=';')     # RUIZ MORENO CARMEN DEL VALLE
