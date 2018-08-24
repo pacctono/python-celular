@@ -4,8 +4,11 @@ from __future__ import print_function # Para poder usar 'print' de version 3.
 
 try:
   if __name__ == '__main__' or 0 > __name__.find('lib'):
-    from . import DIR, LINEA, bMovil
-  else: from lib import DIR, LINEA, bMovil
+    from __init__ import DIR, LINEA, bMovil
+    if not bMovil: DIR = '..' + DIR
+  else:
+    from lib import DIR, LINEA, bMovil
+    if not bMovil: DIR = '.' + DIR
 except:
   DIR = './'
   bMovil = False
@@ -150,7 +153,7 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
   else:
     while True:
       print(titulo)    
-      resultado = input(mensaje)
+      resultado = input(mensaje + ': ')
       if resultado.isdigit() or None == resultado: break
   if None == resultado: return None
   resultado = fgEliminarPuntos(resultado)
@@ -244,7 +247,7 @@ def entradaConLista(droid, titulo, mensaje, lista):
     for item in lista:
       print(i, item, sep='.-')
       i += 1
-    indice = entradaNumero(droid, '', 'Introduzca un número: ', 0, True, True)
+    indice = entradaNumero(droid, '', 'Introduzca un número', 0, True, True)
   if None == indice or 0 > indice or (len(lista) <= indice): return None
   else: return indice
 # funcion entradaConLista

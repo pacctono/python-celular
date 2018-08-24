@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# bancos: Modulo para leer bancos de IPASPUDO.
+# libBancos: Modulo para leer bancos de IPASPUDO.
 #-*-coding:utf8;-*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
@@ -28,7 +27,6 @@ def poblarDicBancos(co, de, act='', cta='', sdo=''):
   return {'cod':co, 'des':de, 'act':act, 'cta':cta, 'sdo':sdo}	# Codigo, desc,
 # com: 2 primeros digitos comprobante, nu: cod tabla_prestamo,
 # no: es concepto de nomina (S/N), au: automatico (S/N).
-# FIN funcion poblarDic
 def creaDicBancos():
   dBanco = {}
   archTexto = "bancos.txt"

@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# personas: Modulo para leer socios de IPASPUDO.
+# libPersonas: Modulo para leer socios de IPASPUDO.
 #-*-coding:utf8;-*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
