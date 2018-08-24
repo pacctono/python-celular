@@ -70,7 +70,7 @@ while True:
           bSF = IP.selFuncion(nOp)
         IP.cigAntIgualA(ci)
   else:
-    func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
+    func = eval('IP.' + sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
     else: break
 # Fin while True

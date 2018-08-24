@@ -5,10 +5,10 @@ from __future__ import print_function # Para poder usar 'print' de version 3.
 try:
   if __name__ == '__main__' or 0 > __name__.find('lib'):
     from __init__ import DIR, LINEA, bMovil
-    if not bMovil: DIR = '..' + DIR
+    if not bMovil: DIR = '../' + DIR
   else:
     from lib import DIR, LINEA, bMovil
-    if not bMovil: DIR = '.' + DIR
+    if not bMovil: DIR = './' + DIR
 except:
   DIR = './'
   bMovil = False

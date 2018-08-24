@@ -808,15 +808,16 @@ def nomina(bLN=True):
   ftDed  = 0.00
   bImpar = True
 
-  nCarDesc = CO.nCarLin - 23 - 1		# Numero de caracteres (espacio total), donde se mostrara el campo. 23 es resto.
-  maxLongCad = 30									# numero maximo de caracteres del campo especificado.
+  nCarDesc = CO.nCarLin - 23 - 1	# Numero de caracteres (espacio total), donde se mostrara el campo. 23 es resto.
+  maxLongCad = 28									# numero maximo de caracteres del campo especificado.
   if maxLongCad < nCarDesc: nCarDesc = maxLongCad	# > longitud maxima de la cadena a mostrar en el campo.
-  nCarMostrar = 23 + nCarDesc						# Numero de caracteres, maximo, a mostrar por linea.
-  sTitNomina  = AZUL + "CON " + CO.justIzqTituloCol('DESCRIPCION', nCarDesc) + " ValorFij  ValorVar"
+  nCarMostrar = 23 + nCarDesc			# Numero de caracteres, maximo, a mostrar por linea.
+  sTitNomina  = AZUL + "CON " + CO.justIzqTituloCol('DESCRIPCION', nCarDesc) +\
+                        "  ValorFijo ValorVariab"
   if 25 <= (CO.nCarLin - nCarMostrar):				# 25 es la maxima longitud del 'saldo[cuota]'.
-    sTitNomina  += '        Saldo:[Cuota]'
+    sTitNomina  += '          Saldo:[Cuota]'
     nCarMostrar += 25
-    nCarSaldo    = 13
+    nCarSaldo    = 15
     bSaldo       = True
   else:
     nCarSaldo = 0
@@ -828,13 +829,16 @@ def nomina(bLN=True):
       nF += 1
       sColor, bImpar = ES.colorLinea(bImpar, VERDE)
 # 0:Cedula, 1:Concepto, 2:Valor fijo, 3: Valor variable, 4:Saldo, 5:Cuota
-      stl = "%s%.3s %*.*s %.9s %.9s%s" %\
-      		(sColor, l[1], nCarDesc, nCarDesc, mConcepto(l[1]).ljust(nCarDesc, " "),\
-      			ES.fgFormateaNumero(l[2], 2).rstrip().rjust(9), ES.fgFormateaNumero(l[3], 2).rstrip().rjust(9), FIN)
+      stl = "%s%.3s %*.*s %.11s %.11s%s" % (sColor, l[1], nCarDesc, nCarDesc,
+                                          mConcepto(l[1]).ljust(nCarDesc, " "),
+                              ES.fgFormateaNumero(l[2], 2).rstrip().rjust(11),
+                              ES.fgFormateaNumero(l[3], 2).rstrip().rjust(11),
+                              FIN)
       if bSaldo:
         if (0.00 < float(l[4])):
-          stl += "%s%.*s[%s]%s" % (sColor, nCarSaldo, ES.fgFormateaNumero(l[4], 2).rstrip().rjust(nCarSaldo),\
-            						ES.fgFormateaNumero(l[5], 2).rstrip(), FIN)
+          stl += "%s%.*s[%s]%s" % (sColor, nCarSaldo,
+                      ES.fgFormateaNumero(l[4], 2).rstrip().rjust(nCarSaldo),
+                      ES.fgFormateaNumero(l[5], 2).rstrip(), FIN)
       try:
         if (500 > int(l[1])): ftAsig += float(l[2]) + float(l[3])
         else: ftDed += float(l[2]) + float(l[3])

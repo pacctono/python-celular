@@ -162,8 +162,8 @@ for DATA in lDATA:
 			f = open(DIR + DATA, "w")
 			bAbierto = True											# No hubo error al abrir para escribir en archivo local.
 		except:
-			print("%sERROR AL TRATAR DE ABRIR%s %s %sPARA ESCRITURA.%s" % \
-									(CO.ROJO, CO.FIN, DATA, CO.ROJO, CO.FIN))
+			print("%sERROR AL TRATAR DE ABRIR%s %s%s %sPARA ESCRITURA.%s" % \
+								(CO.ROJO, CO.FIN, DIR, DATA, CO.ROJO, CO.FIN))
 			bAbierto = False
 		if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
 			print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
