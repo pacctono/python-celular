@@ -60,7 +60,7 @@ def obtenerIP(servidor):		# Es la unica rutina que consegui para obtener mi IP.
 
 ES.muestraInicio("IPASPUDO: J-30619229-8.")
 
-ind = ES.entradaConLista(droid, 'Busqueda del servidor', 'Seleccione servidor',
+ind = ES.entradaConLista(droid												, 'Busqueda del servidor', 'Seleccione servidor',
 										lSitios)		# Busca el servidor.
 if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or \
 					(0 > ind):	# Se asegura de tener el indice correcto.
@@ -97,21 +97,22 @@ try:
 	lControl = [linea.strip().split(';')
 									for linea in data.rstrip().split('\n')]
 except:
-	lControl = [['-1', nombArch] for nombArch in lDATA]
+	lControl = [['0', nombArch] for nombArch in lDATA]
 dControl = {linea[1].strip():[linea[0].strip(), linea[0].strip()]
 					for linea in lControl if ES.esEntero(linea[0].strip())}
 lBancosHoy = None		# La lista de bancos de hoy esta vacia al principio.
 for DATA in lDATA:
 	if 'control.txt' != DATA:
-		(timeAnterior, timeNuevo) = dControl.get(DATA, ['-1', '-1'])
+		(timeAnterior, timeNuevo) = dControl.get(DATA, ['0', '-1'])
 	else: timeAnterior = timeNuevo = 0
 	segsDiferencia = int(timeNuevo) - int(timeAnterior)
 	sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
 	print("%sLeyendo%s %s remoto. Local modificado en: %d seg posteriores" %
 						(sColor, CO.FIN, DATA, segsDiferencia))
 	if 'control.txt' != DATA and 0 >= segsDiferencia:
-		print("%s, %slocal; ya esta actualizado con%s %d cars! El %s" % (DATA,
-				sColor, CO.FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
+		if 0 == segsDiferencia:
+			print("%s, %slocal; ya esta actualizado con%s %d lineas! El %s" % \
+			(DATA, sColor, CO.FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
 		continue
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
@@ -147,11 +148,14 @@ for DATA in lDATA:
 						sys.exit()
 				# FIN if bOtroDia
 				for linea in lControl:
-					if ES.esEntero(linea[0]):
-						if linea[1] in dControl:
-							dControl[linea[1]] = [dControl[linea[1]][0],
-																	linea[0]]
-						else: dControl[linea[1]] = ['-1', linea[0]]
+					if ES.esEntero(linea[0]):	# linea[0] sera el nuevo tiempo.
+						dControl[linea[1]] = [
+							dControl.get(linea[1], ['0', 0])[0], linea[0]
+						]	# el tiempo anterior es el primer item de dControl o -1.
+#						if linea[1] in dControl:
+#							dControl[linea[1]] = [dControl[linea[1]][0],
+#																	linea[0]]
+#						else: dControl[linea[1]] = ['-1', linea[0]]
 			# FIN if 0 < len(lControl)
 			else:
 				ES.muestraFin()
@@ -176,10 +180,13 @@ for DATA in lDATA:
 			finally:
 				f.close()
 			if bEscrito:
-				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % \
-									(DATA, CO.CYAN, CO.FIN, ES.cLineas(DATA)))
-				else: print("%s %sactualizado con%s %d!" % (DATA, sColor,
+				print("%s %sactualizado con%s %d lineas!" % (DATA,
+								(CO.CYAN if 'heute.txt' == DATA else sColor),
 													CO.FIN, ES.cLineas(DATA)))
+#				if 'heute.txt' == DATA: print("%s %sactualizado con%s %d!" % \
+#									(DATA, CO.CYAN, CO.FIN, ES.cLineas(DATA)))
+#				else: print("%s %sactualizado con%s %d!" % (DATA, sColor,
+#													CO.FIN, ES.cLineas(DATA)))
 				if 'archsBanco.txt' == DATA:
 					lBancosHoy = data.rstrip().split('\n')
 			# Fin if bEscrito
