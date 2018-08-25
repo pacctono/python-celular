@@ -133,9 +133,8 @@ for DATA in lDATA:
 								'ACTUALIZADO Al: %d/%m/%Y %H:%M:%S')
 						sControl = "%sControl al: %s%s." % (CO.PURPURA, CO.FIN,
 																fechaControl)
-						if (dHoy == fechaControl.strftime('%Y%m%d')):
-							bOtroDia = False
-						else: bOtroDia = True
+						if (dHoy != fechaControl.strftime('%Y%m%d')):
+							bOtroDia = True
 						break
 					# if 1 < len(ll) and 'Sinca' == ll[0]
 				# for l in lControl
@@ -143,7 +142,7 @@ for DATA in lDATA:
 					ES.imprime(sControl)
 					ind = ES.entradaConLista(droid, 'Continuar', 'Seleccione',
 												['Si', 'No'])		# Continuar.
-					if (2 <= ind) or (0 > ind) or (1 == ind) or (None == ind):	# Se asegura de tener el indice correcto.
+					if (1 <= ind) or (0 > ind) or (None == ind):	# Se asegura de tener el indice correcto.
 						ES.muestraFin()
 						sys.exit()
 				# FIN if bOtroDia
