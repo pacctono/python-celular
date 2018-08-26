@@ -1,6 +1,6 @@
 # libNomina: Modulo para el manejo de la nomina de la UDO para IPASPUDO.
 #-*-coding:utf8;-*-
-from lib import Comun as COM
+from ipa import Comun as COM
 from lib import ES, Const as CO
 
 try:
@@ -71,7 +71,7 @@ def nomina(bLN=True):
   '''Maneja la lista de conceptos de nomina de un socio y
     muestra la informacion.'''
   global lNom, lNomCNE
-  from lib.IPASPUDO import cig as ci
+  from ipa.AhorroYPrestamo import cig as ci
  
   if bLN: lN = lNom
   else: lN   = lNomCNE
@@ -170,7 +170,7 @@ def concepto(bLN=True):
   '''Maneja la lista de los conceptos de un socio en Nomina y
     muestra el detalle de cualquiera de los conceptos.'''
   global lNom, lNomCNE
-  from lib.IPASPUDO import cig as ci
+  from ipa.AhorroYPrestamo import cig as ci
 
   if bLN: lN = lNom
   else: lN   = lNomCNE
