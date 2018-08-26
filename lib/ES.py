@@ -153,8 +153,9 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
   else:
     while True:
       print(titulo)    
-      resultado = input(mensaje + ': ')
-      if resultado.isdigit() or None == resultado: break
+      resultado = input(mensaje + '[' + str(porDefecto) + ']: ')
+      if '' == resultado or None == resultado: resultado = str(porDefecto)
+      if resultado.isdigit(): break
   if None == resultado: return None
   resultado = fgEliminarPuntos(resultado)
   bMatch = patron.match(resultado)

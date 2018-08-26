@@ -20,6 +20,9 @@ if bMovil:
 else: droid = None
 
 from lib import IPASPUDO as IP
+from lib import GanYPer as GyP
+from lib import Nomina as NOM
+from lib import Comun as COM
 from lib import ES, Cuota as CU
 
 esperar = 'Espere un momento, por favor...'
@@ -31,11 +34,9 @@ else: print(esperar)
 IP.prepararListasDeTrabajo()
 if droid: droid.dialogSetCurrentProgress(60)
 else: print('Listas listas!')
-IP.prepararDiccionariosDeTrabajo()
 if droid: droid.dialogSetCurrentProgress(90)
 else: print('Diccionarios listos!')
 
-IP.colocarDroid(droid)
 ES.muestraInicio("IPASPUDO: J-30619229-8.")
 if droid: droid.dialogSetCurrentProgress(95)
 
@@ -52,25 +53,24 @@ while True:
   elif 'salir' == sOpcion or None == sOpcion: break
   elif isinstance(sOpcion, int) and 0 > int(sOpcion): break
   elif 'cedula' == sOpcion:
-    IP.cigIgualMenosUno()
-    ci, sNombre = IP.valSocio()
+    ci, sNombre = COM.valSocio(IP.cig)
     if (0 < ci):
-      IP.mSocio(sNombre)
-      bSF = True
+      IP.cig = ci
+      COM.mSocio(sNombre, ci)
+      bSF = True              # Función seleccionada.
       while bSF:
         bSF = IP.selFuncion(nOp)
   elif 'nombre' == sOpcion:
-    IP.hacercigAntIgualAcig()
     ci, sNombre = IP.buscarNombre()
     if (0 < ci):
-      IP.mSocio(sNombre)
-      if not IP.escigAntIgualAcig():
-        bSF = True
-        while bSF:
-          bSF = IP.selFuncion(nOp)
-        IP.cigAntIgualA(ci)
+      if ci != IP.cig:
+        COM.mSocio(sNombre, ci)
+        IP.cig = ci
+      bSF = True            # Función seleccionada.
+      while bSF:
+        bSF = IP.selFuncion(nOp)
   else:
-    func = eval('IP.' + sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
+    func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
     else: break
 # Fin while True
