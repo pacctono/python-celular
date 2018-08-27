@@ -1,12 +1,6 @@
 # libCuota: Modulo para el manejo de cuota.
 #-*-coding:utf8;-*-
-from lib import ES, Const as CO
-bAmplia = CO.bPantAmplia
-AMARI = CO.color.YELLOW			# Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN			# Identificacion del socio.
-AZUL  = CO.color.BLUE			# Identificacion de los datos.
-VERDE = CO.color.GREEN			# Linea final (totales).
-FIN   = CO.color.END
+from lib import ES, Const as CO, General as FG
 
 def calCuota(rM, iN, rI=12):	# Monto (rM), numero de meses (iN) e interes anual (rI).
 	'Calcula la cuota de un prestamo, segun el monto, numero de cuotas y porcentaje.'
@@ -30,10 +24,10 @@ def cuota(droid=None, bImp=True):
 
 	ES.alerta(droid, 'CUOTA DEL PRESTAMO', '%9.2f' % c)
 	if bImp:
-		if bAmplia: sFormCuota = "%sMonto:%s %s, %sNumero de meses:%s %s, %sInteres:%s %s, %sCuota:%s %s"
+		if CO.bPantAmplia: sFormCuota = "%sMonto:%s %s, %sNumero de meses:%s %s, %sInteres:%s %s, %sCuota:%s %s"
 		else: sFormCuota = "%sMo:%s%s,%s#Mes:%s%s,%sI:%s%s,%sCta:%s%s"
-		sMsj = sFormCuota % (AZUL, FIN, ES.fgFormateaNumero(rM), AZUL, FIN, ES.fgFormateaNumero(iN), AZUL, FIN,\
-										ES.fgFormateaNumero(rI, 2), AZUL, FIN, ES.fgFormateaNumero(c, 2))
+		sMsj = sFormCuota % (CO.AZUL, CO.FIN, FG.formateaNumero(rM), CO.AZUL, CO.FIN, FG.formateaNumero(iN), CO.AZUL, CO.FIN,\
+										FG.formateaNumero(rI, 2), CO.AZUL, CO.FIN, FG.formateaNumero(c, 2))
 		ES.imprime(sMsj.rstrip(' \t\n\r'))
 	return rM, iN, rI, c
 # funcion cuota

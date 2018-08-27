@@ -1,6 +1,6 @@
 # libGanYPer: Modulo de ganancias y perdidas para IPASPUDO.
 #-*-coding:utf8;-*-
-from lib import ES, Const as CO
+from lib import ES, Const as CO, General as FG
 
 def ganYperXmes():
   'Lee los datos de ganancias y perdidas por mes y los despliega'
@@ -31,13 +31,13 @@ def ganYperXmes():
       if 1 >= abs(fct): sColorFactor = ''
       else: sColorFactor = CO.FIN + CO.ROJO
       st += sColor + sMes.rjust(2) + ' ' +\
-		ES.fgFormateaNumero(l[1], 2).rstrip().rjust(15) +\
-		ES.fgFormateaNumero(fcti, 3).rstrip().rjust(7) +\
-		ES.fgFormateaNumero(l[2], 2).rstrip().rjust(15) +\
-		ES.fgFormateaNumero(fcte, 3).rstrip().rjust(7) +\
-		ES.fgFormateaNumero(l[3], 2).rstrip().rjust(15) +\
+		FG.formateaNumero(l[1], 2).rstrip().rjust(15) +\
+		FG.formateaNumero(fcti, 3).rstrip().rjust(7) +\
+		FG.formateaNumero(l[2], 2).rstrip().rjust(15) +\
+		FG.formateaNumero(fcte, 3).rstrip().rjust(7) +\
+		FG.formateaNumero(l[3], 2).rstrip().rjust(15) +\
 		sColorFactor +\
-		ES.fgFormateaNumero(fct, 3).rstrip().rjust(8) +\
+		FG.formateaNumero(fct, 3).rstrip().rjust(8) +\
 		CO.FIN + "\n"
 # Fin for
   ES.imprime(st.rstrip(' \t\n\r'))
@@ -63,16 +63,16 @@ def ganYperAcum():
     if '5--' == l[0]: rTotEgr = float(l[3])
     if '-' == l[0][2:3]: sColor = CO.VERDE
     else: sColor = ''
-    if 0.00 != float(l[2]): sIng = ES.fgFormateaNumero(l[2], 2).rstrip()
+    if 0.00 != float(l[2]): sIng = FG.formateaNumero(l[2], 2).rstrip()
     else: sIng = ''
-    if 0.00 != float(l[3]): sEgr = ES.fgFormateaNumero(l[3], 2).rstrip()
+    if 0.00 != float(l[3]): sEgr = FG.formateaNumero(l[3], 2).rstrip()
     else: sEgr = ''
     st += sColor + l[0].ljust(3) + ' ' + l[1][0:35].ljust(35) +\
 			sIng.rjust(15) + sEgr.rjust(15) + CO.FIN + "\n"
 # Fin for
-  sTotIng = ES.fgFormateaNumero(rTotIng, 2)
-  sTotEgr = ES.fgFormateaNumero(rTotEgr, 2)
-  sDif    = ES.fgFormateaNumero(rTotIng + rTotEgr, 2)
+  sTotIng = FG.formateaNumero(rTotIng, 2)
+  sTotEgr = FG.formateaNumero(rTotEgr, 2)
+  sDif    = FG.formateaNumero(rTotIng + rTotEgr, 2)
   st += "%sTOT Ingresos: %s%s%s, Egresos: %s%s%s; Dif: %s%s" % (CO.CYAN,
           CO.VERDE, sTotIng, CO.CYAN, CO.ROJO, sTotEgr, CO.CYAN, CO.FIN, sDif)
   ES.imprime(st.rstrip(' \t\n\r'))

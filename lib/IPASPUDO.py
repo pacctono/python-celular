@@ -3,15 +3,7 @@
 import types
 from operator import itemgetter, attrgetter
 import json
-from lib import ES, Const as CO
-
-NMAXITEM = CO.NMAXITEM			# Numero maximo de items (cheques) a mostrar en una lista de seleccion. Usado: lCheques.
-AMARI = CO.color.YELLOW			# Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN			# Identificacion del socio.
-AZUL  = CO.color.BLUE			# Identificacion de los datos.
-VERDE = CO.color.GREEN			# Linea final (totales).
-ROJO  = CO.color.RED			# Perdida o error.
-FIN   = CO.color.END
+from lib import ES, Const as CO, General as FG
 
 bAmplia = CO.bPantAmplia
 
@@ -51,7 +43,7 @@ def lFecha(k="Sinca", sig=""):
   else: return sFecha
 # funcion lFecha
 def noCedula(ci):
-  return "La cedula %s no fue encontrada\n" % ES.fgFormateaNumero(ci)
+  return "La cedula %s no fue encontrada\n" % FG.formateaNumero(ci)
 # funcion noCedula
 def cedulaI():
   global cig, cigAnt
@@ -95,7 +87,7 @@ def mNombre(ci):
     sNombre = "UnicodeError: " + ci
   if ("NO" == sNombre):
     sNombre = "NO ENCONTRE EL NOMBRE"
-    ES.alerta(droid, 'SOCIO ERROR', ES.fgFormateaNumero(ci) + ', ' + sNombre)
+    ES.alerta(droid, 'SOCIO ERROR', FG.formateaNumero(ci) + ', ' + sNombre)
     cigAnt = cig		# Quizas se pueda reutilizar la cedula errada, para introducir la nueva
     cig = -1
   return sNombre
@@ -128,34 +120,34 @@ def mSocio(Nombre, bCadena=True):
 
   if (bCadena): sFecha = lFecha()
   else: sFecha = Nombre[len(Nombre)-1]
-  st = AMARI + sFecha + ' (Descargado:' + FIN + lFecha('persona.txt', '') + ')' + "\n" + AZUL + "Cedula:".rjust(21) + FIN 
-  if (bCadena): st += " %s" % (ES.fgFormateaNumero(cig))
+  st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN + lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL + "Cedula:".rjust(21) + CO.FIN 
+  if (bCadena): st += " %s" % (FG.formateaNumero(cig))
   else: st += " %s" % Nombre[0]
   nJustDerecha = 21
   if 0 < len(l) and '' != l[0]:
     if len(l[0].rstrip(' \t\n\r')) > (CO.nCarLin - nJustDerecha - 1):	# Cars a justificar derecha + 1 espacio despues ':'.
       nJustDerecha = CO.nCarLin - len(l[0].rstrip(' \t\n\r')) - 1
     st += "\n"
-    st += AZUL + "Nombre:".rjust(nJustDerecha) + FIN + " %s" % (l[0].rstrip(' \t\n\r'))
+    st += CO.AZUL + "Nombre:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[0].rstrip(' \t\n\r'))
   nJustDerecha = 21
   if 1 < len(l) and '' != l[1]:
-    st += "\n" + AZUL + "Nucleo:".rjust(nJustDerecha) + FIN
+    st += "\n" + CO.AZUL + "Nucleo:".rjust(nJustDerecha) + CO.FIN
     if (bCadena): st += " %s" % (CO.dNucleo.get(l[1], 'ESTA ERRADO EN LA BD'))
     else: st += " %s" % (l[1])
   if 2 < len(l) and '' != l[2]:
-    st += "\n" + AZUL + "Fecha de nacimiento:".rjust(nJustDerecha) + FIN
+    st += "\n" + CO.AZUL + "Fecha de nacimiento:".rjust(nJustDerecha) + CO.FIN
     if (bCadena): st += " %2s/%2s/%4s" % (l[2][0:2], l[2][2:4], l[2][4:])
     else: st+= " %s" % (l[2])
   if 3 < len(l) and '' != l[3]:
     st += "\n"
-    st += AZUL + "Disponibilidad:".rjust(nJustDerecha) + FIN + " %s" % (l[3])
+    st += CO.AZUL + "Disponibilidad:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[3])
   if 4 < len(l) and '' != l[4]:
-    st += "\n" + AZUL + "Extension:".rjust(nJustDerecha) + FIN
+    st += "\n" + CO.AZUL + "Extension:".rjust(nJustDerecha) + CO.FIN
     if (bCadena): st += " %s" % (CO.dExtension.get(l[4], 'ERRADA'))
     else: st+= " %s" % (l[4])
   if not bCadena:
-    st += "\n" + AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) + FIN + " %s" % (l[5])
-    st += "\n" + AZUL + "Servicio funerario:".rjust(nJustDerecha) + FIN + " %s" % (l[6])
+    st += "\n" + CO.AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[5])
+    st += "\n" + CO.AZUL + "Servicio funerario:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[6])
   ES.imprime(st)
 # funcion mSocio
 def aSocio(lPer):
@@ -242,20 +234,20 @@ def lCheques():
     print >> fErr, len(lNvaCh)
     return None
   nCheques = len(lCheq)
-  if (nCheques > NMAXITEM):
-    nInicial = int((nCheques/NMAXITEM)+1)
+  if (nCheques > CO.NMAXITEM):
+    nInicial = int((nCheques/CO.NMAXITEM)+1)
     ES.alerta(droid, 'lCheques', 'Son ' + str(nCheques) + ' cheques! Mostrare ' + str(nInicial) + ' listas!')
-    for k in range(nInicial):				# Si el numero de cheques es grande mostrar varias listas de NMAXITEM cada una.
-      if (k+1)*NMAXITEM >= nCheques:
+    for k in range(nInicial):				# Si el numero de cheques es grande mostrar varias listas de CO.NMAXITEM cada una.
+      if (k+1)*CO.NMAXITEM >= nCheques:
         iUltimo = nCheques
-        lNueva  = lCheq[k*NMAXITEM:iUltimo]
+        lNueva  = lCheq[k*CO.NMAXITEM:iUltimo]
       else:
-        iUltimo = (k+1)*NMAXITEM
-        lNueva  = lCheq[k*NMAXITEM:iUltimo] + ['Proxima lista']
-      ind = ES.entradaConLista(droid, str(nCheques) + ' CHEQUES. De ' + str((k*NMAXITEM)+1) + ' a ' + str(iUltimo), '', lNueva)
+        iUltimo = (k+1)*CO.NMAXITEM
+        lNueva  = lCheq[k*CO.NMAXITEM:iUltimo] + ['Proxima lista']
+      ind = ES.entradaConLista(droid, str(nCheques) + ' CHEQUES. De ' + str((k*CO.NMAXITEM)+1) + ' a ' + str(iUltimo), '', lNueva)
       if None == ind or 0 > ind: return None
-      if NMAXITEM > ind:					# Si ind == NMAXITEM, se selecciono la opcion 'Continuar'.
-        indice = ind + (k*NMAXITEM)
+      if CO.NMAXITEM > ind:					# Si ind == CO.NMAXITEM, se selecciono la opcion 'Continuar'.
+        indice = ind + (k*CO.NMAXITEM)
         break
   else:
     indice = ES.entradaConLista(droid, 'CHEQUES: ' + str(nCheques), 'Seleccione cheque', lCheq)
@@ -263,13 +255,13 @@ def lCheques():
   return lNvaCh[indice]
 # funcion lCheques
 def mCheque(lChe):
-  st = AMARI + lFecha("Sinca", "Cheques")  + ' (Descargado:' + FIN + lFecha('cheques.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha("Sinca", "Cheques")  + ' (Descargado:' + CO.FIN + lFecha('cheques.txt', '') + ')' + "\n"
   if '99' == lChe[0]: sDesc = 'TRA'
   elif 6 > len(lChe[1]): sDesc = 'CHQ'
   else: sDesc = 'DEP'
   st += "Banco:%+10.9s (%-.6s [%s]); Est:%+7.6s\nBeneficiario: %-12.11s%-30.30s\nConcepto: %-31.30s\nFecha:%+11.10s Monto: %-15.14s" % \
-  			 (mBanco(lChe[0]), lChe[1], sDesc, mEstado(lChe[7]), ES.fgFormateaNumero(lChe[2]), extraeNombre(lChe[3]),\
-  			 lChe[5], lChe[4], ES.fgFormateaNumero(lChe[6], 2))
+  			 (mBanco(lChe[0]), lChe[1], sDesc, mEstado(lChe[7]), FG.formateaNumero(lChe[2]), extraeNombre(lChe[3]),\
+  			 lChe[5], lChe[4], FG.formateaNumero(lChe[6], 2))
   ES.imprime(st.rstrip(' \t\n\r'))
   return True
 # funcion mCheque
@@ -321,18 +313,18 @@ def ganYperXmes():
   'Lee los datos de ganancias y perdidas por mes y los despliega'
   global lGyPxM
 
-#  st = AMARI + lFecha("Sinca", "GanyPerxMes") + ' (Descargado:' + FIN + lFecha('egyp.txt', '') + ')' + "\n"
+#  st = CO.AMARI + lFecha("Sinca", "GanyPerxMes") + ' (Descargado:' + CO.FIN + lFecha('egyp.txt', '') + ')' + "\n"
   nF = 0
   bImpar = True
 
-  sTitPrestamos = AZUL + "MES" + "Ingresos".rjust(15) + "FACTOR".rjust(7) + "Egresos".rjust(15) + "FACTOR".rjust(7) +\
-					"Resultado".rjust(15) + "FACTOR".rjust(8) + FIN + "\n"
+  sTitPrestamos = CO.AZUL + "MES" + "Ingresos".rjust(15) + "FACTOR".rjust(7) + "Egresos".rjust(15) + "FACTOR".rjust(7) +\
+					"Resultado".rjust(15) + "FACTOR".rjust(8) + CO.FIN + "\n"
   st = sTitPrestamos
   rTotIng = float(lGyPxM[len(lGyPxM)-1][1])
   rTotEgr = float(lGyPxM[len(lGyPxM)-1][2])
   for l in lGyPxM:
       nF += 1
-      sColor, bImpar = ES.colorLinea(bImpar, VERDE)
+      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
 # 0:Mes,1:Ingresos,2:Egresos,3:Resultado
       if 0.00 != rTotIng: fcti = float(l[1])/rTotIng
       else: fcti = 0.00
@@ -343,16 +335,16 @@ def ganYperXmes():
       if 13 > int(l[0]): sMes = str(l[0])
       else: sMes = 'TO'
       if 1 >= abs(fct): sColorFactor = ''
-      else: sColorFactor = FIN + ROJO
+      else: sColorFactor = CO.FIN + CO.ROJO
       st += sColor + sMes.rjust(2) + ' ' +\
-		ES.fgFormateaNumero(l[1], 2).rstrip().rjust(15) +\
-		ES.fgFormateaNumero(fcti, 3).rstrip().rjust(7) +\
-		ES.fgFormateaNumero(l[2], 2).rstrip().rjust(15) +\
-		ES.fgFormateaNumero(fcte, 3).rstrip().rjust(7) +\
-		ES.fgFormateaNumero(l[3], 2).rstrip().rjust(15) +\
+		FG.formateaNumero(l[1], 2).rstrip().rjust(15) +\
+		FG.formateaNumero(fcti, 3).rstrip().rjust(7) +\
+		FG.formateaNumero(l[2], 2).rstrip().rjust(15) +\
+		FG.formateaNumero(fcte, 3).rstrip().rjust(7) +\
+		FG.formateaNumero(l[3], 2).rstrip().rjust(15) +\
 		sColorFactor +\
-		ES.fgFormateaNumero(fct, 3).rstrip().rjust(8) +\
-		FIN + "\n"
+		FG.formateaNumero(fct, 3).rstrip().rjust(8) +\
+		CO.FIN + "\n"
 # Fin for
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion ganYperXmes
@@ -360,33 +352,33 @@ def ganYperAcum():
   'Lee los datos de ganancias y perdidas acumulado y los despliega'
   global lGyPAc
 
-#  st = AMARI + lFecha("Sinca", "GanyPerAcum") + ' (Descargado:' + FIN + lFecha('egyp.txt', '') + ')' + "\n"
+#  st = CO.AMARI + lFecha("Sinca", "GanyPerAcum") + ' (Descargado:' + CO.FIN + lFecha('egyp.txt', '') + ')' + "\n"
   nF = 0
 #  bImpar = True
 
-  sTitPrestamos = AZUL + "CTA " + "DESCRIPCION".ljust(35)+ "Ingresos".rjust(15) + "Egresos".rjust(15) + FIN + "\n"
+  sTitPrestamos = CO.AZUL + "CTA " + "DESCRIPCION".ljust(35)+ "Ingresos".rjust(15) + "Egresos".rjust(15) + CO.FIN + "\n"
   st = sTitPrestamos
   
   rTotIng = 0.00; rTotEgr = 0.00
   for l in lGyPAc:
     nF += 1
-#    sColor, bImpar = ES.colorLinea(bImpar, VERDE)
+#    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
 # 0:Cuenta,1:Descripcion,2:Ingresos,3:Egresos
     if '4--' == l[0]: rTotIng = float(l[2])
     if '5--' == l[0]: rTotEgr = float(l[3])
-    if '-' == l[0][2:3]: sColor = VERDE
+    if '-' == l[0][2:3]: sColor = CO.VERDE
     else: sColor = ''
-    if 0.00 != float(l[2]): sIng = ES.fgFormateaNumero(l[2], 2).rstrip()
+    if 0.00 != float(l[2]): sIng = FG.formateaNumero(l[2], 2).rstrip()
     else: sIng = ''
-    if 0.00 != float(l[3]): sEgr = ES.fgFormateaNumero(l[3], 2).rstrip()
+    if 0.00 != float(l[3]): sEgr = FG.formateaNumero(l[3], 2).rstrip()
     else: sEgr = ''
     st += sColor + l[0].ljust(3) + ' ' + l[1][0:35].ljust(35) +\
-			sIng.rjust(15) + sEgr.rjust(15) + FIN + "\n"
+			sIng.rjust(15) + sEgr.rjust(15) + CO.FIN + "\n"
 # Fin for
-  sTotIng = ES.fgFormateaNumero(rTotIng, 2)
-  sTotEgr = ES.fgFormateaNumero(rTotEgr, 2)
-  sDif    = ES.fgFormateaNumero(rTotIng + rTotEgr, 2)
-  st += "%sTOT Ingresos: %s%s%s, Egresos: %s%s%s; Dif: %s%s" % (CYAN, VERDE, sTotIng, CYAN, ROJO, sTotEgr, CYAN, FIN, sDif)
+  sTotIng = FG.formateaNumero(rTotIng, 2)
+  sTotEgr = FG.formateaNumero(rTotEgr, 2)
+  sDif    = FG.formateaNumero(rTotIng + rTotEgr, 2)
+  st += "%sTOT Ingresos: %s%s%s, Egresos: %s%s%s; Dif: %s%s" % (CO.CYAN, CO.VERDE, sTotIng, CO.CYAN, CO.ROJO, sTotEgr, CO.CYAN, CO.FIN, sDif)
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion ganYperAcum
 def resNominaN(lN=None):
@@ -394,31 +386,31 @@ def resNominaN(lN=None):
   global lNomN
   if None == lN: lN = lNomN
   
-  st = AMARI + lFecha("Nomina", "Nomina") + ' (Descargado:' + FIN + lFecha('nomina.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha("Nomina", "Nomina") + ' (Descargado:' + CO.FIN + lFecha('nomina.txt', '') + ')' + "\n"
   ftValFi = 0.00
   ftValVa = 0.00
   ftTotal = 0.00
   bImpar  = True
 
-  sTitNomina  = AZUL + "CON".ljust(4) + 'DESCRIPCION'.ljust(25) +\
-				"VALOR FIJO".rjust(16) + "VALOR VARIABLE".rjust(16) + "T O T A L".rjust(16) + FIN + "\n"
+  sTitNomina  = CO.AZUL + "CON".ljust(4) + 'DESCRIPCION'.ljust(25) +\
+				"VALOR FIJO".rjust(16) + "VALOR VARIABLE".rjust(16) + "T O T A L".rjust(16) + CO.FIN + "\n"
   st += sTitNomina
   for l in lN:
       if 8 > len(l) or 0.00 == float(l[7]): continue
-      sColor, bImpar = ES.colorLinea(bImpar, VERDE)
+      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
 # 0:Concepto, 1:Descripcion, 2:Cta credito, 3:Cta Debito, 4:Cta Interese, 5:Valor fijo, 6: Valor variable, 7:Total
       stl = "%s%.3s %-25.25s %15.15s %15.15s %15.15s%s" %\
-      		(sColor, l[0], l[1], ES.fgFormateaNumero(l[5], 2).rstrip().rjust(15),
-      		 ES.fgFormateaNumero(l[6], 2).rstrip().rjust(15), ES.fgFormateaNumero(l[7], 2).rstrip().rjust(15), FIN)
+      		(sColor, l[0], l[1], FG.formateaNumero(l[5], 2).rstrip().rjust(15),
+      		 FG.formateaNumero(l[6], 2).rstrip().rjust(15), FG.formateaNumero(l[7], 2).rstrip().rjust(15), CO.FIN)
       ftValFi += float(l[5])
       ftValVa += float(l[6])
       ftTotal += float(l[7])
       st += stl + '\n'
 # Fin for
-  stValFi = ES.fgFormateaNumero(ftValFi, 2)
-  stValVa = ES.fgFormateaNumero(ftValVa, 2)
-  stTotal = ES.fgFormateaNumero(ftTotal, 2)
-  stl = AZUL + "T O T A L E S".rjust(29) + stValFi.rjust(16) + stValVa.rjust(16) + stTotal.rjust(16) + FIN
+  stValFi = FG.formateaNumero(ftValFi, 2)
+  stValVa = FG.formateaNumero(ftValVa, 2)
+  stTotal = FG.formateaNumero(ftTotal, 2)
+  stl = CO.AZUL + "T O T A L E S".rjust(29) + stValFi.rjust(16) + stValVa.rjust(16) + stTotal.rjust(16) + CO.FIN
   st += stl
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion resNominaN
@@ -444,7 +436,7 @@ def chequeXCedula(llCh=None):
 
   lCheq = [l for l in llCh if '' != l[2] and ci == int(l[2])]    # Nueva lista de cheques.
   if not lCheq:
-    ES.alerta(droid, 'CHEQUE x CEDULA', "No hay cheque en transito con cedula %s!" % ES.fgFormateaNumero(ci))
+    ES.alerta(droid, 'CHEQUE x CEDULA', "No hay cheque en transito con cedula %s!" % FG.formateaNumero(ci))
     return -2
   nCheques = len(lCheq)
   if 1 == nCheques:
@@ -467,34 +459,34 @@ def disponibilidad():
   ci, sNombre = valSocio()
   if 0 >= ci: return -4
 
-  st = AMARI + lFecha("Sinca", "Disponibilidad") + ' (Descargado:' + FIN + lFecha('disponibilidad.txt', '') + ')' + "\n"	# 'Conta' se refiere al sistema de contabilidad.
+  st = CO.AMARI + lFecha("Sinca", "Disponibilidad") + ' (Descargado:' + CO.FIN + lFecha('disponibilidad.txt', '') + ')' + "\n"	# 'Conta' se refiere al sistema de contabilidad.
   nF = 0		# Numero de registros de una misma persona (socio)
   for l in lSi:
     if 0 == nF and ('' == l[0] or ci > int(l[0])): continue
     elif l[0] in ('','0',str(ci)):
       nF += 1
       if l[1] in dConc:
-        if '0' == l[1]: stl = AZUL + dConc[l[1]].rstrip().rjust(20) + FIN + ': ' + l[2].rstrip().ljust(12)
+        if '0' == l[1]: stl = CO.AZUL + dConc[l[1]].rstrip().rjust(20) + CO.FIN + ': ' + l[2].rstrip().ljust(12)
         elif l[1] in ('D', 'E', 'F'):
-          stl = AZUL
+          stl = CO.AZUL
           if 55 <= CO.nCarLin: stl += ('NETO NOMINA ' + dConc[l[1]]).rstrip().rjust(20)
           else: stl += dConc[l[1]].rstrip().rjust(9)
-          stl += FIN + ': '
-          if (6 <= len(l)): stl += ES.fgFormateaNumero(l[2]) + '-' + ES.fgFormateaNumero(l[3]) + ' = ' +\
-          											ES.fgFormateaNumero(l[4], 2) + '(' + ES.fgFormateaNumero(l[5]) + '%)'
-        else: stl = AZUL + dConc[l[1]].rstrip().rjust(20) + FIN + ': ' + ES.fgFormateaNumero(l[2], 2).rstrip().ljust(12)
-        if 1 == nF: stl = CYAN + ES.fgFormateaNumero(ci) + ':' + nombreSocio(sNombre) + FIN + "\n" + stl
+          stl += CO.FIN + ': '
+          if (6 <= len(l)): stl += FG.formateaNumero(l[2]) + '-' + FG.formateaNumero(l[3]) + ' = ' +\
+          											FG.formateaNumero(l[4], 2) + '(' + FG.formateaNumero(l[5]) + '%)'
+        else: stl = CO.AZUL + dConc[l[1]].rstrip().rjust(20) + CO.FIN + ': ' + FG.formateaNumero(l[2], 2).rstrip().ljust(12)
+        if 1 == nF: stl = CO.CYAN + FG.formateaNumero(ci) + ':' + nombreSocio(sNombre) + CO.FIN + "\n" + stl
 #        if 'B' == l[1]: disp = l[2].rstrip().rjust(12)
       else: stl = l[2].rstrip() + ' DESCONOCIDO (' + l[1] + ')'
       if '0.00' != l[2].rstrip() or 'A' == l[1]:
         st += stl + '\n'
-      if 'C' == l[1] and 55 > CO.nCarLin: st += CYAN + 'N E T O S'.rjust(int((CO.nCarLin-9)/2)+9) + '\n' + FIN	# 9 es la longitud de 'N E T O S'
+      if 'C' == l[1] and 55 > CO.nCarLin: st += CO.CYAN + 'N E T O S'.rjust(int((CO.nCarLin-9)/2)+9) + '\n' + CO.FIN	# 9 es la longitud de 'N E T O S'
     else: break
 # Fin for
   if 0 >= nF: st = noCedula(ci)
   else:
-    st += AZUL + ('Dividendo ' + CO.anoDividendo).rjust(20) + FIN + ': '  + ES.fgFormateaNumero(mDividendo(ci), 2).ljust(12) + '\n'
-#    ES.alerta(droid, 'DISPONIBILIDAD', '%s: %12s' % (sNombre, ES.fgFormateaNumero(disp, 2)))
+    st += CO.AZUL + ('Dividendo ' + CO.anoDividendo).rjust(20) + CO.FIN + ': '  + FG.formateaNumero(mDividendo(ci), 2).ljust(12) + '\n'
+#    ES.alerta(droid, 'DISPONIBILIDAD', '%s: %12s' % (sNombre, FG.formateaNumero(disp, 2)))
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion disponibilidad
 def prestamos():
@@ -504,7 +496,7 @@ def prestamos():
   ci, sNombre = valSocio()
   if 0 >= ci: return -5
 
-  st = AMARI + lFecha("Sinca", "Prestamos") + ' (Descargado:' + FIN + lFecha('prestamos.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha("Sinca", "Prestamos") + ' (Descargado:' + CO.FIN + lFecha('prestamos.txt', '') + ')' + "\n"
   nF = 0
   bImpar = True
 
@@ -512,26 +504,26 @@ def prestamos():
   maxLongCad = 30									# numero maximo de caracteres del campo especificado.
   if maxLongCad < nCarDesc: nCarDesc = maxLongCad	# > longitud maxima de la cadena a mostrar en el campo.
   nCarMostrar = 23 + nCarDesc						# Numero de caracteres, maximo, a mostrar por linea.
-  sTitPrestamos = AZUL + "CON " + CO.justIzqTituloCol('DESCRIPCION', nCarDesc) + "    Saldo  Cuota FeSol"
+  sTitPrestamos = CO.AZUL + "CON " + CO.justIzqTituloCol('DESCRIPCION', nCarDesc) + "    Saldo  Cuota FeSol"
   if 31 <= (CO.nCarLin - nCarMostrar):				# 31 es la longitud de '     Saldo Saldo+Int Me  #CtCan'.
     sTitPrestamos += ' Monto Sol Saldo+Int Me  #CtCan'
     nCarMostrar   += 31
     bExtra         = True
   else: bExtra     = False
-  sTitPrestamos += FIN + "\n"
+  sTitPrestamos += CO.FIN + "\n"
   for l in lPre:
     if 0 == nF and ('' == l[0] or ci > int(l[0])): continue
     elif l[0] in ('','0',str(ci)):
       nF += 1
-      sColor, bImpar = ES.colorLinea(bImpar, VERDE)
+      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
 # 0:Cedula,1:Concepto,2:monto solicitado,3:Monto total(Concedido + intereses);4:Saldo;5:Saldo total(Saldo + intereses);6:Cuota,7:Fecha inicial (mm/aa),8:ult actualizacion (mm),9:cuotas (pagadas/total)
       stl = sColor + l[1] + ' ' + mConcepto(l[1])[0:nCarDesc].ljust(nCarDesc, " ") + ' ' +\
-      		ES.fgFormateaNumero(l[4]).rstrip().rjust(9) + ES.fgFormateaNumero(l[6]).rstrip().rjust(7) + ' ' + l[7].rstrip().rjust(5)
-      if bExtra: stl += ' ' + ES.fgFormateaNumero(l[2]).rstrip().rjust(9) + ' ' +\
-      					ES.fgFormateaNumero(l[5]).rstrip().rjust(9) + ' ' + l[8].rstrip().rjust(2) + ' ' +\
+      		FG.formateaNumero(l[4]).rstrip().rjust(9) + FG.formateaNumero(l[6]).rstrip().rjust(7) + ' ' + l[7].rstrip().rjust(5)
+      if bExtra: stl += ' ' + FG.formateaNumero(l[2]).rstrip().rjust(9) + ' ' +\
+      					FG.formateaNumero(l[5]).rstrip().rjust(9) + ' ' + l[8].rstrip().rjust(2) + ' ' +\
       					l[9].rstrip().rjust(7)
-      stl += FIN
-      if 1 == nF: stl = CYAN + ES.fgFormateaNumero(ci) + ':' + nombreSocio(mNombre(ci)) + FIN + "\n" +\
+      stl += CO.FIN
+      if 1 == nF: stl = CO.CYAN + FG.formateaNumero(ci) + ':' + nombreSocio(mNombre(ci)) + CO.FIN + "\n" +\
       					sTitPrestamos + stl
 #      if '0.00' != l[2].rstrip():		# Comparar, cuando agregar la linea. Solicitado = 0.00. Mes ult. act .vs. fecha.
       st += stl + '\n'
@@ -545,26 +537,26 @@ def detallePrestamo(ced, sNombre, lPres, lDesc):
 
 #  sTitulo = "Detalle de un Prestamo"
   sMensaje = ''
-  sMensaje  = "%sSocio: %s %s%s\n" % (CYAN, ES.fgFormateaNumero(ced), sNombre.lstrip().split('|')[0], FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
-  sMoPre = ES.fgFormateaNumero(lPres[2], 2)	# Monto concedido
-  sTotal = ES.fgFormateaNumero(lPres[3], 2)	# Monto total (Concedido + intereses)
-  sSaldo = ES.fgFormateaNumero(lPres[4], 2)	# Saldo
-  sSdoTo = ES.fgFormateaNumero(lPres[5], 2)	# Saldo total (Saldo + intereses)
-  sCuota = ES.fgFormateaNumero(lPres[6], 2)	# Cuota
-  sMensaje += "%sCodigo del Prestamo:%s %s\n" % (AZUL, FIN, lPres[1])
-  sMensaje += "%sDescripcion:%s %s\n" % (AZUL, FIN, lDesc)
-  sMensaje += "%sMonto concedido:%s BsF. %*.*s\n" % (AZUL, FIN, len(sMoPre), len(sMoPre), sMoPre)
+  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, FG.formateaNumero(ced), sNombre.lstrip().split('|')[0], CO.FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
+  sMoPre = FG.formateaNumero(lPres[2], 2)	# Monto concedido
+  sTotal = FG.formateaNumero(lPres[3], 2)	# Monto total (Concedido + intereses)
+  sSaldo = FG.formateaNumero(lPres[4], 2)	# Saldo
+  sSdoTo = FG.formateaNumero(lPres[5], 2)	# Saldo total (Saldo + intereses)
+  sCuota = FG.formateaNumero(lPres[6], 2)	# Cuota
+  sMensaje += "%sCodigo del Prestamo:%s %s\n" % (CO.AZUL, CO.FIN, lPres[1])
+  sMensaje += "%sDescripcion:%s %s\n" % (CO.AZUL, CO.FIN, lDesc)
+  sMensaje += "%sMonto concedido:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sMoPre), len(sMoPre), sMoPre)
   if bAmplia: sExtra = ' (Concedido + intereses)'
   else: sExtra = ''
-  sMensaje += "%sMonto total%s:%s BsF. %*.*s\n" % (AZUL, sExtra, FIN, len(sTotal), len(sTotal), sTotal)
-  sMensaje += "%sSaldo del Prestamo:%s BsF. %*.*s\n" % (AZUL, FIN, len(sSaldo), len(sSaldo), sSaldo)
+  sMensaje += "%sMonto total%s:%s BsF. %*.*s\n" % (CO.AZUL, sExtra, CO.FIN, len(sTotal), len(sTotal), sTotal)
+  sMensaje += "%sSaldo del Prestamo:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sSaldo), len(sSaldo), sSaldo)
   if bAmplia: sExtra = ' (Saldo + intereses)'
   else: sExtra = ''
-  sMensaje += "%sMonto total deuda%s:%s BsF. %*.*s\n" % (AZUL, sExtra, FIN, len(sSdoTo), len(sSdoTo), sSdoTo)
-  sMensaje += "%sMonto de la cuota:%s BsF. %*.*s\n" % (AZUL, FIN, len(sCuota), len(sCuota), sCuota)
-  sMensaje += "%sFecha de la solicitud:%s %s\n" % (AZUL, FIN, lPres[7])
-  if 0 < len(lPres[8]): sMensaje += "%sMes ult Actualizacion:%s %s\n" % (AZUL, FIN, lPres[8])
-  if 0 < len(lPres[9]): sMensaje += "%sNumero de cuotas:%s %s\n" % (AZUL, FIN, lPres[9])
+  sMensaje += "%sMonto total deuda%s:%s BsF. %*.*s\n" % (CO.AZUL, sExtra, CO.FIN, len(sSdoTo), len(sSdoTo), sSdoTo)
+  sMensaje += "%sMonto de la cuota:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sCuota), len(sCuota), sCuota)
+  sMensaje += "%sFecha de la solicitud:%s %s\n" % (CO.AZUL, CO.FIN, lPres[7])
+  if 0 < len(lPres[8]): sMensaje += "%sMes ult Actualizacion:%s %s\n" % (CO.AZUL, CO.FIN, lPres[8])
+  if 0 < len(lPres[9]): sMensaje += "%sNumero de cuotas:%s %s\n" % (CO.AZUL, CO.FIN, lPres[9])
   ES.imprime(sMensaje.rstrip(' \t\n\r'))
 # funcion detallePrestamo
 def prestamo():
@@ -602,7 +594,7 @@ def extension():
   ci, sNombre = valSocio()
   if 0 >= ci: return -6
 
-  st = AMARI + lFecha("Extension", "Extension") + ' (Descargado:' + FIN + lFecha('extension.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha("Extension", "Extension") + ' (Descargado:' + CO.FIN + lFecha('extension.txt', '') + ')' + "\n"
   nF = 0											# Numero de filas
   rC = 0.00											# Cuota
 
@@ -618,8 +610,8 @@ def extension():
     sParTi   = 'PAREN'
     nCarPare = 3
     sCuota = ' Cta.'
-  sTitExtension = AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare)\
-  						+ sCuota + '  AIng' + FIN + "\n"
+  sTitExtension = CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare)\
+  						+ sCuota + '  AIng' + CO.FIN + "\n"
   if bAmplia:
     sFormato  = '%s%10.10s %-*.*s %-*.*s%8.8s %s%s\n'
     nCarPare += 3
@@ -633,14 +625,14 @@ def extension():
   for l in lCgE:
     if (0 == nF) and ('' == l[0] or ci > int(l[0])): continue
     elif l[0] in ('','0',str(ci)):
-      sColor, bImpar = ES.colorLinea(bImpar, VERDE)
+      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
       try:
         if 0 == nF:
           if '1250' == l[4]: nSumaAseg = 500000
           elif '500' == l[4]: nSumaAseg = 250000
           else: nSumaAseg = 0
-          st += CYAN + "SUMA ASEGURADA: " + l[4] + "UT = BsF. " + ES.fgFormateaNumero(nSumaAseg) +\
-          		FIN + "\n" + sTitExtension
+          st += CO.CYAN + "SUMA ASEGURADA: " + l[4] + "UT = BsF. " + FG.formateaNumero(nSumaAseg) +\
+          		CO.FIN + "\n" + sTitExtension
         nF += 1
         rC += float(l[5])
         if 0 < float(l[5]):
@@ -649,8 +641,8 @@ def extension():
           else: sPar = l[3].lstrip().split(' ')[0][0:nCarPare]
           if 6 < len(l) and l[6].isdigit(): sAno = l[6]
           else: sAno = '----'
-          st += sFormato % (sColor, ES.fgFormateaNumero(l[1]), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
-          					nCarPare, sPar, ES.fgFormateaNumero(float(l[5])/12, iDec), sAno, FIN)
+          st += sFormato % (sColor, FG.formateaNumero(l[1]), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
+          					nCarPare, sPar, FG.formateaNumero(float(l[5])/12, iDec), sAno, CO.FIN)
       except Exception as ex:
         print('ex: ', ex)
 # Fin elif
@@ -660,11 +652,11 @@ def extension():
     st = noCedula(ci)
 #    ES.alerta(droid, 'EXTENSION', '%s: INACTIVO' % (sNombre))
   else:
-    frC = ES.fgFormateaNumero(rC, 2)
-    fmC = ES.fgFormateaNumero(rC/12, 2)
+    frC = FG.formateaNumero(rC, 2)
+    fmC = FG.formateaNumero(rC/12, 2)
     stl = "TOTAL Anual: %-*.*s (mensual: %-*.*s)" % (len(str(frC)), len(str(frC))+1, frC, \
 									len(fmC), len(str(fmC))+1, fmC)
-    st += CYAN + stl + FIN
+    st += CO.CYAN + stl + CO.FIN
   ES.imprime(st)
 # funcion extension
 def servifun():
@@ -676,7 +668,7 @@ def servifun():
 
   nF = 0
   fC = 0
-  st = AMARI + lFecha("Sinca", "ServiFun") + ' (Descargado:' + FIN + lFecha('servifun.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha("Sinca", "ServiFun") + ' (Descargado:' + CO.FIN + lFecha('servifun.txt', '') + ')' + "\n"
   bImpar = True
 
   nCarMostrar, nCarNomb, maxCarLs = CO.carPorCampo(lCgS, 2, 23)	# Max numero cars de una linea, max # caracteres del campo.
@@ -691,8 +683,8 @@ def servifun():
     sParTi   = 'PAR'
     nCarPare = 3
     sEsp     = ''
-  st += AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE DE LA CARGA', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare) +\
-  				sEsp + "FInsc" + " Ed" + FIN + "\n"
+  st += CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE DE LA CARGA', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare) +\
+  				sEsp + "FInsc" + " Ed" + CO.FIN + "\n"
 
   sFormato = '%s%10.10s %-*.*s %-*.*s %-5.5s%3d%s\n'
 # [0]Cedula; [1]Cedula carga;[2]Nombre(Nombre|Disponibilidad|A/N); [3]Parentesco;[4]Fecha ingreso a servifun
@@ -708,23 +700,23 @@ def servifun():
         elif (75 < nEd): fC += CO.CM75
         elif (70 < nEd): fC += CO.CM70
       else: nEd = -1
-      sColor, bImpar = ES.colorLinea(bImpar, VERDE)
-      st += sFormato % (sColor, ES.fgFormateaNumero(l[1], 0), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
-      					nCarPare, l[3], l[4], nEd, FIN)
+      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+      st += sFormato % (sColor, FG.formateaNumero(l[1], 0), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
+      					nCarPare, l[3], l[4], nEd, CO.FIN)
     else: break
 # Fin for
   if 0 >= nF: st = noCedula(ci)
   else:
     if 1 == nF:
       fC += CO.CI
-      sfC = ES.fgFormateaNumero(fC, 2)
+      sfC = FG.formateaNumero(fC, 2)
       sC = "igual a Bs. %*s" % (len(sfC), sfC)
     else:
       fC += CO.CCC
-      sfC = ES.fgFormateaNumero(fC, 2)
+      sfC = FG.formateaNumero(fC, 2)
       sC = "mayor o igual a Bs. %*s" % (len(sfC), sfC)
     stl = "La cuota mensual es " + sC
-    st += CYAN + stl + FIN
+    st += CO.CYAN + stl + CO.FIN
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion servifun
 def servicioEspecifico(sCodigo, sNombre):
@@ -734,31 +726,31 @@ def servicioEspecifico(sCodigo, sNombre):
   sMensaje = ''
   for l in lPa:
     if sCodigo != l[0]: continue			# Codigo del parentesco
-    sMensaje  = "%sServicios p/(%s) %s: %s%s\n" % (CYAN, l[0], l[1], sNombre.lstrip().split('|')[0], FIN)	# Codigo, descripcion del parentesco
+    sMensaje  = "%sServicios p/(%s) %s: %s%s\n" % (CO.CYAN, l[0], l[1], sNombre.lstrip().split('|')[0], CO.FIN)	# Codigo, descripcion del parentesco
     if 14 <= len(l): rLp = int(l[13]) * float(utg)			# Lapida
     else: rLp = 0
-    sLp = ES.fgFormateaNumero(rLp, 2)		# Lapida formateado
+    sLp = FG.formateaNumero(rLp, 2)		# Lapida formateado
     if 13 <= len(l): rCr = int(l[12]) * float(utg)			# Cremacion
     else: rCr = 0
-    sCr = ES.fgFormateaNumero(rCr, 2)		# Cremacion formateado
+    sCr = FG.formateaNumero(rCr, 2)		# Cremacion formateado
     if 12 <= len(l): rFo = int(l[11]) * float(utg)			# Fosa
     else: rFo = 0
-    sFo = ES.fgFormateaNumero(rFo, 2)		# Fosa formateado
+    sFo = FG.formateaNumero(rFo, 2)		# Fosa formateado
     if 11 <= len(l): rTr = int(l[10]) * float(utg)			# Traslado
     else: rTr = 0
-    sTr = ES.fgFormateaNumero(rTr, 2)		# Traslado formateado
+    sTr = FG.formateaNumero(rTr, 2)		# Traslado formateado
     if 10 <= len(l): rSv = int(l[9]) * float(utg)			# Servicio
     else: rSv = 0
-    sSv = ES.fgFormateaNumero(rSv, 2)		# Servicio formateado
+    sSv = FG.formateaNumero(rSv, 2)		# Servicio formateado
     if 9 <= len(l): rAy = int(l[8]) * float(utg)			# Ayuda
     else: rAy = 0
-    sAy = ES.fgFormateaNumero(rAy, 2)		# Ayuda formateado
-    sMensaje += "%sAyuda:%s BsF. %*.*s (%-3s UT)\n" % (AZUL, FIN, len(sAy), len(sAy), sAy, l[8])
-    sMensaje += "%sServicio:%s BsF. %*.*s (%-3s UT)\n" % (AZUL, FIN, len(sSv), len(sSv), sSv, l[9])
-    sMensaje += "%sTraslado:%s BsF. %*.*s (%-3s UT)\n" % (AZUL, FIN, len(sTr), len(sTr), sTr, l[10])
-    if 0 < rFo: sMensaje += "%sFosa (solo 1):%s BsF. %*.*s (%-3s UT)\n" % (AZUL, FIN, len(sFo), len(sFo), sFo, l[11])
-    if 0 < rCr: sMensaje += "%sCremacion:%s BsF. %*.*s (%-3s UT)\n" % (AZUL, FIN, len(sCr), len(sCr), sCr, l[12])
-    if 0 < rLp: sMensaje += "%sLapida:%s BsF. %*.*s (%-3s UT)\n" % (AZUL, FIN, len(sLp), len(sLp), sLp, l[13])
+    sAy = FG.formateaNumero(rAy, 2)		# Ayuda formateado
+    sMensaje += "%sAyuda:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sAy), len(sAy), sAy, l[8])
+    sMensaje += "%sServicio:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sSv), len(sSv), sSv, l[9])
+    sMensaje += "%sTraslado:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sTr), len(sTr), sTr, l[10])
+    if 0 < rFo: sMensaje += "%sFosa (solo 1):%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sFo), len(sFo), sFo, l[11])
+    if 0 < rCr: sMensaje += "%sCremacion:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sCr), len(sCr), sCr, l[12])
+    if 0 < rLp: sMensaje += "%sLapida:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sLp), len(sLp), sLp, l[13])
   # Fin for
   ES.imprime(sMensaje.rstrip(' \t\n\r'))
 # funcion servicioEspecifico
@@ -802,7 +794,7 @@ def nomina(bLN=True):
   ci, sNombre = valSocio()
   if 0 >= ci: return -8
 
-  st = AMARI + lFecha("Nomina", "Nomina") + ' (Descargado:' + FIN + lFecha('nomina.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha("Nomina", "Nomina") + ' (Descargado:' + CO.FIN + lFecha('nomina.txt', '') + ')' + "\n"
   nF = 0
   ftAsig = 0.00
   ftDed  = 0.00
@@ -812,7 +804,7 @@ def nomina(bLN=True):
   maxLongCad = 28									# numero maximo de caracteres del campo especificado.
   if maxLongCad < nCarDesc: nCarDesc = maxLongCad	# > longitud maxima de la cadena a mostrar en el campo.
   nCarMostrar = 23 + nCarDesc			# Numero de caracteres, maximo, a mostrar por linea.
-  sTitNomina  = AZUL + "CON " + CO.justIzqTituloCol('DESCRIPCION', nCarDesc) +\
+  sTitNomina  = CO.AZUL + "CON " + CO.justIzqTituloCol('DESCRIPCION', nCarDesc) +\
                         "  ValorFijo ValorVariab"
   if 25 <= (CO.nCarLin - nCarMostrar):				# 25 es la maxima longitud del 'saldo[cuota]'.
     sTitNomina  += '          Saldo:[Cuota]'
@@ -822,29 +814,29 @@ def nomina(bLN=True):
   else:
     nCarSaldo = 0
     bSaldo    = False
-  sTitNomina += FIN + "\n"
+  sTitNomina += CO.FIN + "\n"
   for l in lN:
     if 0 == nF and ('' == l[0] or ci > int(l[0])): continue
     elif l[0] in ('','0',str(ci)):
       nF += 1
-      sColor, bImpar = ES.colorLinea(bImpar, VERDE)
+      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
 # 0:Cedula, 1:Concepto, 2:Valor fijo, 3: Valor variable, 4:Saldo, 5:Cuota
       stl = "%s%.3s %*.*s %.11s %.11s%s" % (sColor, l[1], nCarDesc, nCarDesc,
                                           mConcepto(l[1]).ljust(nCarDesc, " "),
-                              ES.fgFormateaNumero(l[2], 2).rstrip().rjust(11),
-                              ES.fgFormateaNumero(l[3], 2).rstrip().rjust(11),
-                              FIN)
+                              FG.formateaNumero(l[2], 2).rstrip().rjust(11),
+                              FG.formateaNumero(l[3], 2).rstrip().rjust(11),
+                              CO.FIN)
       if bSaldo:
         if (0.00 < float(l[4])):
           stl += "%s%.*s[%s]%s" % (sColor, nCarSaldo,
-                      ES.fgFormateaNumero(l[4], 2).rstrip().rjust(nCarSaldo),
-                      ES.fgFormateaNumero(l[5], 2).rstrip(), FIN)
+                      FG.formateaNumero(l[4], 2).rstrip().rjust(nCarSaldo),
+                      FG.formateaNumero(l[5], 2).rstrip(), CO.FIN)
       try:
         if (500 > int(l[1])): ftAsig += float(l[2]) + float(l[3])
         else: ftDed += float(l[2]) + float(l[3])
       except Exception as ex:
         print('Tipo: ' + type(ex), ', ex: ', ex)
-      if 1 == nF: stl = CYAN + ES.fgFormateaNumero(ci) + ':' + nombreSocio(mNombre(ci)) + FIN + "\n" +\
+      if 1 == nF: stl = CO.CYAN + FG.formateaNumero(ci) + ':' + nombreSocio(mNombre(ci)) + CO.FIN + "\n" +\
       				sTitNomina + stl
       st += stl + '\n'
     else: break
@@ -852,13 +844,13 @@ def nomina(bLN=True):
   if 0 >= nF: st = noCedula(ci)
   elif (0.00 != ftAsig) or (0.00 != ftDed):
     fNeto = ftAsig - ftDed
-    stAsig = ES.fgFormateaNumero(ftAsig, 2)
-    stDed  = ES.fgFormateaNumero(ftDed, 2)
-    sNeto  = ES.fgFormateaNumero(fNeto, 2)
+    stAsig = FG.formateaNumero(ftAsig, 2)
+    stDed  = FG.formateaNumero(ftDed, 2)
+    sNeto  = FG.formateaNumero(fNeto, 2)
     if bSaldo: sFormato = "%sAsignaciones:%s%-*.*s; %sDeducciones:%s%-*.*s; %sNeto:%s %-*.*s"
     else: sFormato = "%sAs:%s%-*.*s;%sDs:%s%-*.*s;%sNeto:%s %-*.*s"
-    stl = sFormato % (AZUL, FIN, len(stAsig), len(stAsig)+1, stAsig, \
-    				AZUL, FIN, len(stDed), len(stDed)+1, stDed, AZUL, FIN, len(sNeto), len(sNeto)+1, sNeto)
+    stl = sFormato % (CO.AZUL, CO.FIN, len(stAsig), len(stAsig)+1, stAsig, \
+    				CO.AZUL, CO.FIN, len(stDed), len(stDed)+1, stDed, CO.AZUL, CO.FIN, len(sNeto), len(sNeto)+1, sNeto)
     st += stl
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion nomina
@@ -867,17 +859,17 @@ def detalleConcepto(ced, sNombre, lCon, lDesc):
 #  sTitulo = "Detalle de un Concepto"
   sMensaje = ''
 # 0:Cedula, 1:Concepto, 2:Valor fijo, 3: Valor variable, 4:Saldo, 5:Cuota
-  sMensaje  = "%sSocio: %s %s%s\n" % (CYAN, ES.fgFormateaNumero(ced), sNombre.lstrip().split('|')[0], FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
-  sVaFij = ES.fgFormateaNumero(lCon[2], 2)	# Valor fijo
-  sVaVar = ES.fgFormateaNumero(lCon[3], 2)	# Valor variable
-  sSaldo = ES.fgFormateaNumero(lCon[4], 2)	# Saldo
-  sCuota = ES.fgFormateaNumero(lCon[5], 2)	# Cuota
-  sMensaje += "%sCodigo del Concepto:%s %s\n" % (AZUL, FIN, lCon[1])
-  sMensaje += "%sDescripcion:%s %s\n" % (AZUL, FIN, lDesc)
-  sMensaje += "%sValor fijo:%s BsF. %*.*s\n" % (AZUL, FIN, len(sVaFij), len(sVaFij), sVaFij)
-  sMensaje += "%sValor variable:%s BsF. %*.*s\n" % (AZUL, FIN, len(sVaVar), len(sVaVar), sVaVar)
-  sMensaje += "%sSaldo del Concepto:%s BsF. %*.*s\n" % (AZUL, FIN, len(sSaldo), len(sSaldo), sSaldo)
-  sMensaje += "%sMonto de la cuota:%s BsF. %*.*s\n" % (AZUL, FIN, len(sCuota), len(sCuota), sCuota)
+  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, FG.formateaNumero(ced), sNombre.lstrip().split('|')[0], CO.FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
+  sVaFij = FG.formateaNumero(lCon[2], 2)	# Valor fijo
+  sVaVar = FG.formateaNumero(lCon[3], 2)	# Valor variable
+  sSaldo = FG.formateaNumero(lCon[4], 2)	# Saldo
+  sCuota = FG.formateaNumero(lCon[5], 2)	# Cuota
+  sMensaje += "%sCodigo del Concepto:%s %s\n" % (CO.AZUL, CO.FIN, lCon[1])
+  sMensaje += "%sDescripcion:%s %s\n" % (CO.AZUL, CO.FIN, lDesc)
+  sMensaje += "%sValor fijo:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sVaFij), len(sVaFij), sVaFij)
+  sMensaje += "%sValor variable:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sVaVar), len(sVaVar), sVaVar)
+  sMensaje += "%sSaldo del Concepto:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sSaldo), len(sSaldo), sSaldo)
+  sMensaje += "%sMonto de la cuota:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sCuota), len(sCuota), sCuota)
   # Fin for
   ES.imprime(sMensaje.rstrip(' \t\n\r'))
 # funcion detalleConcepto
@@ -924,30 +916,30 @@ def ubicacion():
   ci, sNombre = valSocio()
   if 0 >= ci: return -9
 
-  st = AMARI + lFecha('Sinca', 'Ubicacion') + ' (Descargado:' + FIN + lFecha('ubicacion.txt', '') + ')' + "\n"
+  st = CO.AMARI + lFecha('Sinca', 'Ubicacion') + ' (Descargado:' + CO.FIN + lFecha('ubicacion.txt', '') + ')' + "\n"
   nF = 0
   nJustDerecha = 21
   for l in lUb:
     if ci > int(l[0]): continue
     elif ci == int(l[0]):
-      st += "%s%s:%-30.29s%s" % (CYAN, ES.fgFormateaNumero(ci), nombreSocio(mNombre(ci)), FIN)
+      st += "%s%s:%-30.29s%s" % (CO.CYAN, FG.formateaNumero(ci), nombreSocio(mNombre(ci)), CO.FIN)
       if 1 < len(l) and '' != l[1]:
         st += "\n"
-        st += AZUL + "Telefono habitacion:".rjust(nJustDerecha) + FIN + " 0%3s-%3s-%4s" % (l[1][0:3], l[1][3:6], l[1][6:])
+        st += CO.AZUL + "Telefono habitacion:".rjust(nJustDerecha) + CO.FIN + " 0%3s-%3s-%4s" % (l[1][0:3], l[1][3:6], l[1][6:])
       if 2 < len(l) and '' != l[2]:
         st += "\n"
-        st += AZUL + "Telefono trabajo:".rjust(nJustDerecha) + FIN + " 0%3s-%3s-%4s" % (l[2][0:3], l[2][3:6], l[2][6:])
+        st += CO.AZUL + "Telefono trabajo:".rjust(nJustDerecha) + CO.FIN + " 0%3s-%3s-%4s" % (l[2][0:3], l[2][3:6], l[2][6:])
       if 3 < len(l) and '' != l[3]:
         st += "\n"
-        st += AZUL + "Celular:".rjust(nJustDerecha) + FIN + " 0%3s-%3s-%4s" % (l[3][0:3], l[3][3:6], l[3][6:])
+        st += CO.AZUL + "Celular:".rjust(nJustDerecha) + CO.FIN + " 0%3s-%3s-%4s" % (l[3][0:3], l[3][3:6], l[3][6:])
       if 4 < len(l) and '' != l[4]:
         st += "\n"
-        st += AZUL + "Celular:".rjust(nJustDerecha) + FIN + " 0%3s-%3s-%4s" % (l[4][0:3], l[4][3:6], l[4][6:])
+        st += CO.AZUL + "Celular:".rjust(nJustDerecha) + CO.FIN + " 0%3s-%3s-%4s" % (l[4][0:3], l[4][3:6], l[4][6:])
       if 5 < len(l) and '' != l[5]:
         if len(l[5].rstrip(' \t\n\r')) > (CO.nCarLin - nJustDerecha - 1):	# Cars a justificar derecha + 1 espacio despues ':'.
           nJustDerecha = CO.nCarLin - len(l[5].rstrip(' \t\n\r')) - 1
         st += "\n"
-        st += AZUL + "Correo:".rjust(nJustDerecha) + FIN + " %s" % l[5].rstrip(' \t\n\r')
+        st += CO.AZUL + "Correo:".rjust(nJustDerecha) + CO.FIN + " %s" % l[5].rstrip(' \t\n\r')
       nF += 1
 # Fin elif
     else: break

@@ -1,7 +1,7 @@
 # libComun: Rutinas comunes para ipaspudo.
 #-*-coding:utf8;-*-
 import json
-from lib import ES, Const as CO
+from lib import ES, Const as CO, General as FG
 
 try:
   from lib import DIR, LINEA, bMovil
@@ -24,8 +24,8 @@ lClasCheques = [
 lMenu = [['Calcular cuota', 'cuota'],					            # 0
 		 ['Cedula del socio', 'cedula'], 
 		 ['Buscar cedula del socio', 'nombre'], 
-		 ['Cheques', 'cheque'], 
-         ['Deposito por fecha', 'depositos'], 
+		 ['Cheques', 'AP.cheque'], 
+         ['Deposito por fecha', 'AP.depositos'], 
          ['Ganancias y Perds X Mes', 'GyP.ganYperXmes'],  # 5
          ['Ganancias y Perds Acumu', 'GyP.ganYperAcum'],	# 6
          ['Resumen de Nomina normal', 'NOM.resNominaN'],	# 7
@@ -37,9 +37,9 @@ lMenu = [['Calcular cuota', 'cuota'],					            # 0
          ['Disponibilidad', 'disponibilidad'], 
  		 ['Prestamos', 'prestamos'],
  		 ['Detalle prestamo', 'prestamo'],
-		 ['Extension', 'extension'], 
-		 ['Servifun', 'servifun'], 
-		 ['Servicio funerario', 'servicio'], 
+		 ['Extension', 'ESF.extension'], 
+		 ['Servifun', 'ESF.servifun'], 
+		 ['Servicio funerario', 'ESF.servicio'], 
 		 ['Nomina', 'NOM.nomina'],
 		 ['Detalle nomina', 'NOM.concepto'],
 		 ['Nomina con extras', 'NOM.nominacne'],
@@ -53,10 +53,10 @@ def lFecha(k="Sinca", sig=""):
   sFecha = sig + " " + dFecha.get(k, "No hay fecha.")
   if "ServiFun" == sig: return sFecha[0:-3]
   else: return sFecha
-# funcion lFecha
+# Funcion lFecha
 def noCedula(ci):
-  return "La cedula %s no fue encontrada\n" % ES.fgFormateaNumero(ci)
-# funcion noCedula
+  return "La cedula %s no fue encontrada\n" % FG.formateaNumero(ci)
+# Funcion noCedula
 def cedulaI(ciAnt):
   
   while True:
@@ -67,7 +67,7 @@ def cedulaI(ciAnt):
       print('Debe introducir un número entero de 6 o más dígitos')
     else: break
   return ci
-# funcion cedulaI
+# Funcion cedulaI
 def extraeNombre(sNombre):
   ''' Extrae el nombre de una cadena denominada nombre; pero, contiene:
   		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador, 8 digitos), Disponibilidad (o No) y
@@ -79,7 +79,7 @@ def extraeNombre(sNombre):
   except ValueError:
     sub = sNombre
   return sub.rstrip(' \t\n\r')
-# funcion nombreSocio
+# Funcion nombreSocio
 def nombreSocio(sNombre):
   ''' Extrae el nombre de una cadena denominada nombre; pero, contiene:
   		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador, 8 digitos), Disponibilidad (o No) y
@@ -88,7 +88,7 @@ def nombreSocio(sNombre):
   		Nombre, Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
   l = sNombre.rstrip(' \t\n\r').split('|')
   return l[0].rstrip(' \t\n\r')
-# funcion nombreSocio
+# Funcion nombreSocio
 def mNombre(ci):
 
   try:
@@ -97,9 +97,9 @@ def mNombre(ci):
     sNombre = "UnicodeError: " + ci
   if ("NO" == sNombre):
     sNombre = "NO ENCONTRE EL NOMBRE"
-    ES.alerta(droid, 'SOCIO ERROR', ES.fgFormateaNumero(ci) + ', ' + sNombre)
+    ES.alerta(droid, 'SOCIO ERROR', FG.formateaNumero(ci) + ', ' + sNombre)
   return sNombre
-# funcion mNombre
+# Funcion mNombre
 def valSocio(ciAnt = -1):
 
   ci = cedulaI(ciAnt)
@@ -109,7 +109,7 @@ def valSocio(ciAnt = -1):
     return -1, 'La cedula debe ser un número entero'
   
   return ci, mNombre(ci)    # Devuelve una tupla
-# funcion valSocio
+# Funcion valSocio
 def mSocio(Nombre, ci, bCadena=True):
   global dPer
 
@@ -119,7 +119,7 @@ def mSocio(Nombre, ci, bCadena=True):
   if (bCadena): sFecha = lFecha()
   else: sFecha = Nombre[len(Nombre)-1]
   st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN + lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL + "Cedula:".rjust(21) + CO.FIN 
-  if (bCadena): st += " %s" % (ES.fgFormateaNumero(ci))
+  if (bCadena): st += " %s" % (FG.formateaNumero(ci))
   else: st += " %s" % Nombre[0]
   nJustDerecha = 21
   if 0 < len(l) and '' != l[0]:
@@ -147,7 +147,7 @@ def mSocio(Nombre, ci, bCadena=True):
     st += "\n" + CO.AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[5])
     st += "\n" + CO.AZUL + "Servicio funerario:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[6])
   ES.imprime(st)
-# funcion mSocio
+# Funcion mSocio
 def aSocio(lPer, cig):    # Esta funcion no se utiliza.
   global dPer
 
@@ -167,7 +167,7 @@ def aSocio(lPer, cig):    # Esta funcion no se utiliza.
         pass
       fPer.close()
   return True
-# funcion aSocio
+# Funcion aSocio
 def mDividendo(ci):
   global dDiv
   try:
@@ -177,28 +177,33 @@ def mDividendo(ci):
   except UnicodeError:
     rDividendo = -2.00
   return rDividendo
-# funcion mDividendo
+# Funcion mDividendo
 def mBanco(cbn):
   global dBanco
   return dBanco.get(cbn, cbn)
-# funcion mBanco
+# Funcion mBanco
 def mConcepto(ccp):
   global dConcepto
   return dConcepto.get(ccp, "NO DESCRIPCION")
-# funcion mConcepto
+# Funcion mConcepto
 def mEstado(sI= '0'):
   lEstado = CO.lEstado   # Estado del cheque
   i = int(sI)
   if (0 > i) or (3 < i): return sI
   else: return lEstado[i]
-# funcion mEstado
+# Funcion mEstado
 def creaOp(l):
   return ("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1], extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6]))
-# funcion creaOp
+# Funcion creaOp
 
-dBanco = ES.cargaDicc("bancos.txt")		# [0]Codigo; [1]Descripcion
-dConcepto = ES.cargaDicc("conceptos.txt")	# [0]Codigo; [1]Descripcion
-dFecha = ES.cargaDicc("control.txt")	# [0]Identificacion del proceso; [1]Fecha
-dPer = ES.cargaDicc("persona.txt")		# [0]Cedula;
+# Definir variables globales
+def prepararDiccionariosDeTrabajo():
+  global dBanco, dConcepto, dFecha, dPer, dDiv
+
+  dBanco = ES.cargaDicc("bancos.txt")		# [0]Codigo; [1]Descripcion
+  dConcepto = ES.cargaDicc("conceptos.txt")	# [0]Codigo; [1]Descripcion
+  dFecha = ES.cargaDicc("control.txt")	# [0]Identificacion del proceso; [1]Fecha
+  dPer = ES.cargaDicc("persona.txt")		# [0]Cedula;
   # [1]Nombre(Nombre|Nucleo|Fecha de nacimiento o P:personal|disponibilidad o No|A/N:extension)
-dDiv = ES.cargaDicc("dividendos.txt")		# [0]Cedula; [1]Monto
+  dDiv = ES.cargaDicc("dividendos.txt")		# [0]Cedula; [1]Monto
+# Funcion prepararDiccionariosDeTrabajo

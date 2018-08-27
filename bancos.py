@@ -23,7 +23,7 @@ if bMovil:
 else:
   from os.path import abspath, basename
 
-from lib import ES, Const as CO
+from lib import ES, Const as CO, General as FG
 
 patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 pat = re.compile(r"\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
@@ -389,14 +389,16 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
         except NameError: bCINoEncontrada = True
         if sCed.lstrip('0') == l[iCI].lstrip('0'):
           st = "%sCedula de identidad:%s %s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL,
-                                            ES.fgFormateaNumero(sCed), CO.FIN)
+                (FG.formateaNumero(sCed) if FG.formateaNumero(sCed) else sCed),
+                                                                        CO.FIN)
           st = "%sNombre:%s %s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL, l[iNbr],
                                                                       CO.FIN)
           st = "%sCuenta:%s %s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL,
                   [iCC][0:4]+'-'+l[iCC][4:8]+'-'+l[iCC][8:10]+'-'+l[iCC][10:],
                                                                       CO.FIN)
           st = "%sMonto:%s %s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL,
-                                      ES.fgFormateaNumero(l[iMto], 2), CO.FIN)
+                (FG.formateaNumero(l[iMto], 2) if FG.formateaNumero(l[iMto], 2)
+                 else str(l[iMto])), CO.FIN)
           bCINoEncontrada = False
     except ValueError as er:
       print(er)
@@ -409,7 +411,9 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
 # FIN for
   if '' != sCed and bCINoEncontrada:
     st = "%sLa cedula de identidad:%s %s%s%s no fue encontrada." % (CO.ROJO,
-                          CO.FIN, CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
+            CO.FIN, CO.AZUL,
+            (FG.formateaNumero(sCed) if FG.formateaNumero(sCed) else sCed),
+            CO.FIN)
   return lTot, st
 # FIN funcion calcTotal
 def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2,
@@ -430,23 +434,28 @@ def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2,
     st += ("%sError:%s El monto total de la primera fila no concuerda con la "
               "suma del monto total de depositos.\n") % (CO.ROJO, CO.FIN)
     st += "Valor entre columnas " + str(iMtoTot1) + " y " + str(iMtoTot2) + \
-            " del primer registro: " + ES.fgFormateaNumero(fMtoTot, 2) + '.\n'
+            " del primer registro: " + \
+           (FG.formateaNumero(fMtoTot, 2) if FG.formateaNumero(fMtoTot, 2) 
+            else str(fMtoTot)) + '.\n'
     st += "Monto total de depositos en registros de detalle: " + \
-            ES.fgFormateaNumero(lTot[1], 2) + '.\n'
+            (FG.formateaNumero(lTot[1], 2) if FG.formateaNumero(lTot[1], 2) 
+             else str(lTot[1])) + '.\n'
   if bMerc or bMProv or bBan: st += "%sNumero de lote:%s %s%s%s\n" % (CO.AZUL,
                                             CO.FIN, CO.CYAN, sNumLote, CO.FIN)
   if bMerc or bMProv or bBan: st += "%sRif:%s %s%s%s\n" % (CO.AZUL, CO.FIN,
                                       CO.CYAN, sRif[0:1]+'-'+sRif[1:], CO.FIN)
   if bMerc or bMProv or bBan: st += "%sFecha valor:%s %s%s%s\n" % (CO.AZUL,
                                     CO.FIN, CO.CYAN, sFechaValor[6:] + '/' +\
-                                    sFechaValor[4:6] + '/' + sFechaValor[0:4],
+                                    sFechaValor[4:6] + '/' +sFechaValor[0:4],
                                     CO.FIN)
   elif bVzla: st += "%sFecha valor:%s %s%s%s\n" % (CO.AZUL, CO.FIN, CO.CYAN,
                                                           sFechaValor, CO.FIN)
   st += "%sCodigo de cuenta bancaria:%s %s%s%s.\n" % (CO.AZUL, CO.FIN, CO.CYAN,
       sCodCta[0:4]+'-'+sCodCta[4:8]+'-'+sCodCta[8:10]+'-'+sCodCta[10:], CO.FIN)
   st += "%sSe deposita a %d socios, la cantidad de %s bolivares.%s\n" % \
-        (CO.VERDE, lTot[0], ES.fgFormateaNumero(lTot[1], 2), CO.FIN)
+        (CO.VERDE, lTot[0],
+         (FG.formateaNumero(lTot[1], 2) if FG.formateaNumero(lTot[1], 2) 
+          else lTot[1]), CO.FIN)
   return st
 # FIN funcion cargarFilas
 

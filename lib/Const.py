@@ -4,6 +4,7 @@ try:
   from lib import DIR, LINEA, bMovil
 except:
   DIR = './'
+  LINEA = 70
   bMovil = False
 
 

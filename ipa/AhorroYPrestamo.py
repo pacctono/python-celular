@@ -1,16 +1,17 @@
-# libIPASPUDO: Modulo para IPASPUDO.
+# libAhorroYPrestamo: Modulo de ahorro y prestamo para IPASPUDO.
 #-*-coding:utf8;-*-
 import types
 from operator import itemgetter, attrgetter
-import json
+from ipa import ExtensionYServiFun as ESF
 from ipa import Nomina as NOM
 from ipa import Comun as COM
-from lib import ES, Const as CO
+from lib import ES, Const as CO, General as FG
 
 try:
   from lib import DIR, LINEA, bMovil
 except:
-  DIR = './'
+  DIR    = './'
+  LINEA  = 70
   bMovil = False
 
 if bMovil:
@@ -74,18 +75,18 @@ def lCheques():
     indice = ES.entradaConLista(droid, 'CHEQUES: ' + str(nCheques), 'Seleccione cheque', lCheq)
     if None == indice or 0 > indice: return None
   return lNvaCh[indice]
-# funcion lCheques
+# Funcion lCheques
 def mCheque(lChe):
   st = CO.AMARI + COM.lFecha("Sinca", "Cheques")  + ' (Descargado:' + CO.FIN + COM.lFecha('cheques.txt', '') + ')' + "\n"
   if '99' == lChe[0]: sDesc = 'TRA'
   elif 6 > len(lChe[1]): sDesc = 'CHQ'
   else: sDesc = 'DEP'
   st += "Banco:%+10.9s (%-.6s [%s]); Est:%+7.6s\nBeneficiario: %-12.11s%-30.30s\nConcepto: %-31.30s\nFecha:%+11.10s Monto: %-15.14s" % \
-  			 (COM.mBanco(lChe[0]), lChe[1], sDesc, COM.mEstado(lChe[7]), ES.fgFormateaNumero(lChe[2]), COM.extraeNombre(lChe[3]),\
-  			 lChe[5], lChe[4], ES.fgFormateaNumero(lChe[6], 2))
+  			 (COM.mBanco(lChe[0]), lChe[1], sDesc, COM.mEstado(lChe[7]), FG.formateaNumero(lChe[2]), COM.extraeNombre(lChe[3]),\
+  			 lChe[5], lChe[4], FG.formateaNumero(lChe[6], 2))
   ES.imprime(st.rstrip(' \t\n\r'))
   return True
-# funcion mCheque
+# Funcion mCheque
 
 def cheque():
   'Maneja la lista de cheques y muestra la informacion de uno o varios cheque(s).'
@@ -110,7 +111,7 @@ def cheque():
     else: break
 # Fin for
   if not bEnc: ES.alerta(droid, 'CHEQUE', "El cheque %5d no fue encontrado." % ch)
-# funcion cheque
+# Funcion cheque
 def depositos():
   'Maneja la lista de cheques y muestra los depositos de una fecha especifica.'
   global lCh
@@ -129,7 +130,7 @@ def depositos():
   indice = ES.entradaConLista(droid, 'DEPOSITOS ENCONTRADOS: ' + str(nlDep), 'Seleccione deposito', lCheq)
   if None == indice or 0 > indice: return -3
   mCheque(lDep[indice])
-# funcion depositos
+# Funcion depositos
 def chequeXCedula(llCh=None):
   'Maneja la lista de cheques y muestra los cheques en transito de un socio.'
   global lCh, cig
@@ -140,7 +141,7 @@ def chequeXCedula(llCh=None):
 
   lCheq = [l for l in llCh if '' != l[2] and ci == int(l[2])]    # Nueva lista de cheques.
   if not lCheq:
-    ES.alerta(droid, 'CHEQUE x CEDULA', "No hay cheque en transito con cedula %s!" % ES.fgFormateaNumero(ci))
+    ES.alerta(droid, 'CHEQUE x CEDULA', "No hay cheque en transito con cedula %s!" % FG.formateaNumero(ci))
     return -2
   nCheques = len(lCheq)
   if 1 == nCheques:
@@ -150,12 +151,12 @@ def chequeXCedula(llCh=None):
   indice = ES.entradaConLista(droid, 'CHEQUES ENCONTRADOS: ' + str(nCheques), 'Seleccione cheque', lCheqO)
   if None == indice or 0 > indice: return -2
   mCheque(lCheq[indice])
-# funcion chequeXCedula
+# Funcion chequeXCedula
 def heuteXCedula():
   global lHeute
 
   chequeXCedula(lHeute)
-# funcion heuteXCedula
+# Funcion heuteXCedula
 def disponibilidad():
   'Maneja la lista de conceptos de un socio y muestra la informacion.'
   global lSi, cig
@@ -177,10 +178,10 @@ def disponibilidad():
           if 55 <= CO.nCarLin: stl += ('NETO NOMINA ' + dConc[l[1]]).rstrip().rjust(20)
           else: stl += dConc[l[1]].rstrip().rjust(9)
           stl += CO.FIN + ': '
-          if (6 <= len(l)): stl += ES.fgFormateaNumero(l[2]) + '-' + ES.fgFormateaNumero(l[3]) + ' = ' +\
-          											ES.fgFormateaNumero(l[4], 2) + '(' + ES.fgFormateaNumero(l[5]) + '%)'
-        else: stl = CO.AZUL + dConc[l[1]].rstrip().rjust(20) + CO.FIN + ': ' + ES.fgFormateaNumero(l[2], 2).rstrip().ljust(12)
-        if 1 == nF: stl = CO.CYAN + ES.fgFormateaNumero(ci) + ':' + COM.nombreSocio(sNombre) + CO.FIN + "\n" + stl
+          if (6 <= len(l)): stl += FG.formateaNumero(l[2]) + '-' + FG.formateaNumero(l[3]) + ' = ' +\
+          											FG.formateaNumero(l[4], 2) + '(' + FG.formateaNumero(l[5]) + '%)'
+        else: stl = CO.AZUL + dConc[l[1]].rstrip().rjust(20) + CO.FIN + ': ' + FG.formateaNumero(l[2], 2).rstrip().ljust(12)
+        if 1 == nF: stl = CO.CYAN + FG.formateaNumero(ci) + ':' + COM.nombreSocio(sNombre) + CO.FIN + "\n" + stl
 #        if 'B' == l[1]: disp = l[2].rstrip().rjust(12)
       else: stl = l[2].rstrip() + ' DESCONOCIDO (' + l[1] + ')'
       if '0.00' != l[2].rstrip() or 'A' == l[1]:
@@ -190,10 +191,10 @@ def disponibilidad():
 # Fin for
   if 0 >= nF: st = COM.noCedula(ci)
   else:
-    st += CO.AZUL + ('Dividendo ' + CO.anoDividendo).rjust(20) + CO.FIN + ': '  + ES.fgFormateaNumero(COM.mDividendo(ci), 2).ljust(12) + '\n'
-#    ES.alerta(droid, 'DISPONIBILIDAD', '%s: %12s' % (sNombre, ES.fgFormateaNumero(disp, 2)))
+    st += CO.AZUL + ('Dividendo ' + CO.anoDividendo).rjust(20) + CO.FIN + ': '  + FG.formateaNumero(COM.mDividendo(ci), 2).ljust(12) + '\n'
+#    ES.alerta(droid, 'DISPONIBILIDAD', '%s: %12s' % (sNombre, FG.formateaNumero(disp, 2)))
   ES.imprime(st.rstrip(' \t\n\r'))
-# funcion disponibilidad
+# Funcion disponibilidad
 def prestamos():
   'Maneja la lista de conceptos de prestamos de un socio y muestra la informacion.'
   global lPre, cig
@@ -223,12 +224,12 @@ def prestamos():
       sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
 # 0:Cedula,1:Concepto,2:monto solicitado,3:Monto total(Concedido + intereses);4:Saldo;5:Saldo total(Saldo + intereses);6:Cuota,7:Fecha inicial (mm/aa),8:ult actualizacion (mm),9:cuotas (pagadas/total)
       stl = sColor + l[1] + ' ' + COM.mConcepto(l[1])[0:nCarDesc].ljust(nCarDesc, " ") + ' ' +\
-      		ES.fgFormateaNumero(l[4]).rstrip().rjust(9) + ES.fgFormateaNumero(l[6]).rstrip().rjust(7) + ' ' + l[7].rstrip().rjust(5)
-      if bExtra: stl += ' ' + ES.fgFormateaNumero(l[2]).rstrip().rjust(9) + ' ' +\
-      					ES.fgFormateaNumero(l[5]).rstrip().rjust(9) + ' ' + l[8].rstrip().rjust(2) + ' ' +\
+      		FG.formateaNumero(l[4]).rstrip().rjust(9) + FG.formateaNumero(l[6]).rstrip().rjust(7) + ' ' + l[7].rstrip().rjust(5)
+      if bExtra: stl += ' ' + FG.formateaNumero(l[2]).rstrip().rjust(9) + ' ' +\
+      					FG.formateaNumero(l[5]).rstrip().rjust(9) + ' ' + l[8].rstrip().rjust(2) + ' ' +\
       					l[9].rstrip().rjust(7)
       stl += CO.FIN
-      if 1 == nF: stl = CO.CYAN + ES.fgFormateaNumero(ci) + ':' + COM.nombreSocio(COM.mNombre(ci)) + CO.FIN + "\n" +\
+      if 1 == nF: stl = CO.CYAN + FG.formateaNumero(ci) + ':' + COM.nombreSocio(COM.mNombre(ci)) + CO.FIN + "\n" +\
       					sTitPrestamos + stl
 #      if '0.00' != l[2].rstrip():		# Comparar, cuando agregar la linea. Solicitado = 0.00. Mes ult. act .vs. fecha.
       st += stl + '\n'
@@ -236,18 +237,18 @@ def prestamos():
 # Fin for
   if 0 >= nF: st = COM.noCedula(ci)
   ES.imprime(st.rstrip(' \t\n\r'))
-# funcion prestamos
+# Funcion prestamos
 def detallePrestamo(ced, sNombre, lPres, lDesc):
   '''Muestra el detalle de prestamo de un socio.'''
 
 #  sTitulo = "Detalle de un Prestamo"
   sMensaje = ''
-  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, ES.fgFormateaNumero(ced), sNombre.lstrip().split('|')[0], CO.FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
-  sMoPre = ES.fgFormateaNumero(lPres[2], 2)	# Monto concedido
-  sTotal = ES.fgFormateaNumero(lPres[3], 2)	# Monto total (Concedido + intereses)
-  sSaldo = ES.fgFormateaNumero(lPres[4], 2)	# Saldo
-  sSdoTo = ES.fgFormateaNumero(lPres[5], 2)	# Saldo total (Saldo + intereses)
-  sCuota = ES.fgFormateaNumero(lPres[6], 2)	# Cuota
+  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, FG.formateaNumero(ced), sNombre.lstrip().split('|')[0], CO.FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
+  sMoPre = FG.formateaNumero(lPres[2], 2)	# Monto concedido
+  sTotal = FG.formateaNumero(lPres[3], 2)	# Monto total (Concedido + intereses)
+  sSaldo = FG.formateaNumero(lPres[4], 2)	# Saldo
+  sSdoTo = FG.formateaNumero(lPres[5], 2)	# Saldo total (Saldo + intereses)
+  sCuota = FG.formateaNumero(lPres[6], 2)	# Cuota
   sMensaje += "%sCodigo del Prestamo:%s %s\n" % (CO.AZUL, CO.FIN, lPres[1])
   sMensaje += "%sDescripcion:%s %s\n" % (CO.AZUL, CO.FIN, lDesc)
   sMensaje += "%sMonto concedido:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sMoPre), len(sMoPre), sMoPre)
@@ -263,7 +264,7 @@ def detallePrestamo(ced, sNombre, lPres, lDesc):
   if 0 < len(lPres[8]): sMensaje += "%sMes ult Actualizacion:%s %s\n" % (CO.AZUL, CO.FIN, lPres[8])
   if 0 < len(lPres[9]): sMensaje += "%sNumero de cuotas:%s %s\n" % (CO.AZUL, CO.FIN, lPres[9])
   ES.imprime(sMensaje.rstrip(' \t\n\r'))
-# funcion detallePrestamo
+# Funcion detallePrestamo
 def prestamo():
   'Maneja la lista de los prestamos de un socio en Prestamos y muestra el detalle de cualquiera de los prestamos.'
   global lPre, cig
@@ -291,206 +292,7 @@ def prestamo():
 #    if indice < len(lCodigo): detallePrestamo(ci, sNombre, lPrestamo[indice], lDescripcion[indice].lstrip().split(':')[1])
     if indice < len(lCodigo): detallePrestamo(ci, sNombre, lPrestamo[indice], COM.mConcepto(lCodigo[indice]))
     else: return None
-# funcion prestamo
-def extension():
-  'Maneja la lista de la carga de un socio en la extension y muestra la informacion.'
-  global lCgE, utg, cig
-
-  ci = cig
-  if 0 >= ci: return -6
-
-  st = CO.AMARI + COM.lFecha("Extension", "Extension") + ' (Descargado:' + CO.FIN + COM.lFecha('extension.txt', '') + ')' + "\n"
-  nF = 0											# Numero de filas
-  rC = 0.00											# Cuota
-
-  nCarMostrar, nCarNomb, maxCarLs = CO.carPorCampo(lCgE, 2, 28)	# Max numero cars de una linea, max # caracteres del campo.
-  if CO.bPantAmplia:											# Verifica si la pantalla es amplia.
-    nCarMostrar -= 12									# 12 = numero de caracteres aprox de disponibilidad y A/N.
-    nCarNomb    -= 12
-    maxCarLs    -= 12
-    sParTi = 'PARENTESCO'
-    sCuota = '    Cuota'
-    nCarMostrar, nCarPare, maxCarLs = CO.carPorCampo(lCgE, 3, nCarMostrar)
-  else:
-    sParTi   = 'PAREN'
-    nCarPare = 3
-    sCuota = ' Cta.'
-  sTitExtension = CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare)\
-  						+ sCuota + '  AIng' + CO.FIN + "\n"
-  if CO.bPantAmplia:
-    sFormato  = '%s%10.10s %-*.*s %-*.*s%8.8s %s%s\n'
-    nCarPare += 3
-    iDec      = 2
-  else:
-    sFormato = '%s%10.10s %-*.*s %-*.*s%5.5s %s%s\n'
-    nCarPare += 2
-    iDec      = 0
-  bImpar = True
-#[0]Cedula; [1]Cedula carga;[2]Nombre(Nombre|Disponibilidad|A/N); [3]Parentesco; [4]#UT; [5]Costo poliza
-  for l in lCgE:
-    if (0 == nF) and ('' == l[0] or ci > int(l[0])): continue
-    elif l[0] in ('','0',str(ci)):
-      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-      try:
-        if 0 == nF:
-          if '1250' == l[4]: nSumaAseg = 500000
-          elif '500' == l[4]: nSumaAseg = 250000
-          else: nSumaAseg = 0
-          st += CO.CYAN + "SUMA ASEGURADA: " + l[4] + "UT = BsF. " + ES.fgFormateaNumero(nSumaAseg) +\
-          		CO.FIN + "\n" + sTitExtension
-        nF += 1
-        rC += float(l[5])
-        if 0 < float(l[5]):
-          if l[3].lstrip().split(' ')[0][0:3] in ['TIT', 'CON', 'tit', 'con']:
-            sPar = l[3].lstrip().split(' ')[0][0:nCarPare-2] + '-' + l[3][-2:]
-          else: sPar = l[3].lstrip().split(' ')[0][0:nCarPare]
-          if 6 < len(l) and l[6].isdigit(): sAno = l[6]
-          else: sAno = '----'
-          st += sFormato % (sColor, ES.fgFormateaNumero(l[1]), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
-          					nCarPare, sPar, ES.fgFormateaNumero(float(l[5])/12, iDec), sAno, CO.FIN)
-      except Exception as ex:
-        print('ex: ', ex)
-# Fin elif
-    else: break
-# Fin for
-  if 0 >= nF or 0.00 >= rC:
-    st = COM.noCedula(ci)
-#    ES.alerta(droid, 'EXTENSION', '%s: INACTIVO' % (sNombre))
-  else:
-    frC = ES.fgFormateaNumero(rC, 2)
-    fmC = ES.fgFormateaNumero(rC/12, 2)
-    stl = "TOTAL Anual: %-*.*s (mensual: %-*.*s)" % (len(str(frC)), len(str(frC))+1, frC, \
-									len(fmC), len(str(fmC))+1, fmC)
-    st += CO.CYAN + stl + CO.FIN
-  ES.imprime(st)
-# funcion extension
-def servifun():
-  'Maneja la lista de la carga de un socio en ServiFun y muestra la informacion.'
-  global lCgS, utg, cig
-
-  ci = cig
-  if 0 >= ci: return -7
-
-  nF = 0
-  fC = 0
-  st = CO.AMARI + COM.lFecha("Sinca", "ServiFun") + ' (Descargado:' + CO.FIN + COM.lFecha('servifun.txt', '') + ')' + "\n"
-  bImpar = True
-
-  nCarMostrar, nCarNomb, maxCarLs = CO.carPorCampo(lCgS, 2, 23)	# Max numero cars de una linea, max # caracteres del campo.
-  if CO.bPantAmplia:											# Verifica si la pantalla es amplia.
-    nCarMostrar -= 12									# 12 = numero de caracteres aprox de disponibilidad y A/N.
-    nCarNomb    -= 12
-    maxCarLs    -= 12
-    sParTi = 'PARENTE'
-    sEsp   = ''
-    nCarMostrar, nCarPare, maxCarLs = CO.carPorCampo(lCgS, 3, nCarMostrar)
-  else:
-    sParTi   = 'PAR'
-    nCarPare = 3
-    sEsp     = ''
-  st += CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE DE LA CARGA', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare) +\
-  				sEsp + "FInsc" + " Ed" + CO.FIN + "\n"
-
-  sFormato = '%s%10.10s %-*.*s %-*.*s %-5.5s%3d%s\n'
-# [0]Cedula; [1]Cedula carga;[2]Nombre(Nombre|Disponibilidad|A/N); [3]Parentesco;[4]Fecha ingreso a servifun
-  for l in lCgS:
-    if 0 == nF and ('' == l[0] or ci > int(l[0])): continue
-    elif l[0] in ('','0',str(ci)):
-      nF += 1
-      if '-' == l[3][1:2] and l[3][0:1] in ('A', 'N', 'S', 'T'): fC += CO.CO
-      if 5 < len(l) and l[5].isdigit():
-        nEd = int(l[5])
-        if (l[3][0:1] in ('6', '7')) and (25 < nEd): fC += CO.CHM25
-        if (80 < nEd): fC += CO.CM80
-        elif (75 < nEd): fC += CO.CM75
-        elif (70 < nEd): fC += CO.CM70
-      else: nEd = -1
-      sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-      st += sFormato % (sColor, ES.fgFormateaNumero(l[1], 0), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
-      					nCarPare, l[3], l[4], nEd, CO.FIN)
-    else: break
-# Fin for
-  if 0 >= nF: st = COM.noCedula(ci)
-  else:
-    if 1 == nF:
-      fC += CO.CI
-      sfC = ES.fgFormateaNumero(fC, 2)
-      sC = "igual a Bs. %*s" % (len(sfC), sfC)
-    else:
-      fC += CO.CCC
-      sfC = ES.fgFormateaNumero(fC, 2)
-      sC = "mayor o igual a Bs. %*s" % (len(sfC), sfC)
-    stl = "La cuota mensual es " + sC
-    st += CO.CYAN + stl + CO.FIN
-  ES.imprime(st.rstrip(' \t\n\r'))
-# funcion servifun
-def servicioEspecifico(sCodigo, sNombre):
-  'Muestra las indemnizaciones de ServiFun usando la lista con los parentesco.'
-  global lPa, utg
-#  sTitulo = "Servifun"
-  sMensaje = ''
-  for l in lPa:
-    if sCodigo != l[0]: continue			# Codigo del parentesco
-    sMensaje  = "%sServicios p/(%s) %s: %s%s\n" % (CO.CYAN, l[0], l[1], sNombre.lstrip().split('|')[0], CO.FIN)	# Codigo, descripcion del parentesco
-    if 14 <= len(l): rLp = int(l[13]) * float(utg)			# Lapida
-    else: rLp = 0
-    sLp = ES.fgFormateaNumero(rLp, 2)		# Lapida formateado
-    if 13 <= len(l): rCr = int(l[12]) * float(utg)			# Cremacion
-    else: rCr = 0
-    sCr = ES.fgFormateaNumero(rCr, 2)		# Cremacion formateado
-    if 12 <= len(l): rFo = int(l[11]) * float(utg)			# Fosa
-    else: rFo = 0
-    sFo = ES.fgFormateaNumero(rFo, 2)		# Fosa formateado
-    if 11 <= len(l): rTr = int(l[10]) * float(utg)			# Traslado
-    else: rTr = 0
-    sTr = ES.fgFormateaNumero(rTr, 2)		# Traslado formateado
-    if 10 <= len(l): rSv = int(l[9]) * float(utg)			# Servicio
-    else: rSv = 0
-    sSv = ES.fgFormateaNumero(rSv, 2)		# Servicio formateado
-    if 9 <= len(l): rAy = int(l[8]) * float(utg)			# Ayuda
-    else: rAy = 0
-    sAy = ES.fgFormateaNumero(rAy, 2)		# Ayuda formateado
-    sMensaje += "%sAyuda:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sAy), len(sAy), sAy, l[8])
-    sMensaje += "%sServicio:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sSv), len(sSv), sSv, l[9])
-    sMensaje += "%sTraslado:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sTr), len(sTr), sTr, l[10])
-    if 0 < rFo: sMensaje += "%sFosa (solo 1):%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sFo), len(sFo), sFo, l[11])
-    if 0 < rCr: sMensaje += "%sCremacion:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sCr), len(sCr), sCr, l[12])
-    if 0 < rLp: sMensaje += "%sLapida:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sLp), len(sLp), sLp, l[13])
-  # Fin for
-  ES.imprime(sMensaje.rstrip(' \t\n\r'))
-# funcion servicioEspecifico
-def servicio():
-  'Maneja la lista de la carga de un socio en ServiFun y muestra la cobertura a cualquiera de la carga.'
-  global lCgS, lPa, cig
-
-  ci = cig
-  if 0 >= ci: return -7
-
-  nF = 0
-  lCodigo = []
-  lParentesco = []
-  lNombre = []
-  for l in lCgS:
-    if 0 == nF and ('' == l[0] or ci > int(l[0])): continue
-    elif l[0] in ('','0',str(ci)):
-      lPar = l[3].rstrip().split('-')			# Parentesco: codigo-descripcion
-      if 1 < len(lPar): lCod = lPar[0]
-      else: lCod = '0'
-      lCodigo.append(lCod)						# Titular
-      lNombre.append(l[2])
-      for lp in lPa:
-        if lCod != lp[0]: continue				# Codigo del parentesco
-        lParentesco.append(lp[1])
-      nF += 1
-    else: break
-# Fin for
-  if 0 >= nF: return None
-  else:
-    indice      = ES.entradaConLista(droid, 'Parentesco', '', lParentesco)
-    if None == indice or 0 > indice: return None
-    if indice < len(lCodigo): servicioEspecifico(lCodigo[indice], lNombre[indice])
-    else: return None
-# funcion servicio
+# Funcion prestamo
 def ubicacion():
   'Maneja la lista con los telefonos y correo electronico de cada socio.'
   global lUb, cig
@@ -504,7 +306,7 @@ def ubicacion():
   for l in lUb:
     if ci > int(l[0]): continue
     elif ci == int(l[0]):
-      st += "%s%s:%-30.29s%s" % (CO.CYAN, ES.fgFormateaNumero(ci), COM.nombreSocio(COM.mNombre(ci)), CO.FIN)
+      st += "%s%s:%-30.29s%s" % (CO.CYAN, FG.formateaNumero(ci), COM.nombreSocio(COM.mNombre(ci)), CO.FIN)
       if 1 < len(l) and '' != l[1]:
         st += "\n"
         st += CO.AZUL + "Telefono habitacion:".rjust(nJustDerecha) + CO.FIN + " 0%3s-%3s-%4s" % (l[1][0:3], l[1][3:6], l[1][6:])
@@ -528,7 +330,7 @@ def ubicacion():
 # Fin for
   if 0 >= nF: st = COM.noCedula(ci)
   ES.imprime(st)
-# funcion ubicacion
+# Funcion ubicacion
 def buscarNombre():
   global cig
 
@@ -550,22 +352,12 @@ def buscarNombre():
   if None == indice or 0 > indice: return -10, None
   cig = int(cedulas[indice])
   return cig, nombres[indice]
-# funcion buscarNombre
-def selOpcionMenu(lOpciones, sTitulo='Que desea hacer'):	# Devuelve una de las opciones de lOpciones.
-  ''' Menu desplegado al inicio. '''
-  nOpciones = len(lOpciones)
-
-  lSeleccion = [lOpciones[i][0] for i in range(nOpciones)]	# Opciones a desplegar.
-  lFuncion   = [lOpciones[i][1] for i in range(nOpciones)]	# Funciones a ejecutar por cada opcion desplegada.
-  indice = ES.entradaConLista(droid, sTitulo, 'Que desea hacer', lSeleccion)
-  if None == indice or 0 > indice: return -11
-  return lFuncion[indice]
-# funcion selOpcionMenu(lOpciones)
+# Funcion buscarNombre
 def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
   ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Cedula>, <Nombre> ..... y <Salir>. '''
 
-  return selOpcionMenu(COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
-# funcion selFuncionInicial(nOpciones)
+  return FG.selOpcionMenu(COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
+# Funcion selFuncionInicial(nOpciones)
 def selFuncion(nOpcion=6):
   ''' Menu desplegado al suministrar una cedula o al encontrar la cedula de una
       parte de un nombre suministrado.
@@ -576,72 +368,32 @@ def selFuncion(nOpcion=6):
   lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las 4 primeras opciones + la opcion 'Volver'.
   sTitulo    = str(cig) + ':' + COM.nombreSocio(COM.mNombre(cig))	# Titulo a desplegar con las opciones.
   try:
-    func = eval(selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
+    func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
   except:
     return False
   if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
   else: return False
   return True
-# funcion selFuncion
-def prepararListasDeTrabajo(sNombre='todos'):
-  global lHeute, lCh, lSi, lPre, lCgE, lCgS, lUb, lPa
+# Funcion selFuncion
 
-  if ('todos'==sNombre) or ('heute'==sNombre):      lHeute = ES.cargaLista("heute.txt")		# [0]Banco; [1]Numero; [2]Cedula;
+# Definir variables globales
+def prepararListasDeTrabajo():
+  global lCh, lHeute, lSi, lPre, lUb
+
+  lHeute = ES.cargaLista("heute.txt")		# [0]Banco; [1]Numero; [2]Cedula;
   											# [3]Nombre; [4]Fecha(d/m/a); [5]descripcion; [6]monto; [7]estado
-  if ('todos'==sNombre) or ('cheques'==sNombre):    lCh = ES.cargaLista("cheques.txt")		# [0]Banco; [1]Numero; [2]Cedula;
+  lCh = ES.cargaLista("cheques.txt")		# [0]Banco; [1]Numero; [2]Cedula;
   											# [3]Nombre; [4]Fecha(d/m/a); [5]descripcion; [6]monto; [7]estado
-  if ('todos'==sNombre) or ('disponibilidad'==sNombre):    lSi = ES.cargaLista("disponibilidad.txt")	# [0]Cedula;
+  lSi = ES.cargaLista("disponibilidad.txt")	# [0]Cedula;
   											# [1]Codigo identificador proximo campo; [2] Campo(Fecha, Monto, etc)
-  if ('todos'==sNombre) or ('prestamos'==sNombre):  lPre = ES.cargaLista("prestamos.txt")	# [0]Cedula; [1]Concepto;
+  lPre = ES.cargaLista("prestamos.txt")	# [0]Cedula; [1]Concepto;
   											# [2]Monto solicitado; [3]Monto total(Concedido + intereses); [4]Saldo;
   											# [5]Saldo total(Saldo + intereses); [6]Cuota; [7]Fecha inicial (mm/aa);
   											# [8]ult actualizacion (mm); [9]cuotas (pagadas/total)
-  if ('todos'==sNombre) or ('extension'==sNombre):  lCgE = ES.cargaLista("extension.txt")	# [0]Cedula; [1]Cedula carga;
-  											# [2]Nombre(Nombre|Disponibilidad|A/N); [3]Parentesco; [4]#UT; [5]Costo poliza
-  if ('todos'==sNombre) or ('servifun'==sNombre):   lCgS = ES.cargaLista("servifun.txt")	# [0]Cedula; [1]Cedula carga;
-  											# [2]Nombre(Nombre|Disponibilidad|A/N); [3]Parentesco;
-  											# [4]Fecha ingreso a servifun
-  if ('todos'==sNombre) or ('ubicacion'==sNombre):  lUb = ES.cargaLista("ubicacion.txt")	# [0]Cedula;
+  lUb = ES.cargaLista("ubicacion.txt")	# [0]Cedula;
   											# [1]Telefono habitacion; [2]Telefono trabajo; [3]Celular 1; [4]Celular 2;
   											# [5]Correo electronico
-  if ('todos'==sNombre) or ('parentesco'==sNombre): lPa = ES.cargaLista("parentesco.txt")	# [0]Codigo; [1]Descripcion;
-  											# [2]Identificar de cambio(Sexo/edad); [3]Poliza 500UT;
-  											# [4]Poliza 500UT si cumple requisito de cambio, ver campo 2; [5]Poliza 1250UT;
-  											# [6]Poliza 1250UT si cumple requisito de cambio, ver campo 2;
-  											# Servifun: [7]Cuota extra; [8]Ayuda; [9]Servicio; [10]Traslado; [11]Fosa;
-  											# [12]Cremacion
-# funcion prepararVariablesDeTrabajo
-def leeValXDefecto():
-  global cig
-
-  fIpa = ES.abrir("ipaspudo.txt")
-  if not fIpa:
-    sUXD   = 'ipas'				# Usuario por defecto
-    sCXD   = 'ipas'				# Contraseña por defecto
-  else:
-    try:
-      sIpa = fIpa.read()
-      lIpa = json.loads(sIpa)
-      sUXD = lIpa[0]		# Usuario por defecto
-      sCXD = lIpa[1]		# Contraseña por defecto
-      cig  = lIpa[2]		# Cedula por defecto. Esta linea es solo para mejorar la vista.
-    except: pass
-    finally: fIpa.close()
-  return sUXD, sCXD
-# funcion leeValXDefecto
-def escValXDefecto(sUXD, sCXD):
-  global cig
-
-  lIpa = [sUXD, sCXD, cig]
-  fIpa = ES.abrir("ipaspudo.txt", 'w')
-  if fIpa:
-    try: fIpa.write(json.dumps(lIpa))
-    except: pass
-    finally: fIpa.close()
-  else: print("No se grabaron los valores por defecto!")
-# funcion escValXDefecto
-
-# Definir variables globales
+# Funcion prepararListasDeTrabajo
 cig    = -1
 utg    = CO.UT
 fErr   = ES.abrirErr("ipaspudo.err")

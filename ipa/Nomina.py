@@ -1,7 +1,7 @@
 # libNomina: Modulo para el manejo de la nomina de la UDO para IPASPUDO.
 #-*-coding:utf8;-*-
 from ipa import Comun as COM
-from lib import ES, Const as CO
+from lib import ES, Const as CO, General as FG
 
 try:
   from lib import DIR, LINEA, bMovil
@@ -39,17 +39,17 @@ def resNominaN(lN=None):
       sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
       # 0:Concepto, 1:Descripcion, 2:Cta credito, 3:Cta Debito, 4:Cta Interese, 5:Valor fijo, 6: Valor variable, 7:Total
       stl = "%s%.3s %-25.25s %15.15s %15.15s %15.15s%s" % (sColor, l[0], l[1],
-                      ES.fgFormateaNumero(l[5], 2).rstrip().rjust(15),
-                      ES.fgFormateaNumero(l[6], 2).rstrip().rjust(15),
-                      ES.fgFormateaNumero(l[7], 2).rstrip().rjust(15), CO.FIN)
+                      FG.formateaNumero(l[5], 2).rstrip().rjust(15),
+                      FG.formateaNumero(l[6], 2).rstrip().rjust(15),
+                      FG.formateaNumero(l[7], 2).rstrip().rjust(15), CO.FIN)
       ftValFi += float(l[5])
       ftValVa += float(l[6])
       ftTotal += float(l[7])
       st += stl + '\n'
   # Fin for
-  stValFi = ES.fgFormateaNumero(ftValFi, 2)
-  stValVa = ES.fgFormateaNumero(ftValVa, 2)
-  stTotal = ES.fgFormateaNumero(ftTotal, 2)
+  stValFi = FG.formateaNumero(ftValFi, 2)
+  stValVa = FG.formateaNumero(ftValVa, 2)
+  stTotal = FG.formateaNumero(ftTotal, 2)
   stl = CO.AZUL + "T O T A L E S".rjust(29) + stValFi.rjust(16) + \
                                 stValVa.rjust(16) + stTotal.rjust(16) + CO.FIN
   st += stl
@@ -107,21 +107,21 @@ def nomina(bLN=True):
       # 0:Cedula, 1:Concepto, 2:Valor fijo, 3: Valor variable, 4:Saldo, 5:Cuota
       stl = "%s%.3s %*.*s %.11s %.11s%s" % (sColor, l[1], nCarDesc, nCarDesc,
                                       COM.mConcepto(l[1]).ljust(nCarDesc, " "),
-                              ES.fgFormateaNumero(l[2], 2).rstrip().rjust(11),
-                              ES.fgFormateaNumero(l[3], 2).rstrip().rjust(11),
+                              FG.formateaNumero(l[2], 2).rstrip().rjust(11),
+                              FG.formateaNumero(l[3], 2).rstrip().rjust(11),
                               CO.FIN)
       if bSaldo:
         if (0.00 < float(l[4])):
           stl += "%s%.*s[%s]%s" % (sColor, nCarSaldo,
-                      ES.fgFormateaNumero(l[4], 2).rstrip().rjust(nCarSaldo),
-                      ES.fgFormateaNumero(l[5], 2).rstrip(), CO.FIN)
+                      FG.formateaNumero(l[4], 2).rstrip().rjust(nCarSaldo),
+                      FG.formateaNumero(l[5], 2).rstrip(), CO.FIN)
       try:
         if (500 > int(l[1])): ftAsig += float(l[2]) + float(l[3])
         else: ftDed += float(l[2]) + float(l[3])
       except Exception as ex:
         print('Tipo: ' + type(ex), ', ex: ', ex)
       if 1 == nF:
-        stl = CO.CYAN + ES.fgFormateaNumero(ci) + ':' + \
+        stl = CO.CYAN + FG.formateaNumero(ci) + ':' + \
             COM.nombreSocio(COM.mNombre(ci)) + CO.FIN + "\n" + sTitNomina + stl
       st += stl + '\n'
     else: break
@@ -129,9 +129,9 @@ def nomina(bLN=True):
   if 0 >= nF: st = COM.noCedula(ci)
   elif (0.00 != ftAsig) or (0.00 != ftDed):
     fNeto = ftAsig - ftDed
-    stAsig = ES.fgFormateaNumero(ftAsig, 2)
-    stDed  = ES.fgFormateaNumero(ftDed, 2)
-    sNeto  = ES.fgFormateaNumero(fNeto, 2)
+    stAsig = FG.formateaNumero(ftAsig, 2)
+    stDed  = FG.formateaNumero(ftDed, 2)
+    sNeto  = FG.formateaNumero(fNeto, 2)
     if bSaldo:
       sFormato = ("%sAsignaciones:%s%-*.*s; %sDeducciones:%s%-*.*s; "
                   "%sNeto:%s %-*.*s")
@@ -147,12 +147,12 @@ def detalleConcepto(ced, sNombre, lCon, lDesc):
   #  sTitulo = "Detalle de un Concepto"
   sMensaje = ''
   # 0:Cedula, 1:Concepto, 2:Valor fijo, 3: Valor variable, 4:Saldo, 5:Cuota
-  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, ES.fgFormateaNumero(ced), 
+  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, FG.formateaNumero(ced), 
                                       sNombre.lstrip().split('|')[0], CO.FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
-  sVaFij = ES.fgFormateaNumero(lCon[2], 2)	# Valor fijo
-  sVaVar = ES.fgFormateaNumero(lCon[3], 2)	# Valor variable
-  sSaldo = ES.fgFormateaNumero(lCon[4], 2)	# Saldo
-  sCuota = ES.fgFormateaNumero(lCon[5], 2)	# Cuota
+  sVaFij = FG.formateaNumero(lCon[2], 2)	# Valor fijo
+  sVaVar = FG.formateaNumero(lCon[3], 2)	# Valor variable
+  sSaldo = FG.formateaNumero(lCon[4], 2)	# Saldo
+  sCuota = FG.formateaNumero(lCon[5], 2)	# Cuota
   sMensaje += "%sCodigo del Concepto:%s %s\n" % (CO.AZUL, CO.FIN, lCon[1])
   sMensaje += "%sDescripcion:%s %s\n" % (CO.AZUL, CO.FIN, lDesc)
   sMensaje += "%sValor fijo:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN, len(sVaFij),

@@ -16,19 +16,12 @@ except:
 import sys
 import os
 import re
+patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
+#pat = re.compile(r"\d{1,3}")	        # Expresion regular: 1 o mas dig (\d+) y tres dig al final (\d{3}).
+
 from time import time, localtime, strftime, sleep
 if 0 > __name__.find('lib'): import Const as CO
 else: from lib import Const as CO
-
-AMARI = CO.color.YELLOW	  # Primer titulo. Identifica la fecha de actualizacion de los datos.
-CYAN  = CO.color.CYAN			# Identificacion del socio.
-AZUL  = CO.color.BLUE			# Identificacion de los datos.
-VERDE = CO.color.GREEN		# Linea final (totales).
-ROJO  = CO.color.RED			# Error.
-FIN  = CO.color.END
-
-patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
-pat = re.compile(r"\d{1,3}")	        # Expresion regular: 1 o mas dig (\d+) y tres dig al final (\d{3}).
 
 par = lambda x: (0 == (x%2))	# Es un numero par.
 def abrir(aNb, modo='r', codigo = 'UTF-8', bImprimir = False):
@@ -45,8 +38,8 @@ def abrir(aNb, modo='r', codigo = 'UTF-8', bImprimir = False):
     return f
   except:
     if (bImprimir):
-      print(AMARI + "[ES]ERROR ABRIENDO (DIR): " + FIN + aNb + ' (' + DIR + ')')
-      print(AMARI + "os.path.abspath(aNb): " + FIN + abspath(aNb))
+      print(CO.AMARI + "[ES]ERROR ABRIENDO (DIR): " + CO.FIN + aNb + ' (' + DIR + ')')
+      print(CO.AMARI + "os.path.abspath(aNb): " + CO.FIN + abspath(aNb))
     return False
 # funcion abrir
 def abrirErr(aNb, bImprimir = False):
@@ -65,61 +58,6 @@ def esEntero(v):
     return v=='0' or (v if v.find('..') > -1 else \
                             v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
 # Funcion esEntero
-def fgFormateaNumero(sCad, dec=0):
-  if (not isinstance(sCad, str) and not isinstance(sCad, float) and \
-      not isinstance(sCad, int)) and ((None != dec) and not dec.isinteger()):
-    return None
-  if None == dec: dec = 0
-  if isinstance(sCad, str): sCad = sCad.strip(' \t\n\r')
-
-  if isinstance(sCad, float) or isinstance(sCad, int): sCad = str(sCad)
-  try:
-    fCad = float(sCad)
-    fCad = round(fCad, dec)
-#    signo = ''
-#    if 0 > fCad:
-#      signo = '-'
-#      fCad  = -fCad
-    sCad = str(fCad)
-  except:
-    return None
-
-  x = sCad.split('.')		# Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
-  x0 = int(x[0])	      # x0 es la parte entera
-  if 1 < len(x):        # Esta y las prox 6 lineas parecen innecesarias por 'round' arriba.
-    x2 = x[1]           # x2 es la parte decimal.
-  if 0 < dec:
-    x2 = ',' + x2.ljust(dec, '0')
-    dec += 1			      # Crece en 1 al agregar la coma "," decimal.
-  else: x2 = ''
-  if dec < len(x2): x2 = x2[0:dec]
-
-# Agrupa de 3 en 3 y separa con ',', luego la remplaza con '.'.
-  x1 = "{:,}".format(x0).replace(',','.')
-#  x1 = ''
-#  x = re.findall(pat, x0)
-#  for i in range(0, len(x)):
-#    if 4 <= len(x0):
-#      x1 = '.' + x0[-3:] + x1
-#      x0 = x0[0:-3]
-#    else:
-#      x1 = x0 + x1
-#  print('fn: ', signo + x1 + x2)
-
-# parte entera (x1) con '.' intercalado cada 3 dec + parte decimal con ',' adelante.
-  return x1 + x2
-# funcion fgFormateaNumero(sCad, dec)
-def fgEliminarPuntos(sCadena, sP='.'):
-  lCadDig = sCadena.rstrip().split(sP)
-  return ''.join(lCadDig)		# Cadena (solo digitos) del socio.
-# funcion fgEliminarPuntos
-def fgCambiarAPunto(sCad):
-	return sCad.replace(',', '.')
-# funcion fgCambiarAPunto(sCad)
-def formateaNumeroTelefono(sNum):
-	if 10 != len(sNum): return sNum
-	else: return "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:])
-# funcion formateaNumeroTelefono
 def alerta(droid, titulo, valor=''):
 
   if droid:
@@ -157,7 +95,7 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
       if '' == resultado or None == resultado: resultado = str(porDefecto)
       if resultado.isdigit(): break
   if None == resultado: return None
-  resultado = fgEliminarPuntos(resultado)
+  resultado = resultado.replace('.', '')
   bMatch = patron.match(resultado)
   if None == bMatch: return bMatch
   elif (not bZero) and (0 == float(resultado)): return None
@@ -204,14 +142,11 @@ def entradaFecha(droid, ano, mes, dia):
     resultado = droid.dialogGetResponse().result
     droid.dialogDismiss()
   else:
-#    import datetime    
+    from datetime import datetime    
     while True:    
       try:
-        fecha = input('Introduzca la fecha en formato DD-MM-YYYY:' )
-#        fech1 = datetime.datetime.strptime(fecha, "%d-%m-%y")
-        dia, mes, ano = map(int, fecha.split('-'))
-        resultado = str(ano).rjust(4, '0') + str(mes).rjust(2, '0') + \
-                                                        str(dia).rjust(2, '0')
+        fecha = input('Introduzca la fecha en formato DD-MM-YYYY: ' )
+        resultado = datetime.strptime(fecha, "%d-%m-%Y")
         break
       except:
         print('Oh! Oh! Fecha Errada.')
@@ -222,9 +157,10 @@ def entradaFechaLocal(droid, ano='', mes='', dia=''):
   if ('' == mes): mes = strftime("%m")
   if ('' == dia): dia = strftime("%d")
   resultado = entradaFecha(droid, ano, mes, dia)
-  resAno = "%04d" % resultado['year']
-  resMes = "%02d" % resultado['month']
-  resDia = "%02d" % resultado['day']
+  print(resultado)
+  resAno = "%04d" % (resultado['year'] if droid else resultado.year)
+  resMes = "%02d" % (resultado['month'] if droid else resultado.month)
+  resDia = "%02d" % (resultado['day'] if droid else resultado.day)
   sFecha = resDia + '/' + resMes + '/' + resAno
   return sFecha
 # funcion entradaFechaLocal
@@ -354,7 +290,7 @@ def imprime(st):
   s = input(sRellenar + nEspIzq + sFin + sRellenar + sFinLin)	# Muestra la cadena final.
   return s
 # funcion imprime
-def colorLinea(bImpar=True, sColor=VERDE, sOtroColor=''):
+def colorLinea(bImpar=True, sColor=CO.VERDE, sOtroColor=''):
   if bImpar: sColor = sOtroColor
   return sColor, not bImpar
 # funcion colorLinea
@@ -363,11 +299,11 @@ def muestraInicio(sEmp):
   if not par(nCar): nCar += 1
   sLinea = llenarCadena(int(nCar/2), '-+')
   print(sLinea)
-  print(AMARI + sEmp + FIN + ' ' + strftime("%d/%m/%Y %H:%M:%S", localtime()))
+  print(CO.AMARI + sEmp + CO.FIN + ' ' + strftime("%d/%m/%Y %H:%M:%S", localtime()))
   print(sLinea)
 # funcion muestraInicio
 def muestraFin():
-  print(AMARI + 'PC 2015 y posterior' + FIN + ' ' + \
+  print(CO.AMARI + 'PC 2015 y posterior' + CO.FIN + ' ' + \
                                     strftime("%d/%m/%Y %H:%M:%S", localtime()))
   print("-+-+-+-+-+-+-+-+-+-+")
   print("Listo!")

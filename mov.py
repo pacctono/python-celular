@@ -22,7 +22,8 @@ if bMovil:
 else:
   from os.path import abspath, basename
 
-from lib import Conceptos as CC, ES, Const as CO
+from lib import ES, Const as CO, General as FG
+from ipa import Conceptos as CC
 
 from lib import MySQL
 bMySQL = MySQL.bMySQL
@@ -128,8 +129,8 @@ def mostrarConceptos(dicc, dConc):
        else: sObs = ''
        st += "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s %s%s\n" % (subrayar,
           sColor, v, dConc.get(sConc, {'des':'NO TENGO DESCRIPCION'})['des'],
-          ES.fgFormateaNumero(dicc[v][0]), ES.fgFormateaNumero(dicc[v][1], 2),
-          ES.fgFormateaNumero(dicc[v][2], 2), ES.fgFormateaNumero(fPorc, 2),
+          FG.formateaNumero(dicc[v][0]), FG.formateaNumero(dicc[v][1], 2),
+          FG.formateaNumero(dicc[v][2], 2), FG.formateaNumero(fPorc, 2),
           sObs, CO.FIN)
               
   return st
@@ -185,18 +186,18 @@ while True:
     for l in lista:
       if sCed.lstrip('0') == l[1].lstrip('0'):
         if bCINoEncontrada: st += "\n%sCI:%s%s%s%s" % (CO.CYAN, CO.FIN,
-                                    CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
+                                    CO.AZUL, FG.formateaNumero(sCed), CO.FIN)
         st += "\n%sCLV:%s%s%s-%-20.20s%s " % (CO.CYAN, CO.FIN, CO.AZUL, l[2],
                 dConc.get(l[2], {'des':'NO TENGO DESCRIPCION'})['des'], CO.FIN)
         st += "%sSdo:%s%s%s%s; Cta:%s%s%s%s" %\
-              (CO.CYAN, CO.FIN, CO.AZUL, ES.fgFormateaNumero(l[3], 2), CO.CYAN,
-                        CO.FIN, CO.AZUL, ES.fgFormateaNumero(l[4], 2), CO.FIN)
+              (CO.CYAN, CO.FIN, CO.AZUL, FG.formateaNumero(l[3], 2), CO.CYAN,
+                        CO.FIN, CO.AZUL, FG.formateaNumero(l[4], 2), CO.FIN)
         st += "%s; Ct:%s%s%s%s; Tp:%s%s%s%s" % (CO.CYAN, CO.FIN, CO.AZUL, l[5],
                                         CO.CYAN, CO.FIN, CO.AZUL, l[6], CO.FIN)
         bCINoEncontrada = False
   if '' != sCed and bCINoEncontrada:
     st += "\n%sLa cedula de identidad:%s %s%s%s no fue encontrada.\n" % \
-                (CO.ROJO, CO.FIN, CO.AZUL, ES.fgFormateaNumero(sCed), CO.FIN)
+                (CO.ROJO, CO.FIN, CO.AZUL, FG.formateaNumero(sCed), CO.FIN)
   else: st += '\n'
 
   if bMovil:

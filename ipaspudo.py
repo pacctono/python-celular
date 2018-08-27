@@ -4,6 +4,7 @@
 #qpy:console
 from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys, time, types
+import json
 
 try:
   from lib import DIR, LINEA, bMovil
@@ -21,9 +22,38 @@ else: droid = None
 
 from ipa import AhorroYPrestamo as AP
 from ipa import GanYPer as GyP
+from ipa import ExtensionYServiFun as ESF
 from ipa import Nomina as NOM
 from ipa import Comun as COM
 from lib import ES, Cuota as CU
+
+def leeValXDefecto():
+
+  fIpa = ES.abrir("ipaspudo.txt")
+  if not fIpa:
+    sUXD   = 'ipas'				# Usuario por defecto
+    sCXD   = 'ipas'				# Contraseña por defecto
+  else:
+    try:
+      sIpa = fIpa.read()
+      lIpa = json.loads(sIpa)
+      sUXD = lIpa[0]		# Usuario por defecto
+      sCXD = lIpa[1]		# Contraseña por defecto
+      AP.cig  = lIpa[2]		# Cedula por defecto. Esta linea es solo para mejorar la vista.
+    except: pass
+    finally: fIpa.close()
+  return sUXD, sCXD
+# funcion leeValXDefecto
+def escValXDefecto(sUXD, sCXD):
+
+  lIpa = [sUXD, sCXD, AP.cig]
+  fIpa = ES.abrir("ipaspudo.txt", 'w')
+  if fIpa:
+    try: fIpa.write(json.dumps(lIpa))
+    except: pass
+    finally: fIpa.close()
+  else: print("No se grabaron los valores por defecto!")
+# funcion escValXDefecto
 
 esperar = 'Espere un momento, por favor...'
 if droid:
@@ -32,15 +62,17 @@ if droid:
   droid.dialogSetCurrentProgress(15)
 else: print(esperar)
 AP.prepararListasDeTrabajo()
+ESF.prepararListasDeTrabajo()
 if droid: droid.dialogSetCurrentProgress(60)
 else: print('Listas listas!')
+COM.prepararDiccionariosDeTrabajo()
 if droid: droid.dialogSetCurrentProgress(90)
 else: print('Diccionarios listos!')
 
 ES.muestraInicio("IPASPUDO: J-30619229-8.")
 if droid: droid.dialogSetCurrentProgress(95)
 
-sUXD, sCXD = AP.leeValXDefecto()
+sUXD, sCXD = leeValXDefecto()
 if droid:
   droid.dialogSetCurrentProgress(100)
   droid.dialogDismiss()
@@ -75,6 +107,6 @@ while True:
     else: break
 # Fin while True
 
-AP.escValXDefecto(sUXD, sCXD)
+escValXDefecto(sUXD, sCXD)
 ES.muestraFin()
 # Fin del programa
