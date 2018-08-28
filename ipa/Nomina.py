@@ -53,7 +53,8 @@ def resNominaN(lN=None):
   stl = CO.AZUL + "T O T A L E S".rjust(29) + stValFi.rjust(16) + \
                                 stValVa.rjust(16) + stTotal.rjust(16) + CO.FIN
   st += stl
-  ES.imprime(st.rstrip(' \t\n\r'))
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
 # funcion resNominaN
 def resNominaH():
 	global lNomH
@@ -67,11 +68,10 @@ def resNominaCcE():
 	global lNomCcE
 	resNominaN(lNomCcE)
 # funcion resNominaN
-def nomina(bLN=True):
+def nomina(ci=-1, bLN=True):
   '''Maneja la lista de conceptos de nomina de un socio y
     muestra la informacion.'''
   global lNom, lNomCNE
-  from ipa.AhorroYPrestamo import cig as ci
  
   if bLN: lN = lNom
   else: lN   = lNomCNE
@@ -140,14 +140,15 @@ def nomina(bLN=True):
               				CO.AZUL, CO.FIN, len(stDed), len(stDed)+1, stDed,
                       CO.AZUL, CO.FIN, len(sNeto), len(sNeto)+1, sNeto)
     st += stl
-  ES.imprime(st.rstrip(' \t\n\r'))
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
 # funcion nomina
-def detalleConcepto(ced, sNombre, lCon, lDesc):
+def detalleConcepto(ci, sNombre, lCon, lDesc):
   'Muestra el detalle de Concepto de un socio.'
   #  sTitulo = "Detalle de un Concepto"
   sMensaje = ''
   # 0:Cedula, 1:Concepto, 2:Valor fijo, 3: Valor variable, 4:Saldo, 5:Cuota
-  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, FG.formateaNumero(ced), 
+  sMensaje  = "%sSocio: %s %s%s\n" % (CO.CYAN, FG.formateaNumero(ci), 
                                       sNombre.lstrip().split('|')[0], CO.FIN)	# Cedula, Nombre, Codigo y descripcion del concepto.
   sVaFij = FG.formateaNumero(lCon[2], 2)	# Valor fijo
   sVaVar = FG.formateaNumero(lCon[3], 2)	# Valor variable
@@ -164,13 +165,13 @@ def detalleConcepto(ced, sNombre, lCon, lDesc):
   sMensaje += "%sMonto de la cuota:%s BsF. %*.*s\n" % (CO.AZUL, CO.FIN,
                                               len(sCuota), len(sCuota), sCuota)
   # Fin for
-  ES.imprime(sMensaje.rstrip(' \t\n\r'))
+  opc = ES.imprime(sMensaje.rstrip(' \t\n\r'))
+  return opc
 # funcion detalleConcepto
-def concepto(bLN=True):
+def concepto(ci=-1, bLN=True):
   '''Maneja la lista de los conceptos de un socio en Nomina y
     muestra el detalle de cualquiera de los conceptos.'''
   global lNom, lNomCNE
-  from ipa.AhorroYPrestamo import cig as ci
 
   if bLN: lN = lNom
   else: lN   = lNomCNE
@@ -196,17 +197,17 @@ def concepto(bLN=True):
     if None == indice or 0 > indice: return None
     # if indice < len(lCodigo): detalleConcepto(ci, sNombre, lConcepto[indice], lDescripcion[indice].lstrip().split(':')[1])
     if indice < len(lCodigo):
-      detalleConcepto(ci, sNombre, lConcepto[indice],
+      return detalleConcepto(ci, sNombre, lConcepto[indice],
                                                 COM.mConcepto(lCodigo[indice]))
     else: return None
 # funcion concepto
-def nominacne():
+def nominacne(ci=-1):
   '''Maneja la lista de conceptos de nomina de un socio y
     muestra la informacion.'''
-  nomina(False)
+  return nomina(ci, False)
 # funcion nominacne
-def conceptocne():
-  concepto(False)
+def conceptocne(ci=-1):
+  return concepto(ci, False)
 # funcion conceptocne
 lNom = ES.cargaLista("nomina.txt")		# [0]Cedula; [1]Concepto;
   											# [2]Valor fijo; [3]Valor variable; [4]Saldo; [5]Cuota

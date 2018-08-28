@@ -1,6 +1,10 @@
 # libComun: Rutinas comunes para ipaspudo.
 #-*-coding:utf8;-*-
+import types
 import json
+from ipa import AhorroYPrestamo as AP
+from ipa import ExtensionYServiFun as ESF
+from ipa import Nomina as NOM
 from lib import ES, Const as CO, General as FG
 
 try:
@@ -32,19 +36,19 @@ lMenu = [['Calcular cuota', 'cuota'],					            # 0
          ['Res Nomina homologacion', 'NOM.resNominaH'],		# 8
          ['Res Nomina completa', 'NOM.resNominaC'],			  # 9
          ['Res Nom comp con extras', 'NOM.resNominaCcE'],	# 10
-		 ['Cheque por cedula', 'chequeXCedula'], 
-         ['Ultimos deposito', 'heuteXCedula'], 
-         ['Disponibilidad', 'disponibilidad'], 
- 		 ['Prestamos', 'prestamos'],
- 		 ['Detalle prestamo', 'prestamo'],
-		 ['Extension', 'ESF.extension'], 
-		 ['Servifun', 'ESF.servifun'], 
-		 ['Servicio funerario', 'ESF.servicio'], 
-		 ['Nomina', 'NOM.nomina'],
-		 ['Detalle nomina', 'NOM.concepto'],
-		 ['Nomina con extras', 'NOM.nominacne'],
-		 ['Detalle nomina con extras', 'NOM.conceptocne'],
-		 ['Ubicacion', 'ubicacion'], 
+		 ['Cheque por cedula', 'AP.chequeXCedula'],           # 11, 0
+         ['Ultimos deposito', 'AP.heuteXCedula'],         # , 1
+         ['Disponibilidad', 'AP.disponibilidad'],         # , 2
+ 		 ['Prestamos', 'AP.prestamos'],                       # , 3
+ 		 ['Detalle prestamo', 'AP.prestamo'],                 # , 4
+		 ['Extension', 'ESF.extension'],                      # , 5
+		 ['Servifun', 'ESF.servifun'],                        # , 6
+		 ['Servicio funerario', 'ESF.servicio'],              # , 7
+		 ['Nomina', 'NOM.nomina'],                            # , 8
+		 ['Detalle nomina', 'NOM.concepto'],                  # , 9
+		 ['Nomina con extras', 'NOM.nominacne'],              # , 10
+		 ['Detalle nomina con extras', 'NOM.conceptocne'],    # , 11
+		 ['Ubicacion', 'AP.ubicacion'],                       # , 12
 		 ['Salir', 'salir']
 		]
 
@@ -61,7 +65,7 @@ def cedulaI(ciAnt):
   
   while True:
     ci = ES.entradaNumero(droid, "CEDULA DE IDENTIDAD",
-                  "Cedula de identidad del socio", str(ciAnt), True, True, True)
+                "Cedula de identidad del socio", str(ciAnt), True, True, True)
     if 0 == ci: return -1
     if ci < 100000:
       print('Debe introducir un número entero de 6 o más dígitos')
@@ -146,15 +150,16 @@ def mSocio(Nombre, ci, bCadena=True):
   if not bCadena:
     st += "\n" + CO.AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[5])
     st += "\n" + CO.AZUL + "Servicio funerario:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[6])
-  ES.imprime(st)
+  opc = ES.imprime(st)
+  return opc
 # Funcion mSocio
-def aSocio(lPer, cig):    # Esta funcion no se utiliza.
+def aSocio(lPer, ci):    # Esta funcion no se utiliza.
   global dPer
 
   try:
-    sNombre = dPer.get(str(cig), "NO")
+    sNombre = dPer.get(str(ci), "NO")
   except UnicodeError:
-    print('ERROR: ' + str(cig) + '|' + json.dumps(lPer))
+    print('ERROR: ' + str(ci) + '|' + json.dumps(lPer))
     return False
   if ("NO" == sNombre):
     fPer = ES.abrir('persona.txt', 'a')
@@ -162,7 +167,7 @@ def aSocio(lPer, cig):    # Esta funcion no se utiliza.
     if fPer:
       try:
         if (6 <= len(lPer)):
-          fPer.write(str(cig) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' + lPer[3] + '|' + lPer[4] + '|' + lPer[5][0:1] + "\n")
+          fPer.write(str(ci) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' + lPer[3] + '|' + lPer[4] + '|' + lPer[5][0:1] + "\n")
       except:
         pass
       fPer.close()
@@ -195,6 +200,55 @@ def mEstado(sI= '0'):
 def creaOp(l):
   return ("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1], extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6]))
 # Funcion creaOp
+def buscarNombre():
+  global dPer
+
+  nombre = ES.entradaNombre(droid, 'Nombre del socio')
+  if None == nombre:
+    return -10, None
+  nombres = []
+  cedulas = []
+  try:
+    for k,v in dPer.items():
+      if 0 <= v.lower().find(nombre.lower()):
+        nombres.append(v)
+        cedulas.append(k)
+  except UnicodeError: pass
+  if not nombres:
+    ES.alerta(droid, nombre, "No hubo coincidencias!")
+    return -10, None
+  indice = ES.entradaConLista(droid, 'SOCIOS ENCONTRADOS', 'Seleccione socio(a)', nombres)
+  if None == indice or 0 > indice: return -10, None
+  return int(cedulas[indice]), nombres[indice]
+# Funcion buscarNombre
+def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
+  ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Cedula>, <Nombre> ..... y <Salir>. '''
+
+  return FG.selOpcionMenu(lMenu[0:nOpciones] + lMenu[(len(lMenu)-1):], 'Inicio')
+# Funcion selFuncionInicial(nOpciones)
+def selFuncion(ci, nOpcion=6):
+  ''' Menu desplegado al suministrar una cedula o al encontrar la cedula de una
+      parte de un nombre suministrado.
+      Eliminados: ['Calcular cuota', 'cuota'], ['Cedula del socio', 'cedula'],
+      ['Buscar cedula del socio', 'nombre'], ['Cheques', 'cheque'],
+      ['Deposito por fecha', 'depositos'] '''
+
+  lNuevoMenu = lMenu[nOpcion:(len(lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las 4 primeras opciones + la opcion 'Volver'.
+  sTitulo    = str(ci) + ':' + nombreSocio(mNombre(ci))	# Titulo a desplegar con las opciones.
+  while True:
+    try:
+      func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
+    except:
+      return False
+    while True:
+      if isinstance(func, types.FunctionType):
+        opc = func(ci)	    # Si la cadena evaluada es una funcion, ejecutela.
+        if FG.esEntero(opc): opc = str(opc)
+        if '' == opc or None == opc or not opc.isdigit() or (opc.isdigit() and
+                        (0 > int(opc) or len(lNuevoMenu) <= int(opc))): break
+        func = eval(lNuevoMenu[int(opc)][1])
+      else: return False
+# Funcion selFuncion
 
 # Definir variables globales
 def prepararDiccionariosDeTrabajo():

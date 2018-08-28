@@ -1,6 +1,5 @@
 # libAhorroYPrestamo: Modulo de ahorro y prestamo para IPASPUDO.
 #-*-coding:utf8;-*-
-import types
 from operator import itemgetter, attrgetter
 from ipa import ExtensionYServiFun as ESF
 from ipa import Nomina as NOM
@@ -84,33 +83,34 @@ def mCheque(lChe):
   st += "Banco:%+10.9s (%-.6s [%s]); Est:%+7.6s\nBeneficiario: %-12.11s%-30.30s\nConcepto: %-31.30s\nFecha:%+11.10s Monto: %-15.14s" % \
   			 (COM.mBanco(lChe[0]), lChe[1], sDesc, COM.mEstado(lChe[7]), FG.formateaNumero(lChe[2]), COM.extraeNombre(lChe[3]),\
   			 lChe[5], lChe[4], FG.formateaNumero(lChe[6], 2))
-  ES.imprime(st.rstrip(' \t\n\r'))
-  return True
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
 # Funcion mCheque
-
 def cheque():
   'Maneja la lista de cheques y muestra la informacion de uno o varios cheque(s).'
   global lCh
   ch = ES.entradaNumero(droid, "CHEQUE", "Numero de cheque", "0", True, True)
   if None == ch or 0 > ch:
     ES.alerta(droid, 'CHEQUE', "Cheque no encontrado!")
-    return
+    return None
   if 0 == ch:
     nCh = lCheques()
-    if not nCh: return
+    if not nCh: return None
     else:
       mCheque(nCh)
-      return
+      return None
   bEnc = False
   for l in lCh:
     if ch > int(l[1]): continue
     elif ch == int(l[1]):
       bEnc = True
       mCheque(l)
-#      return	# Comentada para poder mostrar mas de un cheque con el mismo numero.
+  # return	# Comentada para poder mostrar mas de un cheque con el mismo numero.
     else: break
-# Fin for
-  if not bEnc: ES.alerta(droid, 'CHEQUE', "El cheque %5d no fue encontrado." % ch)
+  # Fin for
+  if not bEnc: ES.alerta(droid, 'CHEQUE', "El cheque %5d no fue encontrado." \
+                                                                        % ch)
+  return None
 # Funcion cheque
 def depositos():
   'Maneja la lista de cheques y muestra los depositos de una fecha especifica.'
@@ -131,12 +131,11 @@ def depositos():
   if None == indice or 0 > indice: return -3
   mCheque(lDep[indice])
 # Funcion depositos
-def chequeXCedula(llCh=None):
+def chequeXCedula(ci, llCh=None):
   'Maneja la lista de cheques y muestra los cheques en transito de un socio.'
-  global lCh, cig
+  global lCh
   if None==llCh: llCh = lCh
 
-  ci = cig
   if 0 >= ci: return -2
 
   lCheq = [l for l in llCh if '' != l[2] and ci == int(l[2])]    # Nueva lista de cheques.
@@ -152,17 +151,17 @@ def chequeXCedula(llCh=None):
   if None == indice or 0 > indice: return -2
   mCheque(lCheq[indice])
 # Funcion chequeXCedula
-def heuteXCedula():
+def heuteXCedula(ci):
   global lHeute
 
-  chequeXCedula(lHeute)
+  chequeXCedula(ci, lHeute)
 # Funcion heuteXCedula
-def disponibilidad():
+def disponibilidad(ci):
   'Maneja la lista de conceptos de un socio y muestra la informacion.'
-  global lSi, cig
+  global lSi
 
   dConc = CO.dConceptos
-  ci = cig; sNombre = COM.mNombre(ci)
+  sNombre = COM.mNombre(ci)
   if 0 >= ci: return -4
 
   st = CO.AMARI + COM.lFecha("Sinca", "Disponibilidad") + ' (Descargado:' + CO.FIN + COM.lFecha('disponibilidad.txt', '') + ')' + "\n"	# 'Conta' se refiere al sistema de contabilidad.
@@ -193,13 +192,13 @@ def disponibilidad():
   else:
     st += CO.AZUL + ('Dividendo ' + CO.anoDividendo).rjust(20) + CO.FIN + ': '  + FG.formateaNumero(COM.mDividendo(ci), 2).ljust(12) + '\n'
 #    ES.alerta(droid, 'DISPONIBILIDAD', '%s: %12s' % (sNombre, FG.formateaNumero(disp, 2)))
-  ES.imprime(st.rstrip(' \t\n\r'))
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
 # Funcion disponibilidad
-def prestamos():
+def prestamos(ci):
   'Maneja la lista de conceptos de prestamos de un socio y muestra la informacion.'
-  global lPre, cig
+  global lPre
 
-  ci = cig
   if 0 >= ci: return -5
 
   st = CO.AMARI + COM.lFecha("Sinca", "Prestamos") + ' (Descargado:' + CO.FIN + COM.lFecha('prestamos.txt', '') + ')' + "\n"
@@ -222,7 +221,7 @@ def prestamos():
     elif l[0] in ('','0',str(ci)):
       nF += 1
       sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-# 0:Cedula,1:Concepto,2:monto solicitado,3:Monto total(Concedido + intereses);4:Saldo;5:Saldo total(Saldo + intereses);6:Cuota,7:Fecha inicial (mm/aa),8:ult actualizacion (mm),9:cuotas (pagadas/total)
+      # 0:Cedula,1:Concepto,2:monto solicitado,3:Monto total(Concedido + intereses);4:Saldo;5:Saldo total(Saldo + intereses);6:Cuota,7:Fecha inicial (mm/aa),8:ult actualizacion (mm),9:cuotas (pagadas/total)
       stl = sColor + l[1] + ' ' + COM.mConcepto(l[1])[0:nCarDesc].ljust(nCarDesc, " ") + ' ' +\
       		FG.formateaNumero(l[4]).rstrip().rjust(9) + FG.formateaNumero(l[6]).rstrip().rjust(7) + ' ' + l[7].rstrip().rjust(5)
       if bExtra: stl += ' ' + FG.formateaNumero(l[2]).rstrip().rjust(9) + ' ' +\
@@ -231,12 +230,13 @@ def prestamos():
       stl += CO.FIN
       if 1 == nF: stl = CO.CYAN + FG.formateaNumero(ci) + ':' + COM.nombreSocio(COM.mNombre(ci)) + CO.FIN + "\n" +\
       					sTitPrestamos + stl
-#      if '0.00' != l[2].rstrip():		# Comparar, cuando agregar la linea. Solicitado = 0.00. Mes ult. act .vs. fecha.
+      # if '0.00' != l[2].rstrip():		# Comparar, cuando agregar la linea. Solicitado = 0.00. Mes ult. act .vs. fecha.
       st += stl + '\n'
     else: break
-# Fin for
+  # Fin for
   if 0 >= nF: st = COM.noCedula(ci)
-  ES.imprime(st.rstrip(' \t\n\r'))
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
 # Funcion prestamos
 def detallePrestamo(ced, sNombre, lPres, lDesc):
   '''Muestra el detalle de prestamo de un socio.'''
@@ -263,13 +263,14 @@ def detallePrestamo(ced, sNombre, lPres, lDesc):
   sMensaje += "%sFecha de la solicitud:%s %s\n" % (CO.AZUL, CO.FIN, lPres[7])
   if 0 < len(lPres[8]): sMensaje += "%sMes ult Actualizacion:%s %s\n" % (CO.AZUL, CO.FIN, lPres[8])
   if 0 < len(lPres[9]): sMensaje += "%sNumero de cuotas:%s %s\n" % (CO.AZUL, CO.FIN, lPres[9])
-  ES.imprime(sMensaje.rstrip(' \t\n\r'))
+  opc = ES.imprime(sMensaje.rstrip(' \t\n\r'))
+  return opc
 # Funcion detallePrestamo
-def prestamo():
+def prestamo(ci):
   'Maneja la lista de los prestamos de un socio en Prestamos y muestra el detalle de cualquiera de los prestamos.'
-  global lPre, cig
+  global lPre
 
-  ci = cig; sNombre = COM.mNombre(ci)
+  sNombre = COM.mNombre(ci)
   if 0 >= ci: return -21
 
   nF = 0
@@ -284,20 +285,20 @@ def prestamo():
       lPrestamo.append(l)						# Lista del prestamo
       nF += 1
     else: break
-# Fin for
+  # Fin for
   if 0 >= nF: return None
   else:
-    indice      = ES.entradaConLista(droid, 'Prestamos', '', lDescripcion)
+    indice = ES.entradaConLista(droid, 'Prestamos', '', lDescripcion)
     if None == indice or 0 > indice: return None
-#    if indice < len(lCodigo): detallePrestamo(ci, sNombre, lPrestamo[indice], lDescripcion[indice].lstrip().split(':')[1])
-    if indice < len(lCodigo): detallePrestamo(ci, sNombre, lPrestamo[indice], COM.mConcepto(lCodigo[indice]))
+    # if indice < len(lCodigo): detallePrestamo(ci, sNombre, lPrestamo[indice], lDescripcion[indice].lstrip().split(':')[1])
+    if indice < len(lCodigo): return detallePrestamo(ci, sNombre,
+                             lPrestamo[indice], COM.mConcepto(lCodigo[indice]))
     else: return None
 # Funcion prestamo
-def ubicacion():
+def ubicacion(ci):
   'Maneja la lista con los telefonos y correo electronico de cada socio.'
-  global lUb, cig
+  global lUb
 
-  ci = cig
   if 0 >= ci: return -9
 
   st = CO.AMARI + COM.lFecha('Sinca', 'Ubicacion') + ' (Descargado:' + CO.FIN + COM.lFecha('ubicacion.txt', '') + ')' + "\n"
@@ -329,52 +330,9 @@ def ubicacion():
     else: break
 # Fin for
   if 0 >= nF: st = COM.noCedula(ci)
-  ES.imprime(st)
+  opc = ES.imprime(st)
+  return opc
 # Funcion ubicacion
-def buscarNombre():
-  global cig
-
-  nombre = ES.entradaNombre(droid, 'Nombre del socio')
-  if None == nombre:
-    return -10, None
-  nombres = []
-  cedulas = []
-  try:
-    for k,v in COM.dPer.items():
-      if 0 <= v.lower().find(nombre.lower()):
-        nombres.append(v)
-        cedulas.append(k)
-  except UnicodeError: pass
-  if not nombres:
-    ES.alerta(droid, nombre, "No hubo coincidencias!")
-    return -10, None
-  indice = ES.entradaConLista(droid, 'SOCIOS ENCONTRADOS', 'Seleccione socio(a)', nombres)
-  if None == indice or 0 > indice: return -10, None
-  cig = int(cedulas[indice])
-  return cig, nombres[indice]
-# Funcion buscarNombre
-def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
-  ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Cedula>, <Nombre> ..... y <Salir>. '''
-
-  return FG.selOpcionMenu(COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
-# Funcion selFuncionInicial(nOpciones)
-def selFuncion(nOpcion=6):
-  ''' Menu desplegado al suministrar una cedula o al encontrar la cedula de una
-      parte de un nombre suministrado.
-      Eliminados: ['Calcular cuota', 'cuota'], ['Cedula del socio', 'cedula'],
-      ['Buscar cedula del socio', 'nombre'], ['Cheques', 'cheque'],
-      ['Deposito por fecha', 'depositos'] '''
-
-  lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las 4 primeras opciones + la opcion 'Volver'.
-  sTitulo    = str(cig) + ':' + COM.nombreSocio(COM.mNombre(cig))	# Titulo a desplegar con las opciones.
-  try:
-    func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
-  except:
-    return False
-  if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
-  else: return False
-  return True
-# Funcion selFuncion
 
 # Definir variables globales
 def prepararListasDeTrabajo():
@@ -394,6 +352,4 @@ def prepararListasDeTrabajo():
   											# [1]Telefono habitacion; [2]Telefono trabajo; [3]Celular 1; [4]Celular 2;
   											# [5]Correo electronico
 # Funcion prepararListasDeTrabajo
-cig    = -1
-utg    = CO.UT
 fErr   = ES.abrirErr("ipaspudo.err")

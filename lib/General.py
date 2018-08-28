@@ -32,6 +32,11 @@ formateaNumeroTelefono = lambda sNum: (sNum if (10!=len(sNum)) else
 #	else: return "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:])
 # funcion formateaNumeroTelefono
 
+def esEntero(v):
+    v = str(v).strip()
+    return v=='0' or (v if v.find('..') > -1 else \
+                            v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
+# Funcion esEntero
 def formateaNumero(sCad, dec=0):
   if (not isinstance(sCad, str) and not isinstance(sCad, float) and \
       not isinstance(sCad, int)) and ((None != dec) and not dec.isinteger()):

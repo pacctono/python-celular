@@ -28,6 +28,7 @@ def cuota(droid=None, bImp=True):
 		else: sFormCuota = "%sMo:%s%s,%s#Mes:%s%s,%sI:%s%s,%sCta:%s%s"
 		sMsj = sFormCuota % (CO.AZUL, CO.FIN, FG.formateaNumero(rM), CO.AZUL, CO.FIN, FG.formateaNumero(iN), CO.AZUL, CO.FIN,\
 										FG.formateaNumero(rI, 2), CO.AZUL, CO.FIN, FG.formateaNumero(c, 2))
-		ES.imprime(sMsj.rstrip(' \t\n\r'))
+		opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
+		return opc
 	return rM, iN, rI, c
 # funcion cuota

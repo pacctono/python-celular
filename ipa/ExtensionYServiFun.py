@@ -18,10 +18,9 @@ if bMovil:
   droid = android.Android()
 else: droid = None
 
-def extension():
+def extension(ci=-1):
   'Maneja la lista de la carga de un socio en la extension y muestra la informacion.'
   global lCgE
-  from ipa.AhorroYPrestamo import cig as ci
 
   if 0 >= ci: return -6
 
@@ -88,12 +87,12 @@ def extension():
     stl = "TOTAL Anual: %-*.*s (mensual: %-*.*s)" % (len(str(frC)), len(str(frC))+1, frC, \
 									len(fmC), len(str(fmC))+1, fmC)
     st += CO.CYAN + stl + CO.FIN
-  ES.imprime(st)
+  opc = ES.imprime(st)
+  return opc
 # Funcion extension
-def servifun():
+def servifun(ci=-1):
   'Maneja la lista de la carga de un socio en ServiFun y muestra la informacion.'
   global lCgS
-  from ipa.AhorroYPrestamo import cig as ci
 
   if 0 >= ci: return -7
 
@@ -148,33 +147,33 @@ def servifun():
       sC = "mayor o igual a Bs. %*s" % (len(sfC), sfC)
     stl = "La cuota mensual es " + sC
     st += CO.CYAN + stl + CO.FIN
-  ES.imprime(st.rstrip(' \t\n\r'))
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
 # Funcion servifun
 def servicioEspecifico(sCodigo, sNombre):
   'Muestra las indemnizaciones de ServiFun usando la lista con los parentesco.'
   global lPa
-  from ipa.AhorroYPrestamo import utg
   #  sTitulo = "Servifun"
   sMensaje = ''
   for l in lPa:
     if sCodigo != l[0]: continue			# Codigo del parentesco
     sMensaje  = "%sServicios p/(%s) %s: %s%s\n" % (CO.CYAN, l[0], l[1], sNombre.lstrip().split('|')[0], CO.FIN)	# Codigo, descripcion del parentesco
-    if 14 <= len(l): rLp = int(l[13]) * float(utg)			# Lapida
+    if 14 <= len(l): rLp = int(l[13]) * float(CO.UT)			# Lapida
     else: rLp = 0
     sLp = FG.formateaNumero(rLp, 2)		# Lapida formateado
-    if 13 <= len(l): rCr = int(l[12]) * float(utg)			# Cremacion
+    if 13 <= len(l): rCr = int(l[12]) * float(CO.UT)			# Cremacion
     else: rCr = 0
     sCr = FG.formateaNumero(rCr, 2)		# Cremacion formateado
-    if 12 <= len(l): rFo = int(l[11]) * float(utg)			# Fosa
+    if 12 <= len(l): rFo = int(l[11]) * float(CO.UT)			# Fosa
     else: rFo = 0
     sFo = FG.formateaNumero(rFo, 2)		# Fosa formateado
-    if 11 <= len(l): rTr = int(l[10]) * float(utg)			# Traslado
+    if 11 <= len(l): rTr = int(l[10]) * float(CO.UT)			# Traslado
     else: rTr = 0
     sTr = FG.formateaNumero(rTr, 2)		# Traslado formateado
-    if 10 <= len(l): rSv = int(l[9]) * float(utg)			# Servicio
+    if 10 <= len(l): rSv = int(l[9]) * float(CO.UT)			# Servicio
     else: rSv = 0
     sSv = FG.formateaNumero(rSv, 2)		# Servicio formateado
-    if 9 <= len(l): rAy = int(l[8]) * float(utg)			# Ayuda
+    if 9 <= len(l): rAy = int(l[8]) * float(CO.UT)			# Ayuda
     else: rAy = 0
     sAy = FG.formateaNumero(rAy, 2)		# Ayuda formateado
     sMensaje += "%sAyuda:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sAy), len(sAy), sAy, l[8])
@@ -184,12 +183,12 @@ def servicioEspecifico(sCodigo, sNombre):
     if 0 < rCr: sMensaje += "%sCremacion:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sCr), len(sCr), sCr, l[12])
     if 0 < rLp: sMensaje += "%sLapida:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sLp), len(sLp), sLp, l[13])
   # Fin for
-  ES.imprime(sMensaje.rstrip(' \t\n\r'))
+  opc = ES.imprime(sMensaje.rstrip(' \t\n\r'))
+  return opc
 # Funcion servicioEspecifico
-def servicio():
+def servicio(ci=-1):
   'Maneja la lista de la carga de un socio en ServiFun y muestra la cobertura a cualquiera de la carga.'
   global lCgS, lPa
-  from ipa.AhorroYPrestamo import cig as ci
 
   if 0 >= ci: return -7
 

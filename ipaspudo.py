@@ -39,14 +39,14 @@ def leeValXDefecto():
       lIpa = json.loads(sIpa)
       sUXD = lIpa[0]		# Usuario por defecto
       sCXD = lIpa[1]		# Contraseña por defecto
-      AP.cig  = lIpa[2]		# Cedula por defecto. Esta linea es solo para mejorar la vista.
+      cig  = lIpa[2]		# Cedula por defecto. Esta linea es solo para mejorar la vista.
     except: pass
     finally: fIpa.close()
-  return sUXD, sCXD
+  return cig, sUXD, sCXD
 # funcion leeValXDefecto
-def escValXDefecto(sUXD, sCXD):
+def escValXDefecto(sUXD, sCXD, cig):
 
-  lIpa = [sUXD, sCXD, AP.cig]
+  lIpa = [sUXD, sCXD, cig]
   fIpa = ES.abrir("ipaspudo.txt", 'w')
   if fIpa:
     try: fIpa.write(json.dumps(lIpa))
@@ -72,41 +72,37 @@ else: print('Diccionarios listos!')
 ES.muestraInicio("IPASPUDO: J-30619229-8.")
 if droid: droid.dialogSetCurrentProgress(95)
 
-sUXD, sCXD = leeValXDefecto()
+cig, sUXD, sCXD = leeValXDefecto()
 if droid:
   droid.dialogSetCurrentProgress(100)
   droid.dialogDismiss()
 
 nOp = 11
 while True:
-  sOpcion = AP.selFuncionInicial(nOp)
+  sOpcion = COM.selFuncionInicial(nOp)
 
   if 'cuota' == sOpcion: CU.cuota(droid)
   elif 'salir' == sOpcion or None == sOpcion: break
   elif isinstance(sOpcion, int) and 0 > int(sOpcion): break
   elif 'cedula' == sOpcion:
-    ci, sNombre = COM.valSocio(AP.cig)
+    ci, sNombre = COM.valSocio(cig)
     if (0 < ci):
-      AP.cig = ci
+      cig = ci
       COM.mSocio(sNombre, ci)
-      bSF = True              # Función seleccionada.
-      while bSF:
-        bSF = AP.selFuncion(nOp)
+      COM.selFuncion(ci, nOp)
   elif 'nombre' == sOpcion:
-    ci, sNombre = AP.buscarNombre()
+    ci, sNombre = COM.buscarNombre()
     if (0 < ci):
-      if ci != AP.cig:
+      if ci != cig:
         COM.mSocio(sNombre, ci)
-        AP.cig = ci
-      bSF = True            # Función seleccionada.
-      while bSF:
-        bSF = AP.selFuncion(nOp)
+        cig = ci
+      COM.selFuncion(ci, nOp)
   else:
     func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
     else: break
 # Fin while True
 
-escValXDefecto(sUXD, sCXD)
+escValXDefecto(sUXD, sCXD, cig)
 ES.muestraFin()
 # Fin del programa

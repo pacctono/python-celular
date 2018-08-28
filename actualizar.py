@@ -18,7 +18,7 @@ if bMovil:
 else: droid = None
 
 import socket, sys
-from lib import ES, Const as CO
+from lib import ES, Const as CO, General as FG
 from urllib.request import urlopen
 from time import time, localtime, strftime, ctime
 from os import stat
@@ -99,7 +99,7 @@ try:
 except:
 	lControl = [['0', nombArch] for nombArch in lDATA]
 dControl = {linea[1].strip():[linea[0].strip(), linea[0].strip()]
-					for linea in lControl if ES.esEntero(linea[0].strip())}
+					for linea in lControl if FG.esEntero(linea[0].strip())}
 lBancosHoy = None		# La lista de bancos de hoy esta vacia al principio.
 for DATA in lDATA:
 	if 'control.txt' != DATA:
