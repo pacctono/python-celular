@@ -214,7 +214,8 @@ def servicio(ci=-1):
   else:
     indice      = ES.entradaConLista(droid, 'Parentesco', '', lParentesco)
     if None == indice or 0 > indice: return None
-    if indice < len(lCodigo): servicioEspecifico(lCodigo[indice], lNombre[indice])
+    if indice < len(lCodigo): return servicioEspecifico(lCodigo[indice],
+                                                              lNombre[indice])
     else: return None
 # Funcion servicio
 

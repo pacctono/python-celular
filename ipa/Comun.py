@@ -2,9 +2,6 @@
 #-*-coding:utf8;-*-
 import types
 import json
-from ipa import AhorroYPrestamo as AP
-from ipa import ExtensionYServiFun as ESF
-from ipa import Nomina as NOM
 from lib import ES, Const as CO, General as FG
 
 try:
@@ -221,34 +218,6 @@ def buscarNombre():
   if None == indice or 0 > indice: return -10, None
   return int(cedulas[indice]), nombres[indice]
 # Funcion buscarNombre
-def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
-  ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Cedula>, <Nombre> ..... y <Salir>. '''
-
-  return FG.selOpcionMenu(lMenu[0:nOpciones] + lMenu[(len(lMenu)-1):], 'Inicio')
-# Funcion selFuncionInicial(nOpciones)
-def selFuncion(ci, nOpcion=6):
-  ''' Menu desplegado al suministrar una cedula o al encontrar la cedula de una
-      parte de un nombre suministrado.
-      Eliminados: ['Calcular cuota', 'cuota'], ['Cedula del socio', 'cedula'],
-      ['Buscar cedula del socio', 'nombre'], ['Cheques', 'cheque'],
-      ['Deposito por fecha', 'depositos'] '''
-
-  lNuevoMenu = lMenu[nOpcion:(len(lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las 4 primeras opciones + la opcion 'Volver'.
-  sTitulo    = str(ci) + ':' + nombreSocio(mNombre(ci))	# Titulo a desplegar con las opciones.
-  while True:
-    try:
-      func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
-    except:
-      return False
-    while True:
-      if isinstance(func, types.FunctionType):
-        opc = func(ci)	    # Si la cadena evaluada es una funcion, ejecutela.
-        if FG.esEntero(opc): opc = str(opc)
-        if '' == opc or None == opc or not opc.isdigit() or (opc.isdigit() and
-                        (0 > int(opc) or len(lNuevoMenu) <= int(opc))): break
-        func = eval(lNuevoMenu[int(opc)][1])
-      else: return False
-# Funcion selFuncion
 
 # Definir variables globales
 def prepararDiccionariosDeTrabajo():

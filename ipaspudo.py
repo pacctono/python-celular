@@ -25,7 +25,7 @@ from ipa import GanYPer as GyP
 from ipa import ExtensionYServiFun as ESF
 from ipa import Nomina as NOM
 from ipa import Comun as COM
-from lib import ES, Cuota as CU
+from lib import ES, Cuota as CU, General as FG
 
 def leeValXDefecto():
 
@@ -54,6 +54,36 @@ def escValXDefecto(sUXD, sCXD, cig):
     finally: fIpa.close()
   else: print("No se grabaron los valores por defecto!")
 # funcion escValXDefecto
+def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
+  ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Cedula>,
+    <Nombre> ..... y <Salir>. '''
+
+  return FG.selOpcionMenu(
+            COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
+# Funcion selFuncionInicial(nOpciones)
+def selFuncion(ci, nOpcion=6):
+  ''' Menu desplegado al suministrar una cedula o al encontrar la cedula de una
+      parte de un nombre suministrado.
+      Eliminados: ['Calcular cuota', 'cuota'], ['Cedula del socio', 'cedula'],
+      ['Buscar cedula del socio', 'nombre'], ['Cheques', 'cheque'],
+      ['Deposito por fecha', 'depositos'] '''
+
+  lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las opciones generales + la opcion 'Volver'.
+  sTitulo    = str(ci) + ':' + COM.nombreSocio(COM.mNombre(ci))	# Titulo a desplegar con las opciones.
+  while True:
+    try:
+      func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
+    except:
+      return False
+    while True:
+      if isinstance(func, types.FunctionType):
+        opc = func(ci)	    # Si la cadena evaluada es una funcion, ejecutela.
+        if FG.esEntero(opc): opc = str(opc)
+        if '' == opc or None == opc or not opc.isdigit() or (opc.isdigit() and
+                        (0 > int(opc) or len(lNuevoMenu) <= int(opc))): break
+        func = eval(lNuevoMenu[int(opc)][1])
+      else: return False
+# Funcion selFuncion
 
 esperar = 'Espere un momento, por favor...'
 if droid:
@@ -79,7 +109,7 @@ if droid:
 
 nOp = 11
 while True:
-  sOpcion = COM.selFuncionInicial(nOp)
+  sOpcion = selFuncionInicial(nOp)
 
   if 'cuota' == sOpcion: CU.cuota(droid)
   elif 'salir' == sOpcion or None == sOpcion: break
@@ -89,14 +119,14 @@ while True:
     if (0 < ci):
       cig = ci
       COM.mSocio(sNombre, ci)
-      COM.selFuncion(ci, nOp)
+      selFuncion(ci, nOp)
   elif 'nombre' == sOpcion:
     ci, sNombre = COM.buscarNombre()
     if (0 < ci):
       if ci != cig:
         COM.mSocio(sNombre, ci)
         cig = ci
-      COM.selFuncion(ci, nOp)
+      selFuncion(ci, nOp)
   else:
     func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
