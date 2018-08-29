@@ -107,13 +107,17 @@ for DATA in lDATA:
 	else: timeAnterior = timeNuevo = 0
 	segsDiferencia = int(timeNuevo) - int(timeAnterior)
 	sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
-	print("%sLeyendo%s %s remoto. Local modificado en: %d seg posteriores" %
+	print("%sLeyendo%s %s remoto. Local modificado hace: %d seg del remoto" %
 						(sColor, CO.FIN, DATA, segsDiferencia))
 	if 'control.txt' != DATA and 0 >= segsDiferencia:
 		if 0 == segsDiferencia:
 			print("%s, %slocal; ya esta actualizado con%s %d lineas! El %s" % \
-			(DATA, sColor, CO.FIN, ES.cLineas(DATA), ctime(int(timeAnterior))))
-		continue
+								(DATA, sColor, CO.FIN, ES.cLineas(DATA),
+													ctime(int(timeAnterior))))
+			continue
+		elif 'archsBanco.txt' != DATA:
+			print("%s %sno está en el archivo de control!%s" % (DATA, CO.ROJO,
+																	CO.FIN))
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.

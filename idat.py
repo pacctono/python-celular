@@ -38,7 +38,7 @@ if bMovil:
   def cargarNombres(nombArch='IDAT*.TXT'):
     rutaDatos = DIR
 
-    lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and \
+    lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and\
                                                 fnmatch.fnmatch(f, nombArch)]
     lFiles.sort()
 

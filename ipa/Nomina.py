@@ -23,7 +23,7 @@ def resNominaN(lN=None):
   global lNomN
   if None == lN: lN = lNomN
   
-  st = CO.AMARI + COM.lFecha("Nomina", "Nomina") + ' (Descargado:' + CO.FIN + \
+  st = CO.AMARI + COM.lFecha("Nomina", "Nomina") + ' (Descargado:' + CO.FIN +\
                                       COM.lFecha('nomina.txt', '') + ')' + "\n"
   ftValFi = 0.00
   ftValVa = 0.00
@@ -31,7 +31,7 @@ def resNominaN(lN=None):
   bImpar  = True
 
   sTitNomina  = CO.AZUL + "CON".ljust(4) + 'DESCRIPCION'.ljust(25) +\
-                      "VALOR FIJO".rjust(16) + "VALOR VARIABLE".rjust(16) + \
+                      "VALOR FIJO".rjust(16) + "VALOR VARIABLE".rjust(16) +\
                       "T O T A L".rjust(16) + CO.FIN + "\n"
   st += sTitNomina
   for l in lN:
@@ -77,7 +77,7 @@ def nomina(ci=-1, bLN=True):
   else: lN   = lNomCNE
   if 0 >= ci: return -8
 
-  st = CO.AMARI + COM.lFecha("Nomina", "Nomina") + ' (Descargado:' + CO.FIN + \
+  st = CO.AMARI + COM.lFecha("Nomina", "Nomina") + ' (Descargado:' + CO.FIN +\
                                       COM.lFecha('nomina.txt', '') + ')' + "\n"
   nF = 0
   ftAsig = 0.00

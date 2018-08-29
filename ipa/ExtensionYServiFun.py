@@ -19,12 +19,14 @@ if bMovil:
 else: droid = None
 
 def extension(ci=-1):
-  'Maneja la lista de la carga de un socio en la extension y muestra la informacion.'
+  '''Maneja la lista de la carga de un socio en la extension y
+    muestra la informacion.'''
   global lCgE
 
   if 0 >= ci: return -6
 
-  st = CO.AMARI + COM.lFecha("Extension", "Extension") + ' (Descargado:' + CO.FIN + COM.lFecha('extension.txt', '') + ')' + "\n"
+  st = CO.AMARI + COM.lFecha("Extension", "Extension") + ' (Descargado:' +\
+                        CO.FIN + COM.lFecha('extension.txt', '') + ')' + "\n"
   nF = 0											# Numero de filas
   rC = 0.00											# Cuota
 
@@ -40,8 +42,9 @@ def extension(ci=-1):
     sParTi   = 'PAREN'
     nCarPare = 3
     sCuota = ' Cta.'
-  sTitExtension = CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare)\
-  						+ sCuota + '  AIng' + CO.FIN + "\n"
+  sTitExtension = CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE',
+                          nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare) +\
+  						            sCuota + '  AIng' + CO.FIN + "\n"
   if CO.bPantAmplia:
     sFormato  = '%s%10.10s %-*.*s %-*.*s%8.8s %s%s\n'
     nCarPare += 3
@@ -61,8 +64,8 @@ def extension(ci=-1):
           if '1250' == l[4]: nSumaAseg = 500000
           elif '500' == l[4]: nSumaAseg = 250000
           else: nSumaAseg = 0
-          st += CO.CYAN + "SUMA ASEGURADA: " + l[4] + "UT = BsF. " + FG.formateaNumero(nSumaAseg) +\
-          		CO.FIN + "\n" + sTitExtension
+          st += CO.CYAN + "SUMA ASEGURADA: " + l[4] + "UT = BsF. " +\
+                  FG.formateaNumero(nSumaAseg) + CO.FIN + "\n" + sTitExtension
         nF += 1
         rC += float(l[5])
         if 0 < float(l[5]):
@@ -71,8 +74,9 @@ def extension(ci=-1):
           else: sPar = l[3].lstrip().split(' ')[0][0:nCarPare]
           if 6 < len(l) and l[6].isdigit(): sAno = l[6]
           else: sAno = '----'
-          st += sFormato % (sColor, FG.formateaNumero(l[1]), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
-          					nCarPare, sPar, FG.formateaNumero(float(l[5])/12, iDec), sAno, CO.FIN)
+          st += sFormato % (sColor, FG.formateaNumero(l[1]), nCarNomb,
+                  nCarNomb, l[2].lstrip().split('|')[0], nCarPare, nCarPare,
+                  sPar, FG.formateaNumero(float(l[5])/12, iDec), sAno, CO.FIN)
       except Exception as ex:
         print('ex: ', ex)
 # Fin elif
@@ -84,21 +88,23 @@ def extension(ci=-1):
   else:
     frC = FG.formateaNumero(rC, 2)
     fmC = FG.formateaNumero(rC/12, 2)
-    stl = "TOTAL Anual: %-*.*s (mensual: %-*.*s)" % (len(str(frC)), len(str(frC))+1, frC, \
-									len(fmC), len(str(fmC))+1, fmC)
+    stl = "TOTAL Anual: %-*.*s (mensual: %-*.*s)" % (len(str(frC)),
+                        len(str(frC))+1, frC, len(fmC), len(str(fmC))+1, fmC)
     st += CO.CYAN + stl + CO.FIN
   opc = ES.imprime(st)
   return opc
 # Funcion extension
 def servifun(ci=-1):
-  'Maneja la lista de la carga de un socio en ServiFun y muestra la informacion.'
+  '''Maneja la lista de la carga de un socio en ServiFun y
+    muestra la informacion.'''
   global lCgS
 
   if 0 >= ci: return -7
 
   nF = 0
   fC = 0
-  st = CO.AMARI + COM.lFecha("Sinca", "ServiFun") + ' (Descargado:' + CO.FIN + COM.lFecha('servifun.txt', '') + ')' + "\n"
+  st = CO.AMARI + COM.lFecha("Sinca", "ServiFun") + ' (Descargado:' + CO.FIN +\
+        COM.lFecha('servifun.txt', '') + ')' + "\n"
   bImpar = True
 
   nCarMostrar, nCarNomb, maxCarLs = CO.carPorCampo(lCgS, 2, 23)	# Max numero cars de una linea, max # caracteres del campo.
@@ -113,8 +119,9 @@ def servifun(ci=-1):
     sParTi   = 'PAR'
     nCarPare = 3
     sEsp     = ''
-  st += CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE DE LA CARGA', nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare) +\
-  				sEsp + "FInsc" + " Ed" + CO.FIN + "\n"
+  st += CO.AZUL + "    CEDULA " + CO.justIzqTituloCol('NOMBRE DE LA CARGA',
+                        nCarNomb) + CO.justIzqTituloCol(sParTi, nCarPare) +\
+  				              sEsp + "FInsc" + " Ed" + CO.FIN + "\n"
 
   sFormato = '%s%10.10s %-*.*s %-*.*s %-5.5s%3d%s\n'
 # [0]Cedula; [1]Cedula carga;[2]Nombre(Nombre|Disponibilidad|A/N); [3]Parentesco;[4]Fecha ingreso a servifun
@@ -131,8 +138,9 @@ def servifun(ci=-1):
         elif (70 < nEd): fC += CO.CM70
       else: nEd = -1
       sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-      st += sFormato % (sColor, FG.formateaNumero(l[1], 0), nCarNomb, nCarNomb, l[2].lstrip().split('|')[0], nCarPare,\
-      					nCarPare, l[3], l[4], nEd, CO.FIN)
+      st += sFormato % (sColor, FG.formateaNumero(l[1], 0), nCarNomb,
+                        nCarNomb, l[2].lstrip().split('|')[0], nCarPare,
+      					        nCarPare, l[3], l[4], nEd, CO.FIN)
     else: break
 # Fin for
   if 0 >= nF: st = COM.noCedula(ci)
@@ -151,13 +159,15 @@ def servifun(ci=-1):
   return opc
 # Funcion servifun
 def servicioEspecifico(sCodigo, sNombre):
-  'Muestra las indemnizaciones de ServiFun usando la lista con los parentesco.'
+  '''Muestra las indemnizaciones de ServiFun usando
+    la lista con los parentesco.'''
   global lPa
   #  sTitulo = "Servifun"
   sMensaje = ''
   for l in lPa:
     if sCodigo != l[0]: continue			# Codigo del parentesco
-    sMensaje  = "%sServicios p/(%s) %s: %s%s\n" % (CO.CYAN, l[0], l[1], sNombre.lstrip().split('|')[0], CO.FIN)	# Codigo, descripcion del parentesco
+    sMensaje  = "%sServicios p/(%s) %s: %s%s\n" % (CO.CYAN, l[0], l[1],
+                        sNombre.lstrip().split('|')[0], CO.FIN)	# Codigo, descripcion del parentesco
     if 14 <= len(l): rLp = int(l[13]) * float(CO.UT)			# Lapida
     else: rLp = 0
     sLp = FG.formateaNumero(rLp, 2)		# Lapida formateado
@@ -176,18 +186,25 @@ def servicioEspecifico(sCodigo, sNombre):
     if 9 <= len(l): rAy = int(l[8]) * float(CO.UT)			# Ayuda
     else: rAy = 0
     sAy = FG.formateaNumero(rAy, 2)		# Ayuda formateado
-    sMensaje += "%sAyuda:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sAy), len(sAy), sAy, l[8])
-    sMensaje += "%sServicio:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sSv), len(sSv), sSv, l[9])
-    sMensaje += "%sTraslado:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sTr), len(sTr), sTr, l[10])
-    if 0 < rFo: sMensaje += "%sFosa (solo 1):%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sFo), len(sFo), sFo, l[11])
-    if 0 < rCr: sMensaje += "%sCremacion:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sCr), len(sCr), sCr, l[12])
-    if 0 < rLp: sMensaje += "%sLapida:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN, len(sLp), len(sLp), sLp, l[13])
+    sMensaje += "%sAyuda:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN,
+                                                len(sAy), len(sAy), sAy, l[8])
+    sMensaje += "%sServicio:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN,
+                                                len(sSv), len(sSv), sSv, l[9])
+    sMensaje += "%sTraslado:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL, CO.FIN,
+                                                len(sTr), len(sTr), sTr, l[10])
+    if 0 < rFo: sMensaje += "%sFosa (solo 1):%s BsF. %*.*s (%-3s UT)\n" %\
+                              (CO.AZUL, CO.FIN, len(sFo), len(sFo), sFo, l[11])
+    if 0 < rCr: sMensaje += "%sCremacion:%s BsF. %*.*s (%-3s UT)\n" %\
+                              (CO.AZUL, CO.FIN, len(sCr), len(sCr), sCr, l[12])
+    if 0 < rLp: sMensaje += "%sLapida:%s BsF. %*.*s (%-3s UT)\n" % (CO.AZUL,
+                                        CO.FIN, len(sLp), len(sLp), sLp, l[13])
   # Fin for
   opc = ES.imprime(sMensaje.rstrip(' \t\n\r'))
   return opc
 # Funcion servicioEspecifico
 def servicio(ci=-1):
-  'Maneja la lista de la carga de un socio en ServiFun y muestra la cobertura a cualquiera de la carga.'
+  '''Maneja la lista de la carga de un socio en ServiFun y
+    muestra la cobertura a cualquiera de la carga.'''
   global lCgS, lPa
 
   if 0 >= ci: return -7
@@ -212,7 +229,7 @@ def servicio(ci=-1):
 # Fin for
   if 0 >= nF: return None
   else:
-    indice      = ES.entradaConLista(droid, 'Parentesco', '', lParentesco)
+    indice = ES.entradaConLista(droid, 'Parentesco', '', lParentesco)
     if None == indice or 0 > indice: return None
     if indice < len(lCodigo): return servicioEspecifico(lCodigo[indice],
                                                               lNombre[indice])

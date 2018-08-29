@@ -36,7 +36,7 @@ if bMovil:
 	def cargarNombres(nombArch='IPAS*.TXT'):
 		rutaDatos = DIR
 
-		lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and \
+		lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and\
                                                 fnmatch.fnmatch(f, nombArch)]
 
 		if not lFiles:

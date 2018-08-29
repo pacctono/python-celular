@@ -26,7 +26,7 @@ from lib import ES
 eliminarPuntos = lambda sCadena, sCad='.': sCadena.replace(sCad, '') # Cadena (solo digitos) del socio.
 cambiarAPunto  = lambda sCadena, sCad=',': sCadena.replace(sCad, '.')
 formateaNumeroTelefono = lambda sNum: (sNum if (10!=len(sNum)) else
-                                "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:]))
+                                "0%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:]))
 #def formateaNumeroTelefono(sNum):
 #	if 10 != len(sNum): return sNum
 #	else: return "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:])

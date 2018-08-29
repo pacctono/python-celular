@@ -25,25 +25,25 @@ lClasCheques = [
 lMenu = [['Calcular cuota', 'cuota'],					            # 0
 		 ['Cedula del socio', 'cedula'], 
 		 ['Buscar cedula del socio', 'nombre'], 
-		 ['Cheques', 'AP.cheque'], 
+		 ['Cheques', 'AP.cheque'],
          ['Deposito por fecha', 'AP.depositos'], 
          ['Ganancias y Perds X Mes', 'GyP.ganYperXmes'],  # 5
-         ['Ganancias y Perds Acumu', 'GyP.ganYperAcum'],	# 6
-         ['Resumen de Nomina normal', 'NOM.resNominaN'],	# 7
+         ['Ganancias y Perds Acumu', 'GyP.ganYperAcum'],
+         ['Resumen de Nomina normal', 'NOM.resNominaN'],
          ['Res Nomina homologacion', 'NOM.resNominaH'],		# 8
-         ['Res Nomina completa', 'NOM.resNominaC'],			  # 9
+         ['Res Nomina completa', 'NOM.resNominaC'],
          ['Res Nom comp con extras', 'NOM.resNominaCcE'],	# 10
 		 ['Cheque por cedula', 'AP.chequeXCedula'],           # 11, 0
          ['Ultimos deposito', 'AP.heuteXCedula'],         # , 1
          ['Disponibilidad', 'AP.disponibilidad'],         # , 2
- 		 ['Prestamos', 'AP.prestamos'],                       # , 3
- 		 ['Detalle prestamo', 'AP.prestamo'],                 # , 4
+ 		 ['Prestamos', 'AP.prestamos'],
+ 		 ['Detalle prestamo', 'AP.prestamo'],
 		 ['Extension', 'ESF.extension'],                      # , 5
-		 ['Servifun', 'ESF.servifun'],                        # , 6
-		 ['Servicio funerario', 'ESF.servicio'],              # , 7
-		 ['Nomina', 'NOM.nomina'],                            # , 8
+		 ['Servifun', 'ESF.servifun'],
+		 ['Servicio funerario', 'ESF.servicio'],
+		 ['Nomina', 'NOM.nomina'],
 		 ['Detalle nomina', 'NOM.concepto'],                  # , 9
-		 ['Nomina con extras', 'NOM.nominacne'],              # , 10
+		 ['Nomina con extras', 'NOM.nominacne'],
 		 ['Detalle nomina con extras', 'NOM.conceptocne'],    # , 11
 		 ['Ubicacion', 'AP.ubicacion'],                       # , 12
 		 ['Salir', 'salir']
@@ -71,10 +71,11 @@ def cedulaI(ciAnt):
 # Funcion cedulaI
 def extraeNombre(sNombre):
   ''' Extrae el nombre de una cadena denominada nombre; pero, contiene:
-  		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador, 8 digitos), Disponibilidad (o No) y
-  		Extension ('A' o 'N'). Separados pr '|' en 'persona.txt'. 
-  		Nombre en extension.txt y servifun.txt, beneficiario y concepto en cheques.txt, solo contiene:
-  		Nombre, Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
+  		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador,
+      8 digitos), Disponibilidad (o No) y Extension ('A' o 'N'). Separados
+      por '|' en 'persona.txt'. Nombre en extension.txt y servifun.txt,
+      beneficiario y concepto en cheques.txt, solo contiene: Nombre,
+      Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
   try:
     sub = sNombre.rstrip(' \t\n\r')[0:sNombre.index('|', 0)] 
   except ValueError:
@@ -83,10 +84,11 @@ def extraeNombre(sNombre):
 # Funcion nombreSocio
 def nombreSocio(sNombre):
   ''' Extrae el nombre de una cadena denominada nombre; pero, contiene:
-  		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador, 8 digitos), Disponibilidad (o No) y
-  		Extension ('A' o 'N'). Separados pr '|' en 'persona.txt'. 
-  		Nombre en extension.txt y servifun.txt, beneficiario y concepto en cheques.txt, solo contiene:
-  		Nombre, Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
+  		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador,
+      8 digitos), Disponibilidad (o No) y Extension ('A' o 'N'). Separados
+      por '|' en 'persona.txt'. Nombre en extension.txt y servifun.txt,
+      beneficiario y concepto en cheques.txt, solo contiene: Nombre,
+      Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
   l = sNombre.rstrip(' \t\n\r').split('|')
   return l[0].rstrip(' \t\n\r')
 # Funcion nombreSocio
@@ -119,7 +121,9 @@ def mSocio(Nombre, ci, bCadena=True):
 
   if (bCadena): sFecha = lFecha()
   else: sFecha = Nombre[len(Nombre)-1]
-  st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN + lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL + "Cedula:".rjust(21) + CO.FIN 
+  st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN +\
+        lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL +\
+        "Cedula:".rjust(21) + CO.FIN 
   if (bCadena): st += " %s" % (FG.formateaNumero(ci))
   else: st += " %s" % Nombre[0]
   nJustDerecha = 21
@@ -127,7 +131,8 @@ def mSocio(Nombre, ci, bCadena=True):
     if len(l[0].rstrip(' \t\n\r')) > (CO.nCarLin - nJustDerecha - 1):	# Cars a justificar derecha + 1 espacio despues ':'.
       nJustDerecha = CO.nCarLin - len(l[0].rstrip(' \t\n\r')) - 1
     st += "\n"
-    st += CO.AZUL + "Nombre:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[0].rstrip(' \t\n\r'))
+    st += CO.AZUL + "Nombre:".rjust(nJustDerecha) + CO.FIN + " %s" %\
+                                                      (l[0].rstrip(' \t\n\r'))
   nJustDerecha = 21
   if 1 < len(l) and '' != l[1]:
     st += "\n" + CO.AZUL + "Nucleo:".rjust(nJustDerecha) + CO.FIN
@@ -139,14 +144,17 @@ def mSocio(Nombre, ci, bCadena=True):
     else: st+= " %s" % (l[2])
   if 3 < len(l) and '' != l[3]:
     st += "\n"
-    st += CO.AZUL + "Disponibilidad:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[3])
+    st += CO.AZUL + "Disponibilidad:".rjust(nJustDerecha) + CO.FIN + " %s" %\
+                                                                        (l[3])
   if 4 < len(l) and '' != l[4]:
     st += "\n" + CO.AZUL + "Extension:".rjust(nJustDerecha) + CO.FIN
     if (bCadena): st += " %s" % (CO.dExtension.get(l[4], 'ERRADA'))
     else: st+= " %s" % (l[4])
   if not bCadena:
-    st += "\n" + CO.AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[5])
-    st += "\n" + CO.AZUL + "Servicio funerario:".rjust(nJustDerecha) + CO.FIN + " %s" % (l[6])
+    st += "\n" + CO.AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) +\
+                                                      CO.FIN + " %s" % (l[5])
+    st += "\n" + CO.AZUL + "Servicio funerario:".rjust(nJustDerecha) +\
+                                                      CO.FIN + " %s" % (l[6])
   opc = ES.imprime(st)
   return opc
 # Funcion mSocio
@@ -164,7 +172,8 @@ def aSocio(lPer, ci):    # Esta funcion no se utiliza.
     if fPer:
       try:
         if (6 <= len(lPer)):
-          fPer.write(str(ci) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' + lPer[3] + '|' + lPer[4] + '|' + lPer[5][0:1] + "\n")
+          fPer.write(str(ci) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' +\
+                        lPer[3] + '|' + lPer[4] + '|' + lPer[5][0:1] + "\n")
       except:
         pass
       fPer.close()
@@ -195,7 +204,8 @@ def mEstado(sI= '0'):
   else: return lEstado[i]
 # Funcion mEstado
 def creaOp(l):
-  return ("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1], extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6]))
+  return ("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1],
+                      extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6]))
 # Funcion creaOp
 def buscarNombre():
   global dPer
@@ -214,7 +224,8 @@ def buscarNombre():
   if not nombres:
     ES.alerta(droid, nombre, "No hubo coincidencias!")
     return -10, None
-  indice = ES.entradaConLista(droid, 'SOCIOS ENCONTRADOS', 'Seleccione socio(a)', nombres)
+  indice = ES.entradaConLista(droid, 'SOCIOS ENCONTRADOS',
+                                              'Seleccione socio(a)', nombres)
   if None == indice or 0 > indice: return -10, None
   return int(cedulas[indice]), nombres[indice]
 # Funcion buscarNombre

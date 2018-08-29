@@ -38,7 +38,8 @@ def abrir(aNb, modo='r', codigo = 'UTF-8', bImprimir = False):
     return f
   except:
     if (bImprimir):
-      print(CO.AMARI + "[ES]ERROR ABRIENDO (DIR): " + CO.FIN + aNb + ' (' + DIR + ')')
+      print(CO.AMARI + "[ES]ERROR ABRIENDO (DIR): " + CO.FIN + aNb + ' (' +\
+              DIR + ')')
       print(CO.AMARI + "os.path.abspath(aNb): " + CO.FIN + abspath(aNb))
     return False
 # funcion abrir
@@ -143,9 +144,12 @@ def entradaFecha(droid, ano, mes, dia):
     droid.dialogDismiss()
   else:
     from datetime import datetime    
+    fechaDefecto = str(dia) + '-' + str(mes) + '-' + str(ano)
     while True:    
       try:
-        fecha = input('Introduzca la fecha en formato DD-MM-YYYY: ' )
+        fecha = input('Introduzca la fecha en formato DD-MM-YYYY [' +
+                                                        fechaDefecto + ']: ' )
+        if None == fecha or '' == fecha: fecha = fechaDefecto
         resultado = datetime.strptime(fecha, "%d-%m-%Y")
         break
       except:
@@ -299,11 +303,12 @@ def muestraInicio(sEmp):
   if not par(nCar): nCar += 1
   sLinea = llenarCadena(int(nCar/2), '-+')
   print(sLinea)
-  print(CO.AMARI + sEmp + CO.FIN + ' ' + strftime("%d/%m/%Y %H:%M:%S", localtime()))
+  print(CO.AMARI + sEmp + CO.FIN + ' ' + strftime("%d/%m/%Y %H:%M:%S",
+                                                                localtime()))
   print(sLinea)
 # funcion muestraInicio
 def muestraFin():
-  print(CO.AMARI + 'PC 2015 y posterior' + CO.FIN + ' ' + \
+  print(CO.AMARI + 'PC 2015 y posterior' + CO.FIN + ' ' +\
                                     strftime("%d/%m/%Y %H:%M:%S", localtime()))
   print("-+-+-+-+-+-+-+-+-+-+")
   print("Listo!")
