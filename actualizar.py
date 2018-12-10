@@ -18,6 +18,8 @@ if bMovil:
 else: droid = None
 
 import socket, sys
+import struct
+
 from lib import ES, Const as CO, General as FG
 from urllib.request import urlopen
 from time import time, localtime, strftime, ctime
@@ -71,7 +73,13 @@ if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
 	IPServ = ES.entradaNombre(droid, 'IP del servidor',
 								'Introduzca IP del servidor', '192.168.0.')
 print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], IPServ))
-miDirIP = obtenerIP(IPServ)											# Esta rutina fue la unica que encontre para mi IP.
+miDirIP = obtenerIP(IPServ)								# Esta rutina fue la unica que encontre para mi IP.
+
+decip = droid.wifiGetConnectionInfo().result['ip_address']
+hexip = hex(decip).split('x')[1]
+dirL = int(hexip, 16)
+miDirIP = socket.inet_ntoa(struct.pack("<L", dirL))
+
 print("Mi direccion IP es: %s" % miDirIP)
 try:
 	if IPServ[0:IPServ.rindex('.')] != miDirIP[0:miDirIP.rindex('.')]:	# Las tres primeras partes de ambos IPv4 deben ser iguales.
