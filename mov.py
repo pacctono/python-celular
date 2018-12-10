@@ -29,8 +29,8 @@ from lib import MySQL
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()
 
-patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
-pat = re.compile(r"\d{1,3}")	# Expresion regular: 1 o mas dec (\d+) y tres dec al final (\d{3}).
+patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o punto float.
+pat = re.compile(r"\d{1,3}")	# Expresion regular: Entre 1 y 3 dec.
 
 if bMovil:
 	def cargarNombres(nombArch='IPAS*.TXT'):
@@ -53,8 +53,9 @@ if bMovil:
 		if None == indice or 0 > indice: return None
 		return(lFiles[indice])
 	# FIN funcion buscarArchivo
-def poblarDicc(lidat, dConc):
-  dicc = {}
+def poblarDicc(lidat, dConc, sConc = ''):
+  if 3 != len(sConc): sConc = ''    # Mostrar solo un concepto especifico.
+  dicc = {} # Tres elementos: # de socios, suma de saldos, suma de cuotas.
   dicc['AHO']  = (0, 0.00, 0.00)
   dConc['AHO'] = {'des':'AHORROS'}
   dicc['CRE']  = (0, 0.00, 0.00)
@@ -64,12 +65,13 @@ def poblarDicc(lidat, dConc):
   dicc['ELI']  = (0, 0.00, 0.00)
   dConc['ELI'] = {'des':'CONCEPTOS ELIMINADOS'}
   dicc['OTR']  = (0, 0.00, 0.00)
-  dConc['OTR'] = {'des':'OTROS CONCEPTOS'}
+  dConc['OTR'] = {'des':'561,563,570 sin Eli'}
   dicc['TOT']  = (0, 0.00, 0.00)
-  dConc['TOT'] = {'des':'TOTAL GENERAL'}
+  dConc['TOT'] = {'des':'TOT GENERAL sin Eli'}
   for l in lidat:
+    if '' != sConc and sConc != l[2]: continue
     try:
-      sLlave = l[2]+'-'+l[0]+'-'+l[5]+'-'+l[6]
+      sLlave = l[2]+'-'+l[0]+'-'+l[5]+'-'+l[6]  # Concepto; 6 o 7; Tipo; SC/CF
       if sLlave not in dicc: dicc[sLlave] = (0, 0.00, 0.00)
       dicc[sLlave] = (dicc[sLlave][0]+1, dicc[sLlave][1]+l[3],
                                                         dicc[sLlave][2]+l[4])
@@ -84,7 +86,7 @@ def poblarDicc(lidat, dConc):
                                                         dicc['DMD'][2]+l[4])
       if '3' == l[5]: dicc['ELI'] = (dicc['ELI'][0]+1, dicc['ELI'][1]+l[3],
                                                         dicc['ELI'][2]+l[4])
-      if l[2] in ('561', '563', '570'):	# Cuota mensual, ServiFun, Fondo de Salud
+      if l[2] in ('561', '563', '570'):	# Cuota mensual, ServiFun, Fondo Salud
         if '3' != l[5]: dicc['OTR'] = (dicc['OTR'][0]+1, dicc['OTR'][1]+l[3],
                                                         dicc['OTR'][2]+l[4])
     except:
@@ -96,14 +98,14 @@ def poblarDicc(lidat, dConc):
   return dicc, dConc
 # FIN funcion poblarDicc
 def mostrarConceptos(dicc, dConc):
-  
+
   lconc = []
   i = 0
   sMax = '000-0-0-0'
   for ld in dicc.items():		# el metodo items(), devuelve una lista de dicc's (llave, valor) tupla pares
-  	lconc.insert(i, ld[0])
-  	if ld[0][0:3].isdigit() and ld[0] > sMax: sMax = ld[0]	# Concepto con el maximo valor, para saber donde subrayar.
-  	i += 1
+    lconc.insert(i, ld[0])
+    if ld[0][0:3].isdigit() and ld[0] > sMax: sMax = ld[0]	# Concepto con el maximo valor, para saber donde subrayar.
+    i += 1
   lconc.sort()
   bImpar  = True
   st = "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s%s\n" % \
@@ -121,7 +123,8 @@ def mostrarConceptos(dicc, dConc):
        elif ('ELI' == v): sColor = CO.ROJO
        elif ('OTR' == v): sColor = CO.PURPURA
        else: sColor, bImpar = ES.colorLinea(bImpar, CO.AZUL, CO.CYAN)
-       fPorc = 100.00*dicc[v][1]/dicc['TOT'][1]
+       if 0 == dicc['TOT'][1]: fPorc = 0.00
+       else: fPorc = 100.00*dicc[v][1]/dicc['TOT'][1]
        sConc = v[0:3]
        if '3' == v[6:7]: sObs = CO.ROJO + 'Eli'
        elif '2' == v[6:7]: sObs = 'Mod'
@@ -132,7 +135,7 @@ def mostrarConceptos(dicc, dConc):
           FG.formateaNumero(dicc[v][0]), FG.formateaNumero(dicc[v][1], 2),
           FG.formateaNumero(dicc[v][2], 2), FG.formateaNumero(fPorc, 2),
           sObs, CO.FIN)
-              
+
   return st
 # FIN funcion mostrarConceptos
 
@@ -158,8 +161,8 @@ while True:
     nombArch = buscarArchivo(lFiles)
     if None == nombArch: break
     f = ES.abrir(nombArch, 'r')
-    iCed = ES.entradaNumero(droid, "Cedula de identidad",
-                                        "Cedula de identidad del socio", sCed)
+    iCed = ES.entradaNumero(droid, "Cedula o Concepto"
+                                        "Cedula del socio o Concepto", sCed)
     if None == iCed or 0 == iCed: sCed = ''
     else: sCed = str(iCed)
   else:
@@ -172,15 +175,17 @@ while True:
                                             nombArchCompleto, CO.ROJO, CO.FIN))
     break
 
-# 0:Mov (6:retroact o 7:fijo); 1:CI; 2:Conc; 3:Saldo; 4:Cuota; 5:Ctrl (1:Crea, 2:Mod, 3:eli); 6:Tipo (1:Saldo-cuota, 2:Cuota fija).
+# 0:Mov (6:retroact o 7:fijo); 1:CI; 2:Conc; 3:Saldo; 4:Cuota;
+# 5:Ctrl (1:Crea, 2:Mod, 3:eli); 6:Tipo (1:Saldo-cuota, 2:Cuota fija).
   lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9], linea.rstrip()[10:13],
             float(linea.rstrip()[26:38])/100, float(linea.rstrip()[38:49])/100,
             linea.rstrip()[52:53], linea.rstrip()[76:77]) for linea in f]
   if f: f.close()
 
-  dicc, dConc = poblarDicc(lista, dConc)
+  dicc, dConc = poblarDicc(lista, dConc, sCed)
   st = mostrarConceptos(dicc, dConc)
 
+  if 4 > len(sCed): sCed = ''   # Solo se va a listar un concepto.
   if '' != sCed:
     bCINoEncontrada = True
     for l in lista:

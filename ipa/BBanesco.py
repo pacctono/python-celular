@@ -100,7 +100,7 @@ def banesco(f, sFecha, sRif, sEmpresa, sBanco):
       elif '06' == ln[0:2]: ln1 = (ln[0:2], ln[16:17], ln[29:32],
                                     float(ln[32:47])/100)
       else: raise ValueError(CO.ROJO + "Error:" + CO.FIN + " La primera "
-                              "columna de la fila  de detalle tiene un "
+                              "columna de la fila de detalle tiene un "
                               "identificador errado, contiene: '" +
                               ln[0] + "'.")
     if '06' != ln1[0]:

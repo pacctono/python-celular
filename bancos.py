@@ -35,27 +35,26 @@ sHoyDia  = strftime("%d", localtime())
 sRif     = 'J306192298'
 sEmpresa = 'IPASPUDO'
 
-if bMovil:
-	def cargarNombres(nombArch='MERCANTIL*.TXT'):
-		rutaDatos = DIR
+def cargarNombres(nombArch='MERCANTIL*.TXT'):
+  rutaDatos = DIR
 
-		lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and
-                                                fnmatch.fnmatch(f, nombArch)]
+  lFiles = [f for f in listdir(rutaDatos) if isfile(join(rutaDatos, f)) and
+                                              fnmatch.fnmatch(f, nombArch)]
 
-		if not lFiles:
-			ES.alerta(droid, nombArch, "No hubo coincidencias!")
-			return None
-		lFiles.sort()
-		return lFiles
-	# FIN funcion cargarNombres
-	def buscarArchivo(lFiles):
-		if None == lFiles or 1 > len(lFiles): return None
-		if 1 == len(lFiles): return(lFiles[0])
-		indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', "Seleccione "
-                                                            "nombre", lFiles)
-		if None == indice or 0 > indice: return None
-		return(lFiles[indice])
-	# FIN funcion buscarArchivo
+  if not lFiles:
+    ES.alerta(droid, nombArch, "No hubo coincidencias!")
+    return None
+  lFiles.sort()
+  return lFiles
+# FIN funcion cargarNombres
+def buscarArchivo(lFiles):
+  if None == lFiles or 1 > len(lFiles): return None
+  if 1 == len(lFiles): return(lFiles[0])
+  indice = ES.entradaConLista(droid, 'ARCHIVOS ENCONTRADOS', "Seleccione "
+                                                          "nombre", lFiles)
+  if None == indice or 0 > indice: return None
+  return(lFiles[indice])
+# FIN funcion buscarArchivo
 def prepara(nbrArchBanco):
   global sBanco
 
@@ -121,7 +120,7 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
       if bMerc or bMProv:
         if l[3] not in ('1', '3'):
           raise ValueError(CO.ROJO + "Error:" + CO.FIN + " La forma de pago"
-                            "en columna 18 en la fila " + str(nLn) + 
+                            "en columna 18 en la fila " + str(nLn) +
                             ", no contiene '1' o '3', contiene: " + l[3])
         elif '000000000000' != l[4]:
           raise ValueError(CO.ROJO + "Error:" + CO.FIN + " En columna 19 de"
@@ -142,7 +141,7 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
                                       "columna 187 en la fila " + str(nLn) +
                                       ", deberia ser '000000000000000', pero"
                                       "contiene: '" + l[12] + "'")
-  
+
       lTot = (lTot[0]+1, lTot[1]+l[iMto])	# iMto es el indice del monto, definido anteriormente.
       if '' != sCed:
         try: bCINoEncontrada
@@ -168,7 +167,7 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
       print(l)
       print(er)
       sys.exit()
-# FIN for
+  # FIN for
   if '' != sCed and bCINoEncontrada:
     st = "%sLa cedula de identidad:%s %s%s%s no fue encontrada." % (CO.ROJO,
             CO.FIN, CO.AZUL,
@@ -177,8 +176,8 @@ def calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr):
   return lTot, st
 # FIN funcion calcTotal
 def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2,
-                sNumLote, sRif, sFechaValor, sCodCta):
-  global bMerc, bMProv, bBan, bVzla
+                sNumLote, sRif, sFechaValor):
+  global bMerc, bMProv, bBan, bVzla, sCodCta
 
   st = ''
   if (bMerc or bMProv or bBan) and int(nroReg) != lTot[0]:
@@ -195,10 +194,10 @@ def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2,
               "suma del monto total de depositos.\n") % (CO.ROJO, CO.FIN)
     st += "Valor entre columnas " + str(iMtoTot1) + " y " + str(iMtoTot2) + \
             " del primer registro: " + \
-           (FG.formateaNumero(fMtoTot, 2) if FG.formateaNumero(fMtoTot, 2) 
+           (FG.formateaNumero(fMtoTot, 2) if FG.formateaNumero(fMtoTot, 2)
             else str(fMtoTot)) + '.\n'
     st += "Monto total de depositos en registros de detalle: " + \
-            (FG.formateaNumero(lTot[1], 2) if FG.formateaNumero(lTot[1], 2) 
+            (FG.formateaNumero(lTot[1], 2) if FG.formateaNumero(lTot[1], 2)
              else str(lTot[1])) + '.\n'
   if bMerc or bMProv or bBan: st += "%sNumero de lote:%s %s%s%s\n" % (CO.AZUL,
                                             CO.FIN, CO.CYAN, sNumLote, CO.FIN)
@@ -214,7 +213,7 @@ def cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2,
       sCodCta[0:4]+'-'+sCodCta[4:8]+'-'+sCodCta[8:10]+'-'+sCodCta[10:], CO.FIN)
   st += "%sSe deposita a %d socios, la cantidad de %s bolivares.%s\n" % \
         (CO.VERDE, lTot[0],
-         (FG.formateaNumero(lTot[1], 2) if FG.formateaNumero(lTot[1], 2) 
+         (FG.formateaNumero(lTot[1], 2) if FG.formateaNumero(lTot[1], 2)
           else lTot[1]), CO.FIN)
   return st
 # FIN funcion cargarFilas
@@ -280,16 +279,15 @@ while True:
   (lTot, stc) = \
           calcTotal(lista, nLnCtrl, sLnDet, iCI, iCC, iNac, sTPag, iMto, iNbr)
   st = cargarFilas(lTot, nroReg, iNoReg1, iNoReg2, fMtoTot, iMtoTot1, iMtoTot2,
-                    sNumLote, sRif, sFechaValor, sCodCta)
+                    sNumLote, sRif, sFechaValor)
   st += stc
 
+  ES.imprime(st.rstrip(' \t\n\r'))
   if bMovil:
-    ES.imprime(st.rstrip(' \t\n\r'))
     indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer',
                                 ['Otro archivo', 'Salir'])
     if None == indice or 0 > indice or 1 <= indice: break
   else:
-    print(st.rstrip(' \t\n\r'))
     break
 
 # FIN Programa
