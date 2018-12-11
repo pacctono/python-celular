@@ -5,6 +5,7 @@
 from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 import re
+from time import gmtime as tiempo
 try:
   from lib import DIR, LINEA, bMovil
 except:
@@ -31,6 +32,7 @@ oMySQL = MySQL.cMySQL()
 
 patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o punto float.
 pat = re.compile(r"\d{1,3}")	# Expresion regular: Entre 1 y 3 dec.
+sLinTot = 38 * "-+" + "\n"
 
 if bMovil:
 	def cargarNombres(nombArch='IPAS*.TXT'):
@@ -53,16 +55,11 @@ if bMovil:
 		if None == indice or 0 > indice: return None
 		return(lFiles[indice])
 	# FIN funcion buscarArchivo
-def poblarDicc(lidat, dConc, sConc = '563'):
+def poblarDicc(lidat, dConc, sNuc = '01', sConc = '563',
+        diccTot = (0, 0.00, 0.00)):
   dicc = {} # Tres elementos: # de socios, suma de saldos, suma de cuotas.
-  dicc['AHO']  = (0, 0.00, 0.00)
-  dConc['AHO'] = {'des':'AHORROS'}
-  dicc['CRE']  = (0, 0.00, 0.00)
-  dConc['CRE'] = {'des':'CONCEPTOS CREADOS'}
-  dicc['DMD']  = (0, 0.00, 0.00)
-  dConc['DMD'] = {'des':'CONCEPTOS MODIFICADOS'}
-  dicc['ELI']  = (0, 0.00, 0.00)
-  dConc['ELI'] = {'des':'CONCEPTOS ELIMINADOS'}
+  dicc['TOT']  = diccTot
+  dConc['TOT'] = {'des':'SUBTOT sin Eli'}
   for l in lidat:
     if '' != sConc and sConc != l[2]: continue
     try:
@@ -70,15 +67,8 @@ def poblarDicc(lidat, dConc, sConc = '563'):
       if sLlave not in dicc: dicc[sLlave] = (0, 0.00, 0.00)
       dicc[sLlave] = (dicc[sLlave][0]+1, dicc[sLlave][1]+l[3],
                                                         dicc[sLlave][2]+l[4])
-      if l[2] in ('511', '562'):		# Ahorro patronal y ahorro personal
-        if '3' != l[5]: dicc['AHO'] = (dicc['AHO'][0]+1, dicc['AHO'][1]+l[3],
-                                                        dicc['AHO'][2]+l[4])
-      if '1' == l[5]: dicc['CRE'] = (dicc['CRE'][0]+1, dicc['CRE'][1]+l[3],
-                                                        dicc['CRE'][2]+l[4])
-      if '2' == l[5]: dicc['DMD'] = (dicc['DMD'][0]+1, dicc['DMD'][1]+l[3],
-                                                        dicc['DMD'][2]+l[4])
-      if '3' == l[5]: dicc['ELI'] = (dicc['ELI'][0]+1, dicc['ELI'][1]+l[3],
-                                                        dicc['ELI'][2]+l[4])
+      if '3' != l[5]: dicc['TOT'] = (dicc['TOT'][0]+1, dicc['TOT'][1]+l[3],
+                                                        dicc['TOT'][2]+l[4])
     except:
       print(l)
       print(dConc[l[2]])
@@ -87,7 +77,7 @@ def poblarDicc(lidat, dConc, sConc = '563'):
 
   return dicc, dConc
 # FIN funcion poblarDicc
-def mostrarConceptos(dicc, dConc):
+def mostrarConceptos(dicc, dConc, bInicio = False, sNuc = '01'):
 
   lconc = []
   i = 0
@@ -98,9 +88,12 @@ def mostrarConceptos(dicc, dConc):
     i += 1
   lconc.sort()
   bImpar  = True
-  st = "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s%s\n" % \
-      (CO.SUBRAYADO, CO.AMARI, 'CLAVE', 'DESCRIPCION', '#MOVI', '     Saldo',
-                                            '         Cuota', 'PORCEN', CO.FIN)
+  if bInicio:
+    st = "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %6.6s%s\n" % \
+         (CO.SUBRAYADO, CO.AMARI, 'CLAVE', 'DESCRIPCION', '#MOVI',
+          '     Saldo', '         Cuota', 'OBSERV', CO.FIN)
+  else:
+    st = sLinTot
   for v in lconc:
     if not ((0.00 == dicc[v][1]) and (0.00 == dicc[v][2])) or ('3' == v[6:7]):
        if v[0:3].isdigit() and v[4:5].isdigit() and v[6:7].isdigit() and \
@@ -108,16 +101,16 @@ def mostrarConceptos(dicc, dConc):
          if sMax == v: subrayar = CO.SUBRAYADO
          else: subrayar = ''
        else: subrayar = ''
-       if ('AHO' == v): sColor = CO.PURPURA
-       elif ('ELI' == v): sColor = CO.ROJO
+       if ('TOT' == v): sColor = CO.VERDE
        else: sColor, bImpar = ES.colorLinea(bImpar, CO.AZUL, CO.CYAN)
        sConc = v[0:3]
        if '3' == v[6:7]: sObs = CO.ROJO + 'Eli'
        elif '2' == v[6:7]: sObs = 'Mod'
        elif '1' == v[6:7]: sObs = 'Cre'
        else: sObs = ''
-       st += "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %s%s\n" % (subrayar,
-          sColor, v, dConc.get(sConc, {'des':'NO TENGO DESCRIPCION'})['des'],
+       st += "%s%s%9s %-20.20s %6.6s %15.15s %15.15s %s%s\n" %\
+          (subrayar, sColor, v,
+          dConc.get(sConc, {'des':'NO TENGO DESCRIPCION'})['des'] + '-' + sNuc,
           FG.formateaNumero(dicc[v][0]), FG.formateaNumero(dicc[v][1], 2),
           FG.formateaNumero(dicc[v][2], 2), sObs, CO.FIN)
 
@@ -125,11 +118,13 @@ def mostrarConceptos(dicc, dConc):
 # FIN funcion mostrarConceptos
 
 # Inicio principal
+sConc = '563'
 dConc = CC.creaDicConceptos()
-if bMovil:
-  lFiles = cargarNombres('[Ii][Pp][Aa][Ss]0*.[Tt][Xx][Tt]')
-  if not lFiles: sys.exit()
-else:
+# 1:mes(1-12); 2:dia(1-31); 3:hora(0-23); 4:min(0-59); 5:seg(0-60);
+# 6:dia sem(0 a 6 (o lunes)); 7:dia a#o(1-366); 8:Verano(-1,0,1,-1)
+sMes = str(tiempo()[1])
+sAno = str(tiempo()[0])
+if not bMovil:
   if 1 < len(sys.argv):
     mes = sys.argv[1]
     if not mes.isdigit() or 1 > int(mes) or 12 < int(mes):
@@ -140,10 +135,10 @@ else:
       nombArchivo = sys.argv[2]
     else:
       nombArchivo = 'IPAS'
-    if 3 < len(sys.argv) and sys.argv[2].isdigit():
+    if 3 < len(sys.argv) and sys.argv[3].isdigit():
       ano = sys.argv[3]
     else:
-      ano = '2018'
+      ano = sAno
   else:
     print("%sEjecutar: movServifun mm ipas aaaa%s" % (CO.ROJO, CO.FIN))
     sys.exit()
@@ -151,39 +146,52 @@ else:
 
 while True:
   if bMovil:
-    nombArch = buscarArchivo(lFiles)
-    if None == nombArch: break
-    f = ES.abrir(nombArch, 'r')
-    iCed = ES.entradaNumero(droid, "Cedula o Concepto"
-                                        "Cedula del socio o Concepto", sCed)
-    if None == iCed or 0 == iCed: sCed = ''
-    else: sCed = str(iCed)
-  else:
-    sNuc = '01'
-    nombArchivoCompleto = nombArchivo + sNuc + ano + mes + '.TXT'
+    mes = ES.entradaNumero(droid, "Mes del Concepto",
+                                  "Mes del Concepto", sMes)
+    if None == mes or 1 > int(mes) or 12 < int(mes):
+      print("%sEl mes esta errado.%s" % (CO.ROJO, CO.FIN))
+      sys.exit()
+    mes = "%02d" % mes
+    nombArchivo = ES.entradaNombre(droid, "Nombre del archivo",
+                                   "Nombre del Archivo", 'IPAS')
+    ano = ES.entradaNumero(droid, "A#o del Movimiento",
+                                   "A#o del Movimiento", sAno)
+  bInicio = True
+  st = ''
+  for sNuc in ('01', '02', '03', '04', '05', '06'):
+    nombArchivoCompleto = nombArchivo + sNuc + str(ano) + str(mes) +\
+                            '.TXT'
     try:
-      f = open(nombArchivoCompleto, 'r')
+      if bMovil:
+        f = ES.abrir(nombArchivoCompleto, 'r')
+      else:
+        f = open(nombArchivoCompleto, 'r')
     except:
       f = False
-  if not f:
-    print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
-                                        nombArchivoCompleto, CO.ROJO, CO.FIN))
-    break
+    if not f:
+      print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO,
+                        CO.FIN, nombArchivoCompleto, CO.ROJO, CO.FIN))
+      break
 
 # 0:Mov (6:retroact o 7:fijo); 1:CI; 2:Conc; 3:Saldo; 4:Cuota;
 # 5:Ctrl (1:Crea, 2:Mod, 3:eli); 6:Tipo (1:Saldo-cuota, 2:Cuota fija).
-  lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9], linea.rstrip()[10:13],
-            float(linea.rstrip()[26:38])/100, float(linea.rstrip()[38:49])/100,
-            linea.rstrip()[52:53], linea.rstrip()[76:77]) for linea in f]
-  if f: f.close()
+    lista = [(linea.rstrip()[0:1], linea.rstrip()[1:9],
+              linea.rstrip()[10:13], float(linea.rstrip()[26:38])/100,
+              float(linea.rstrip()[38:49])/100, linea.rstrip()[52:53],
+              linea.rstrip()[76:77]) for linea in f]
+    if f: f.close()
 
-  dicc, dConc = poblarDicc(lista, dConc)
-  st = mostrarConceptos(dicc, dConc)
+    if bInicio: diccTot  = (0, 0.00, 0.00)
+    dicc, dConc = poblarDicc(lista, dConc, sNuc, sConc, diccTot)
+    diccTot = dicc['TOT']
+    st += mostrarConceptos(dicc, dConc, bInicio, sNuc)
+    if bInicio: bInicio = False
 
+  st += sLinTot
   if bMovil:
     ES.imprime(st.rstrip(' \t\n\r'))
-    indice = ES.entradaConLista(droid, 'Que desea hacer', 'Que desea hacer',
-                                                    ['Otro archivo', 'Salir'])
+    indice = ES.entradaConLista(droid, 'Que desea hacer',
+                     'Que desea hacer', ['Otros movimientos', 'Salir'])
     if None == indice or 0 > indice or 1 <= indice: break
   else:
     print(st.rstrip(' \t\n\r'))
