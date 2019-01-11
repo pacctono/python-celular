@@ -30,7 +30,7 @@ import re
 def ireplace(self, viejo, nuevo, count=0):
   ''' Se comporta como string.replace(), pero lo hace
       sin importar minusculas o mayusculas. '''
-  
+
 # Las dos lineas siguientes pueden ser sustituidas por:
 #  return re.sub('(?i)'+re.escape(viejo), nuevo, self)
   patron = re.compile(re.escape(viejo), re.I) # re.I:ignora minus/mayus
@@ -40,8 +40,8 @@ if bMovil:
   def cargarNombres(nombArchEnt='nomina*.sql'):
     rutaDatos = DIR
 
-    lFiles = [f for f in listdir(rutaDatos) 
-                if isfile(join(rutaDatos, f)) and 
+    lFiles = [f for f in listdir(rutaDatos)
+                if isfile(join(rutaDatos, f)) and
                     fnmatch.fnmatch(f, nombArchEnt)]
     lFiles.sort()
 
@@ -68,17 +68,17 @@ def obtenerFecha(fechaConFormato):
   if 0 <= iMes: nMes = formato.count('m')
   iAno = formato.find('y')
   if 0 <= iAno: nAno = formato.count('y')
-  if 0 > iDia or 0 > iMes or 0 > iAno: return "'" + fecha + "'"
-  else:
-    return "'" + fecha[iAno:iAno+nAno] + '-' + fecha[iMes:iMes+nMes] + \
-            '-' + fecha[iDia:iDia+nDia] + " 00:00:00'"
+  if 0 <= iDia and 0 <= iMes and 0 <= iAno:
+    fecha = fecha[iAno:iAno+nAno] + '-' + fecha[iMes:iMes+nMes] + \
+            '-' + fecha[iDia:iDia+nDia]
+  return "CAST('" + fecha + "' AS DATETIME)"
 # FIN funcion fechaFormateada
 def tipoNumber(linea):
   if '(' in linea: return ireplace(linea, 'NUMBER', 'DECIMAL')
   else: return ireplace(linea, 'NUMBER', 'DOUBLE')
 # FIN funcion tipoNumber
 def tipoVarchar2(linea):
-  linea = ireplace(linea, 'VARCHAR2', 'VARCHAR')    
+  linea = ireplace(linea, 'VARCHAR2', 'VARCHAR')
   if ' char' in linea.lower():
     iChar = linea.lower().index(' char')
     linea = linea[0:iChar] + linea[iChar+5:]
@@ -121,97 +121,118 @@ else:
     print("%sNo suministro el sufijo de entrada.%s" % (CO.ROJO, CO.FIN))
     sys.exit()
 
-while True:
-  if bMovil:
-    nombArchEnt = buscarArchivo(lFiles)
-    if None == nombArchEnt: break
-    f = ES.abrir(nombArchEnt, 'r', 'latin-1')
-    iCed = ES.entradaNumero(droid, "Cedula de identidad",
-                                  "Cedula de identidad del socio", sCed)
-    if None == iCed or 0 == iCed: sCed = None
-    else: sCed = str(iCed)
-  else:
-    try:
-      f = ES.abrir(nombArchEntCompleto, 'r', 'latin-1')
-    except:
-      f = False
-  if not f:
-    print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
-                                nombArchEntCompleto, CO.ROJO, CO.FIN))
-    break
-#  print("%sNombre de archivos, entrada:%s '%s'%s, salida:%s '%s'" % \
-#        (CO.AMARI, CO.FIN, nombArchEntCompleto, CO.AMARI, CO.FIN, \
-#          nombArchSalCompleto))
-  salida  = []
-  salida.append('SET GLOBAL max_allowed_packet=128*1024*1024;')
-  nLineas = 1       # Numero de lineas
-  nInsert = False   # No se ha encontrado un 'insert into'.
-  crearTabla = False
-  linUltValue = []
-  for linea in f:
-    linea = linea[0:linea.index('\n')]
-    if 'set feed' in linea.lower(): continue  # set feedback
-    if 'alter' in linea.lower() and \
-      'triggers' in linea.lower(): continue   # set alter.*triggers
-    if 'set define' in linea.lower(): continue   # set define
-    if 'prompt' in linea.lower(): continue       # prompt
-    if 'commit' in linea.lower(): continue    # commit
-    if 'NOMINA' in linea: linea = linea.replace('NOMINA', 'nomina')
-    if 'PERSONAL' in linea:
-          linea = linea.replace('PERSONAL', 'personal')
-    if 'RAC' in linea: linea = linea.replace('RAC', 'rac')
-    if crearTabla:
-      if ';' in linea: crearTabla = False
-      if 'number' in linea.lower(): linea = tipoNumber(linea.rstrip())
-      if 'date' in linea.lower(): linea = tipoDate(linea.rstrip())
-      if 'varchar2' in linea.lower():
-        linea = tipoVarchar2(linea.rstrip())
-    if 'create table' in linea.lower():
-      linea = linea.replace(sufijoEntrada, sufijoSalida)
-      salida.append('DROP TABLE IF EXISTS ' + \
-          linea[linea.lower().find('create')+13:] + ';')
-      nLineas += 1
-      linea = linea.replace('create table', 'CREATE TABLE')
-      crearTabla = True
-    if 'create unique index' in linea.lower():
-      linea = linea.replace(sufijoEntrada, sufijoSalida)
-      linea = linea.replace('create unique index', \
-                            'CREATE UNIQUE INDEX')
-    if 'insert into' in linea.lower():
-      if not nInsert: # Mantener y cambiar primera linea con 'insert into'
-        linea = linea.replace(sufijoEntrada, sufijoSalida)
-        linea = linea.lower().replace('insert into', 'INSERT INTO')
-        linea = linea[0:linea.index('(')] + 'VALUES'
-        nInsert = True
-      else:
-        continue
-    if nInsert and 'values ' in linea.lower():
-      if 0 == linea.lower().find('values '):
-        if 0 < linea.rfind(';'): linea = linea[0:linea.rfind(';')] + ','
-        linea = ireplace(linea, 'values ', '')    
-        if 'to_date' in linea.lower():
-          iDate = linea.lower().index('to_date')
-          iParentesisAbre = linea.index('(', iDate)
-          iParentesisCierra = linea.index(')', iParentesisAbre)
-          fechaConFormato = \
-            linea[iParentesisAbre+1:iParentesisCierra].lstrip().rstrip()
-          fecha = obtenerFecha(fechaConFormato)
-          linea = linea[0:iDate] + fecha + \
-                  linea[iParentesisCierra+1:].lstrip().rstrip()
-      else:
-        nInsert = False
-        linUltValue.append(nLineas)
+if bMovil:
+  nombArchEnt = buscarArchivo(lFiles)
+  if None == nombArchEnt: exit
+  f = ES.abrir(nombArchEnt, 'r', 'latin-1')
+  iCed = ES.entradaNumero(droid, "Cedula de identidad",
+                                "Cedula de identidad del socio", sCed)
+  if None == iCed or 0 == iCed: sCed = None
+  else: sCed = str(iCed)
+else:
+  try:
+    f = ES.abrir(nombArchEntCompleto, 'r', 'latin-1')
+  except:
+    f = False
+if not f:
+  print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
+                              nombArchEntCompleto, CO.ROJO, CO.FIN))
+  exit
+#print("%sNombre de archivos, entrada:%s '%s'%s, salida:%s '%s'" % \
+#      (CO.AMARI, CO.FIN, nombArchEntCompleto, CO.AMARI, CO.FIN, \
+#        nombArchSalCompleto))
+salida  = []
+salida.append('SET GLOBAL max_allowed_packet=128*1024*1024;')
+nLineas = 1       # Numero de lineas
+nInsert = False   # No se ha encontrado un 'insert into'.
+crearTabla = False
+linUltValue = []
+restar = 0        # Restar lineas sumadas con anticipacion.
+for linea in f:
+  linea = linea[0:linea.index('\n')]
+  if 'set feed' in linea.lower(): continue  # set feedback
+  if 'alter' in linea.lower() and \
+     'triggers' in linea.lower(): continue   # set alter.*triggers
+  if 'set define' in linea.lower(): continue   # set define
+  if 'prompt' in linea.lower(): continue       # prompt
+  if 'commit' in linea.lower(): continue    # commit
+  if 'NOMINA' in linea: linea = linea.replace('NOMINA', 'nomina')
+  if 'PERSONAL' in linea:
+    linea = linea.replace('PERSONAL', 'personal')
+  if 'RAC' in linea: linea = linea.replace('RAC', 'rac')
+  if crearTabla:
+    if ';' in linea: crearTabla = False
+    if 'number' in linea.lower(): linea = tipoNumber(linea.rstrip())
+    if 'date' in linea.lower(): linea = tipoDate(linea.rstrip())
+    if 'varchar2' in linea.lower():
+      linea = tipoVarchar2(linea.rstrip())
+  if 'create table' in linea.lower():
+    linea = linea.replace(sufijoEntrada, sufijoSalida)
+    linea = ireplace(linea, '_ipaspudo', '')
+    salida.append('DROP TABLE IF EXISTS ' + \
+        linea[linea.lower().find('create')+13:] + ';')
     nLineas += 1
-    salida.append(linea)
-  # FIN del for linea in f:
-  if 0 >= len(linUltValue): linUltValue.append(nLineas - 1)
-  for l in linUltValue:
-    salida[l] = salida[l][0:salida[l].rfind(',')] + ';'
+    restar += 1
+    linea = ireplace(linea, 'create table', 'CREATE TABLE')
+    crearTabla = True
+  if 'create unique index' in linea.lower():
+    linea = linea.replace(sufijoEntrada, sufijoSalida)
+    linea = ireplace(linea, '_ipaspudo', '')
+    linea = ireplace(linea, 'create unique index', \
+                          'CREATE UNIQUE INDEX')
+  if 'insert into' in linea.lower():
+    if not nInsert: # Mantener y cambiar primera linea con 'insert into'
+      linea = linea.replace(sufijoEntrada, sufijoSalida)
+      linea = ireplace(linea, '_ipaspudo', '')
+      linea = ireplace(linea, 'insert into', 'INSERT INTO')
+      linea = linea[0:linea.index('(')] + 'VALUES'
+      nInsert = True
+      nLineas += 1    # El primer 'insert' por el continue
+      restar += 1
+      salida.append(linea)
+    continue
+  if nInsert:
+    if 0 == linea.lower().find('values '):
+      if 0 < linea.rfind(';'): linea = linea[0:linea.rfind(';')] + ','
+      linea = ireplace(linea, 'values ', '')
+      while 'to_date' in linea.lower():
+        iDate = linea.lower().index('to_date')
+        iParentesisAbre = linea.index('(', iDate)
+        iParentesisCierra = linea.index(')', iParentesisAbre)
+        fechaConFormato = \
+          linea[iParentesisAbre+1:iParentesisCierra].lstrip().rstrip()
+        fecha = obtenerFecha(fechaConFormato)
+        linea = linea[0:iDate] + fecha + \
+                linea[iParentesisCierra+1:].lstrip().rstrip()
+    else:
+      nInsert = False
+      linUltValue.append(nLineas-1-restar) # El primer ele de lista es 0.
+  nLineas += 1
+  restar = 0
+  salida.append(linea)
+# FIN del for linea in f:
+if nInsert or 0 >= len(linUltValue): linUltValue.append(nLineas - 1)
+for l in linUltValue:
+  salida[l] = salida[l][0:salida[l].rfind(',')] + ';'
+
+#for linea in salida:
+#  print(linea.encode('utf-8'))
+# Escribir archivo de salida.
+try:
+  f = ES.abrir(nombArchSalCompleto, 'w')
+except:
+  f = False
+if f:
   for linea in salida:
-    print(linea)
-#  print(linUltValue)
-#  print(nLineas)
-
-  break
-
+    f.write(unicode(linea + '\n'))
+else:
+  if bMovil:
+    print("%sNombre de archivo de salida%s '%s' %serrado.%s" % \
+              (CO.ROJO, CO.FIN, nombArchEntCompleto, CO.ROJO, CO.FIN))
+  else:
+    for linea in salida:
+      print(linea.encode('utf-8'))
+#print(linUltValue)
+#print(nLineas)
+#print(linUltValue)
 # FIN Principal
