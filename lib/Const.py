@@ -7,6 +7,19 @@ except:
   LINEA = 70
   bMovil = False
 
+meses = [
+	'',
+	'ENERO',
+	'FEBRERO',
+	'MARZO',
+	'MAYO',
+	'JUNIO',
+	'JULIO',
+	'AGOSTO',
+	'SEPTIEMBRE',
+	'NOVIEMBRE',
+	'DICIEMBRE'
+]
 
 UT  = 1000	# Valor actual de la unidad tributaria
 UTA = 1000	# valor de la unidad tributaria del a#o anterior.

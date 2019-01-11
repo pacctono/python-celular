@@ -5,7 +5,6 @@
 from __future__ import print_function # Para usar 'print' de version 3.
 import sys
 from time import time, localtime, strftime, sleep
-import io
 try:
   from lib import DIR, LINEA, bMovil
 except:
@@ -26,6 +25,47 @@ else:
 
 from lib import ES, Const as CO
 
+crearControlPersonal = """
+CREATE TABLE IF NOT EXISTS controlpersonal_
+(
+  FECHA             VARCHAR(8),
+  LISTOMOVIMIENTO   VARCHAR(1),
+  QUINCENA          VARCHAR(1),
+  NUMSEM            VARCHAR(1),
+  PROCESO           VARCHAR(2),
+  ACT_GENERAL       VARCHAR(1),
+  ACT_ISLR          VARCHAR(1),
+  ACT_HISTORICO     VARCHAR(1),
+  PERMISO           VARCHAR(1),
+  CEDULA_RAC        DECIMAL(9,0),
+  DESCRIPCION       VARCHAR(60),
+  NOMBRE_TABLAS     VARCHAR(15)
+)
+;
+"""
+valoresControlPersonal = [
+  ''                # FECHA
+  '0'               # LISTOMOVIMIENTO
+  '3'               # QUINCENA
+  '4'               # NUMSEM
+  '50'              # PROCESO
+  '0'               # ACT_GENERAL
+  '0'               # ACT_ISLR
+  '0'               # ACT_HISTORICO
+  '0'               # PERMISO
+  '999000399'       # CEDULA_RAC
+  'NOMINA mmm aaaa' # DESCRIPCION
+  '_1016'           # NOMBRE_TABLAS
+]
+
+import calendar   # calendar.mdays[mm]: numero de dias del mes 'mm'.
+def numeroDiaSemana(ano, mes, diaSemana = 0): # 0: lunes
+  return len([1 for i in calendar.monthcalendar(ano, mes)
+              if i[diaSemana] != 0])
+# FIN funcion numeroDiaSemana
+def numeroLunes(ano, mes):
+  return numeroDiaSemana(ano, mes, 0)         # 0:lunes, 1:martes....
+# FIN funcion numeroLunes
 import re
 def ireplace(self, viejo, nuevo, count=0):
   ''' Se comporta como string.replace(), pero lo hace
