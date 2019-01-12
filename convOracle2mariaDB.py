@@ -21,12 +21,14 @@ if bMovil:
   from os.path import isfile, join, basename
   import fnmatch
 else:
+  droid = False
   from os.path import abspath, basename
 
 from lib import ES, Const as CO
 
 crearControlPersonal = """
-CREATE TABLE IF NOT EXISTS controlpersonal_
+DROP TABLE IF EXISTS controlpersonal;
+CREATE TABLE controlpersonal
 (
   FECHA             VARCHAR(8),
   LISTOMOVIMIENTO   VARCHAR(1),
@@ -44,27 +46,27 @@ CREATE TABLE IF NOT EXISTS controlpersonal_
 ;
 """
 valoresControlPersonal = [
-  ''                # FECHA
-  '0'               # LISTOMOVIMIENTO
-  '3'               # QUINCENA
-  '4'               # NUMSEM
-  '50'              # PROCESO
-  '0'               # ACT_GENERAL
-  '0'               # ACT_ISLR
-  '0'               # ACT_HISTORICO
-  '0'               # PERMISO
-  '999000399'       # CEDULA_RAC
-  'NOMINA mmm aaaa' # DESCRIPCION
-  '_1016'           # NOMBRE_TABLAS
+  '',                # FECHA
+  '0',               # LISTOMOVIMIENTO
+  '3',               # QUINCENA
+  '4',               # NUMSEM
+  '50',              # PROCESO
+  '0',               # ACT_GENERAL
+  '0',               # ACT_ISLR
+  '0',               # ACT_HISTORICO
+  '0',               # PERMISO
+  '999000399',       # CEDULA_RAC
+  'NOMINA ', # DESCRIPCION
+  '_1016'            # NOMBRE_TABLAS
 ]
 
 import calendar   # calendar.mdays[mm]: numero de dias del mes 'mm'.
-def numeroDiaSemana(ano, mes, diaSemana = 0): # 0: lunes
-  return len([1 for i in calendar.monthcalendar(ano, mes)
+def numeroDiaSemana(ano, mes, diaSemana = calendar.MONDAY): # 0: lunes
+  return len([1 for i in calendar.monthcalendar(ano, mes) \
               if i[diaSemana] != 0])
 # FIN funcion numeroDiaSemana
 def numeroLunes(ano, mes):
-  return numeroDiaSemana(ano, mes, 0)         # 0:lunes, 1:martes....
+  return numeroDiaSemana(ano, mes, calendar.MONDAY) # 0:lunes, ...
 # FIN funcion numeroLunes
 import re
 def ireplace(self, viejo, nuevo, count=0):
@@ -181,6 +183,7 @@ if not f:
 #print("%sNombre de archivos, entrada:%s '%s'%s, salida:%s '%s'" % \
 #      (CO.AMARI, CO.FIN, nombArchEntCompleto, CO.AMARI, CO.FIN, \
 #        nombArchSalCompleto))
+bControlPersonal = False
 salida  = []
 salida.append('SET GLOBAL max_allowed_packet=128*1024*1024;')
 nLineas = 1       # Numero de lineas
@@ -189,7 +192,7 @@ crearTabla = False
 linUltValue = []
 restar = 0        # Restar lineas sumadas con anticipacion.
 for linea in f:
-  linea = linea[0:linea.index('\n')]
+  linea = linea.rstrip('\n\r ')
   if 'set feed' in linea.lower(): continue  # set feedback
   if 'alter' in linea.lower() and \
      'triggers' in linea.lower(): continue   # set alter.*triggers
@@ -214,6 +217,7 @@ for linea in f:
     nLineas += 1
     restar += 1
     linea = ireplace(linea, 'create table', 'CREATE TABLE')
+    bControlPersonal = 'controlpersonal' in linea
     crearTabla = True
   if 'create unique index' in linea.lower():
     linea = linea.replace(sufijoEntrada, sufijoSalida)
@@ -272,7 +276,29 @@ else:
   else:
     for linea in salida:
       print(linea.encode('utf-8'))
+  exit
 #print(linUltValue)
 #print(nLineas)
 #print(linUltValue)
+
+if not bControlPersonal:
+  ind = ES.entradaConLista(droid, 'Desea preparar la creacion'
+            ' de controlpersonal', 'Seleccione', ['Si', 'No'])
+  if not ((1 <= ind) or (0 > ind) or (None == ind)):	# Se asegura de tener el indice correcto.
+    bControlPersonal = True
+if bControlPersonal:
+  crearControlPersonal = crearControlPersonal.replace(\
+                  'controlpersonal', 'controlpersonal_' + sufijoSalida)
+  f.write(unicode(crearControlPersonal))
+  f.write(unicode('INSERT INTO controlpersonal' + '_' + sufijoSalida +\
+                ' VALUES\n'))
+  ano, mes = sufijoSalida.split('_')
+  valoresControlPersonal[0] = str(calendar.mdays[int(mes)]) + mes + ano
+  valoresControlPersonal[3] = str(numeroLunes(int(ano), int(mes)))
+  valoresControlPersonal[10] += CO.meses[int(mes)] + ' ' + ano
+  valoresInsert = '('
+  for valor in valoresControlPersonal:
+    valoresInsert += "'" + valor + "', "
+  valoresInsert = valoresInsert.rstrip(', ') + ');\n'
+  f.write(unicode(valoresInsert))
 # FIN Principal
