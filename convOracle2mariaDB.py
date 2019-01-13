@@ -10,6 +10,7 @@ import sys
 if 3 == sys.version_info.major:
   unicode = str
 from time import time, localtime, strftime, sleep
+print(strftime("%Y/%m/%d %H:%M:%S"))
 try:
   from lib import DIR, LINEA, bMovil
 except:
@@ -286,26 +287,27 @@ else:
 #print(nLineas)
 #print(linUltValue)
 
+print(strftime("%Y/%m/%d %H:%M:%S"))
 if not bControlPersonal:
   ind = ES.entradaConLista(droid, 'Desea preparar la creacion'
             ' de controlpersonal', 'Seleccione', ['Si', 'No'])
   if not ((1 <= ind) or (0 > ind) or (None == ind)):	# Se asegura de tener el indice correcto.
     ind = 0
-  bControlPersonal = 0 == ind
-if bControlPersonal:
-  crearControlPersonal = crearControlPersonal.replace(\
+  if 0 == ind:
+    crearControlPersonal = crearControlPersonal.replace(\
                   'controlpersonal', 'controlpersonal_' + sufijoSalida)
-  f.write(unicode(crearControlPersonal))
-  f.write(unicode('INSERT INTO controlpersonal' + '_' + sufijoSalida +\
-                ' VALUES\n'))
-  ano, mes = sufijoSalida.split('_')
-  valoresControlPersonal[0] = str(calendar.mdays[int(mes)]) + mes + ano
-  valoresControlPersonal[3] = str(numeroLunes(int(ano), int(mes)))
-  valoresControlPersonal[10] += CO.meses[int(mes)] + ' ' + ano
-  valoresInsert = '('
-  for valor in valoresControlPersonal:
-    valoresInsert += "'" + valor + "', "
-  valoresInsert = valoresInsert.rstrip(', ') + ');\n'
-  f.write(unicode(valoresInsert))
-  print('Se preparó la creación de controlpersonal_' + sufijoSalida)
+    f.write(unicode(crearControlPersonal))
+    f.write(unicode('INSERT INTO controlpersonal' + '_' + sufijoSalida \
+                + ' VALUES\n'))
+    ano, mes = sufijoSalida.split('_')
+    valoresControlPersonal[0] = str(calendar.mdays[int(mes)]) + mes + ano
+    valoresControlPersonal[3] = str(numeroLunes(int(ano), int(mes)))
+    valoresControlPersonal[10] += CO.meses[int(mes)] + ' ' + ano
+    valoresInsert = '('
+    for valor in valoresControlPersonal:
+      valoresInsert += "'" + valor + "', "
+    valoresInsert = valoresInsert.rstrip(', ') + ');\n'
+    f.write(unicode(valoresInsert))
+    print('Se preparó la creación de controlpersonal_' + sufijoSalida)
+print(strftime("%Y/%m/%d %H:%M:%S"))
 # FIN Principal
