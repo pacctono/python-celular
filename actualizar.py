@@ -73,12 +73,13 @@ if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
 	IPServ = ES.entradaNombre(droid, 'IP del servidor',
 								'Introduzca IP del servidor', '192.168.0.')
 print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], IPServ))
-miDirIP = obtenerIP(IPServ)								# Esta rutina fue la unica que encontre para mi IP.
-
-decip = droid.wifiGetConnectionInfo().result['ip_address']
-hexip = hex(decip).split('x')[1]
-dirL = int(hexip, 16)
-miDirIP = socket.inet_ntoa(struct.pack("<L", dirL))
+if droid:
+	decip = droid.wifiGetConnectionInfo().result['ip_address']
+	hexip = hex(decip).split('x')[1]
+	dirL = int(hexip, 16)
+	miDirIP = socket.inet_ntoa(struct.pack("<L", dirL))
+else:
+	miDirIP = obtenerIP(IPServ)	# Esta rutina fue la unica que encontre para mi IP.
 
 print("Mi direccion IP es: %s" % miDirIP)
 try:

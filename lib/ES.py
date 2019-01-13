@@ -1,6 +1,12 @@
 # libES: modulo para entrada y salida.
 #-*-coding:utf8;-*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
+import sys
+# raw_input desaparece en ver 3 y se convierte en input.
+# Ver: https://blog.teamtreehouse.com
+if 2 == sys.version_info.major:
+  input = raw_input
+import os
 
 try:
   if __name__ == '__main__' or 0 > __name__.find('lib'):
@@ -13,8 +19,6 @@ except:
   DIR = './'
   bMovil = False
 
-import sys
-import os
 import re
 patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 #pat = re.compile(r"\d{1,3}")	        # Expresion regular: 1 o mas dig (\d+) y tres dig al final (\d{3}).
@@ -74,7 +78,7 @@ def alerta(droid, titulo, valor=''):
   return resultado
 # funcion alerta
 def mostrarValor(droid, valor):
-  
+
   sValor = repr(valor)
   return alerta(droid, 'EL VALOR SUMINISTRADO', sValor)
 # funcion mostrarValor
@@ -91,7 +95,7 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
     droid.dialogDismiss()
   else:
     while True:
-      print(titulo)    
+      print(titulo)
       resultado = input(mensaje + '[' + str(porDefecto) + ']: ')
       if '' == resultado or None == resultado: resultado = str(porDefecto)
       if resultado.isdigit(): break
@@ -117,7 +121,7 @@ def entradaNombre(droid, titulo = 'Entrada de datos',
     resultado = droid.dialogGetInput(titulo, mensaje, porDefecto).result
     droid.dialogDismiss()
   else:
-    print(titulo)    
+    print(titulo)
     resultado = porDefecto
     resultado = input(mensaje + ': ')
   return resultado
@@ -131,21 +135,21 @@ def entradaContrasena(droid, titulo = 'Contrasena',
     droid.dialogDismiss()
   else:
     import getpass
-    print(titulo)    
+    print(titulo)
     resultado = porDefecto
     resultado = getpass.getpass(mensaje)
   return resultado
 # funcion entradaNombre
 def entradaFecha(droid, ano, mes, dia):
-  if droid:    
+  if droid:
     droid.dialogCreateDatePicker(ano, mes, dia)
     droid.dialogShow()
     resultado = droid.dialogGetResponse().result
     droid.dialogDismiss()
   else:
-    from datetime import datetime    
+    from datetime import datetime
     fechaDefecto = str(dia) + '-' + str(mes) + '-' + str(ano)
-    while True:    
+    while True:
       try:
         fecha = input('Introduzca la fecha en formato DD-MM-YYYY [' +
                                                         fechaDefecto + ']: ' )
@@ -182,8 +186,8 @@ def entradaConLista(droid, titulo, mensaje, lista):
       droid.dialogDismiss()
       return None
   else:
-    print(titulo)    
-    print(mensaje)    
+    print(titulo)
+    print(mensaje)
     i = 0
     for item in lista:
       print(i, item, sep='.-')

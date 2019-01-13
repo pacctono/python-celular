@@ -1,9 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #-*-coding:utf8;-*-
 #qpy:3
 #qpy:console
-from __future__ import print_function # Para usar 'print' de version 3.
+#from __future__ import print_function # Para usar 'print' de version 3.
 import sys
+# unicode desaparece en ver 3 y se convierte en str.
+# Ver: https://blog.teamtreehouse.com/python-2-vs-python-3
+# Tambien: https://nbviewer.jupyter.org/github/rasbt/python_reference/blob/master/tutorials/key_differences_between_python_2_and_3.ipynb
+if 3 == sys.version_info.major:
+  unicode = str
 from time import time, localtime, strftime, sleep
 try:
   from lib import DIR, LINEA, bMovil
@@ -285,7 +290,8 @@ if not bControlPersonal:
   ind = ES.entradaConLista(droid, 'Desea preparar la creacion'
             ' de controlpersonal', 'Seleccione', ['Si', 'No'])
   if not ((1 <= ind) or (0 > ind) or (None == ind)):	# Se asegura de tener el indice correcto.
-    bControlPersonal = True
+    ind = 0
+  bControlPersonal = 0 == ind
 if bControlPersonal:
   crearControlPersonal = crearControlPersonal.replace(\
                   'controlpersonal', 'controlpersonal_' + sufijoSalida)
@@ -301,4 +307,5 @@ if bControlPersonal:
     valoresInsert += "'" + valor + "', "
   valoresInsert = valoresInsert.rstrip(', ') + ');\n'
   f.write(unicode(valoresInsert))
+  print('Se preparó la creación de controlpersonal_' + sufijoSalida)
 # FIN Principal
