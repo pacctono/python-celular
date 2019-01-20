@@ -55,6 +55,11 @@ lDATA = [
 		 'archsBanco.txt'
 		]
 
+def getNetworkIP():
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+	s.connect(('<broadcast>', 0))
+	return s.getsockname()[0]
 def obtenerIP(servidor):		# Es la unica rutina que consegui para obtener mi IP.
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.connect((servidor, 80))	# servidor puede ser cualquiera, no es necesario usar el seleccionado.
