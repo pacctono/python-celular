@@ -1,5 +1,5 @@
 # libES: modulo para entrada y salida.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 # raw_input desaparece en ver 3 y se convierte en input.
@@ -28,7 +28,7 @@ if 0 > __name__.find('lib'): import Const as CO
 else: from lib import Const as CO
 
 par = lambda x: (0 == (x%2))	# Es un numero par.
-def abrir(aNb, modo='r', codigo = 'UTF-8', bImprimir = False):
+def abrir(aNb, modo='r', codigo = 'ISO-8859-1', bImprimir = False):
   'Abre para leer, el archivo cuyo nombre es el valor de aNb'
   import io
   from os.path import abspath, basename

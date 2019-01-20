@@ -1,11 +1,19 @@
 # libConceptos: Modulo para leer conceptos de IPASPUDO.
 #-*-coding:utf8;-*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
+import sys
+PY3 = 3 == sys.version_info.major
+if PY3:
+  unicode = str
+else:
+  input = raw_input
 
 try:
-  if __name__ == '__main__' or 0 > __name__.find('lib'):
-    from . import DIR, bMovil
-  else: from lib import DIR, bMovil
+  if __name__ == '__main__': 
+    import os
+    sys.path.append(os.path.join(os.path.dirname(
+                                  os.path.abspath(__file__)), '..'))
+  from lib import DIR, bMovil
 except:
   bMovil = False
 
@@ -17,9 +25,9 @@ if bMovil:
   droid = android.Android()
 else:
   from os.path import abspath
+  droid = False
 
-if __name__ == '__main__': import ES, Const as CO, MySQL
-else: from lib import ES, Const as CO, MySQL
+from lib import ES, Const as CO, MySQL
 
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()

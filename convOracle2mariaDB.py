@@ -278,7 +278,7 @@ if f:
 else:
   if bMovil:
     print("%sNombre de archivo de salida%s '%s' %serrado.%s" % \
-              (CO.ROJO, CO.FIN, nombArchEntCompleto, CO.ROJO, CO.FIN))
+              (CO.ROJO, CO.FIN, nombArchSalCompleto, CO.ROJO, CO.FIN))
   else:
     for linea in salida:
       print(linea.encode('utf-8'))

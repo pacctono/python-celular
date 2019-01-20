@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 #qpy:3
 #qpy:console
 # Cedula=0:10; Nombre (corto=11:40/largo=11:83); Nucleo (42:44/83:85);
@@ -76,15 +76,15 @@ Iper = Iper.poblarLista(sufijoNomina)
 Idat = Idat.poblarLista(sufijoNomina)
 if fIper and fIdat:
   for l in Iper:
-    fIper.write("%08d %-70.70s  %2.2s %20.20s %1.1s %1.1s %1.1s %1.1s "
+    fIper.write("%010d %-70.70s  %2.2s %20.20s %1.1s %1.1s %1.1s %1.1s "
                 "%1.1s %1.1s %010d %8.8s %010d\n" %
             (l['ci'], l['nmb'], l['nuc'], l['cta'], l['bco'], l['gen'],
               l['esp'], l['cat'], l['cond'], l['ded'],
-              100*int(l['sdo']), l['fing'], 0))
+              l['sdo'], l['fing'], 0))
   print('%d filas en %s.' % (len(Iper), nombArchIper))
   for l in Idat:
-    fIdat.write("%010d %-3.3s%010d%010d\n" %
-            (l['ci'], l['cct'], 100*int(l['vf']), 100*int(l['vv'])))
+    fIdat.write("%08d %-3.3s%010d%010d\n" %
+          (l['ci'], l['cct'], l['vf'], l['vv']))
   print('%d filas en %s.' % (len(Idat), nombArchIdat))
 else:
   print("%sNombre de archivo de salida%s '%s'/'%s' %serrado.%s" % \

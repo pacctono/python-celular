@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 #qpy:3
 #qpy:console
 from __future__ import print_function # Para poder usar 'print' de version 3.
@@ -128,7 +128,7 @@ for DATA in lDATA:
 			print("%s %sno está en el archivo de control!%s" % (DATA, CO.ROJO,
 																	CO.FIN))
 	try:
-		data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
+		data = urlopen(URL + DATA, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.
 	except:
 		print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA,
@@ -240,7 +240,7 @@ if lBancosHoy and (0 < len(lBancosHoy)):
 		sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
 		print("%sLeyendo%s %s remoto..." % (sColor, CO.FIN, DATA))
 		try:
-			data = urlopen(URL + DATA, None, 10).read().decode('UTF-8')	# None, ningun parametro es enviado al servidor; 10, timeout.
+			data = urlopen(URL + DATA, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
 			bLeido = True												# No hubo error de lectura desde el servidor.
 		except:
 			print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA,

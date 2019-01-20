@@ -1,5 +1,5 @@
 # libConceptos: Modulo para leer conceptos de IPASPUDO.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 PY3 = 3 == sys.version_info.major
@@ -43,10 +43,13 @@ def poblarLista(sufijoNomina):
     cursor = oMySQL.abreCursor()
 # Prepara una consulta SQL para SELECT registros desde la base de datos.
     sql = '''
-          SELECT n.Cedula, n.Concepto, n.valor_fijo, n.valor_variable
+          SELECT n.Cedula AS ci, n.Concepto AS cct,
+                 TRUNCATE(100*ROUND(n.valor_fijo, 2), 0) AS vf,
+                 TRUNCATE(100*ROUND(n.valor_variable, 2), 0) AS vv
           FROM   udo.nomina_SUFIJO n INNER JOIN ipaspudo.conceptos c ON
                         (c.Codigo = n.Concepto AND c.id_nomina = 'S')
                   INNER JOIN udo.personal_SUFIJO USING (Cedula)
+          WHERE  n.Valor_fijo != 0 OR n.Valor_variable != 0
           ORDER BY n.Cedula, n.Concepto
           '''
     sql = sql.replace('SUFIJO', sufijoNomina)
@@ -77,4 +80,6 @@ if __name__ == '__main__':
   if 1 < len(sys.argv): sufijo = sys.argv[1]
   else: sufijo = '2018_12'
   lista = poblarLista(sufijo)
+  for l in lista:
+    if 4299801 == l['ci']: print('PC:', l)
   print('fila ' + str(len(lista)) + ': ', lista[len(lista)-1])

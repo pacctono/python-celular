@@ -1,5 +1,5 @@
 # libCuota: Modulo para el manejo de cuota.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from lib import ES, Const as CO, General as FG
 
 def calCuota(rM, iN, rI=12):	# Monto (rM), numero de meses (iN) e interes anual (rI).
