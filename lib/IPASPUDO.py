@@ -1,5 +1,5 @@
 # libIPASPUDO: Modulo para IPASPUDO.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 import types
 from operator import itemgetter, attrgetter
 import json
@@ -196,7 +196,7 @@ def mEstado(sI= '0'):
 # funcion mEstado
 
 def creaOp(l):
-#  return unicode(("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1], extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6])), 'utf-8', 'replace')
+#  return unicode(("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1], extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6])), 'ISO-8859-1', 'replace')
   return ("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1], extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6]))
 # funcion creaOp
 def lCheques():

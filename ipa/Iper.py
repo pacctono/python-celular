@@ -1,4 +1,4 @@
-# libConceptos: Modulo para leer conceptos de IPASPUDO.
+# ipaIper: Modulo para leer conceptos de IPASPUDO.
 #-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys

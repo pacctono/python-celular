@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 #qpy:3
 #qpy:console
 from __future__ import print_function # Para poder usar 'print' de version 3.

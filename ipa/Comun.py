@@ -1,5 +1,5 @@
 # libComun: Rutinas comunes para ipaspudo.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 import types
 import json
 from lib import ES, Const as CO, General as FG

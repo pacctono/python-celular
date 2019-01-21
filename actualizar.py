@@ -3,6 +3,13 @@
 #qpy:3
 #qpy:console
 from __future__ import print_function # Para poder usar 'print' de version 3.
+import sys
+PY3 = 3 == sys.version_info.major
+if PY3:
+  unicode = str
+else:
+  input = raw_input
+
 try:
   from lib import DIR, LINEA, bMovil
 except:
@@ -17,7 +24,7 @@ if bMovil:
   droid = android.Android()
 else: droid = None
 
-import socket, sys
+import socket
 import struct
 
 from lib import ES, Const as CO, General as FG

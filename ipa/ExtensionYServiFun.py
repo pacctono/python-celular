@@ -1,5 +1,5 @@
 # libExtensionYServiFun: Modulo de extension y ServiFun para IPASPUDO.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from ipa import Comun as COM
 from lib import ES, Const as CO, General as FG
 

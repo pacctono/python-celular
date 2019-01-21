@@ -1,5 +1,5 @@
 # libBancos: Modulo para leer bancos de IPASPUDO.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
 try:

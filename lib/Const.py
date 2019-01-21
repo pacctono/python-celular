@@ -1,5 +1,5 @@
 # libConst: modulo para entrada y salida.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 try:
   from lib import DIR, LINEA, bMovil
 except:

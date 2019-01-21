@@ -1,5 +1,5 @@
 # libAhorroYPrestamo: Modulo de ahorro y prestamo para IPASPUDO.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from operator import itemgetter, attrgetter
 from ipa import ExtensionYServiFun as ESF
 from ipa import Nomina as NOM

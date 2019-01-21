@@ -1,5 +1,5 @@
 # libGanYPer: Modulo de ganancias y perdidas para IPASPUDO.
-#-*-coding:utf8;-*-
+#-*- coding:ISO-8859-1 -*-
 from lib import ES, Const as CO, General as FG
 
 def ganYperXmes():
