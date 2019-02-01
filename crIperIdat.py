@@ -40,7 +40,7 @@ from lib import ES, Const as CO
 from ipa import Iper, Idat
 
 print(strftime("%Y/%m/%d %H:%M:%S"))
-prefijoIper = ''
+prefijoDir = ''
 anoNomina = strftime("%Y")
 mesNomina = strftime("%m")
 if 1 < len(sys.argv):
@@ -56,14 +56,16 @@ if 1 < len(sys.argv):
        sys.argv[2] in (anoNomina, str(int(anoNomina)-1)):
       anoNomina = sys.argv[2]
       if 3 < len(sys.argv):
-        prefijoIper = sys.argv[3]
+        prefijoDir = sys.argv[3]
     else:
       print("%sDebe suministrar un numero de año valido:%s %s" % \
             (CO.ROJO, CO.FIN, sys.argv[2]))
       sys.exit()
 sufijoNomina = anoNomina + '_' + mesNomina
-nombArchIper = prefijoIper + 'IPER' + anoNomina + mesNomina + '.TXT'
-nombArchIdat = prefijoIper + 'IDAT' + anoNomina + mesNomina + '.TXT'
+nombArchIper = prefijoDir + 'IPER' + anoNomina + mesNomina + '.TXT'
+nombArchIdat = prefijoDir + 'IDAT' + anoNomina + mesNomina + '.TXT'
+print("Se procede a leer las tablas de nomina '%s' y\ncrear los "
+    "archivos: %s y %s." % (sufijoNomina, nombArchIper, nombArchIdat))
 
 # Inicio principal
 try:

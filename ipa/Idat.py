@@ -66,9 +66,13 @@ def poblarLista(sufijoNomina):
             'vv':fila[3]
           })
       else:
-        print("Error: %s, sufijo: %s" % (resultados, sufijoNomina))
+        print("%sError: %s%s, %ssufijo:%s %s" %
+          (CO.ROJO, CO.FIN, resultados, CO.ROJO, CO.FIN, sufijoNomina))
     except:
-      print("Imposible crear lista de filas. Sufijo: ", sufijoNomina)
+      print("%sImposible crear lista de filas para %s'IDAT%s.TXT'%s "
+            "desde las tablas:%s %s" %
+            (CO.ROJO, CO.FIN, sufijoNomina.replace ('_',''),
+             CO.ROJO, CO.FIN, sufijoNomina))
 # disconnect from server
     oMySQL.cierraCursor(cursor)
     oMySQL.cierraConexion()

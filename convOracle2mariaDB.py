@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-*- coding:ISO-8859-1 -*-
+#-*- coding:UTF-8 -*-
 #qpy:3
 #qpy:console
 #from __future__ import print_function # Para usar 'print' de version 3.
@@ -62,7 +62,7 @@ valoresControlPersonal = [
   '0',               # ACT_HISTORICO
   '0',               # PERMISO
   '999000399',       # CEDULA_RAC
-  'NOMINA ', # DESCRIPCION
+  'NOMINA ',         # DESCRIPCION
   '_1016'            # NOMBRE_TABLAS
 ]
 
@@ -148,7 +148,7 @@ else:
     if 2 < len(sys.argv):
       sufijoSalida = sys.argv[2]
       if 3 < len(sys.argv):
-        prefijoNombArch = sys.argv[3]
+        prefijoNombArch = sys.argv[3]   # nomina_, personal_ o rac_.
     else:
       if sufijoEntrada.isdigit():
         if 4 <= len(sufijoEntrada) <= 6:
@@ -185,7 +185,7 @@ else:
 if not f:
   print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
                               nombArchEntCompleto, CO.ROJO, CO.FIN))
-  exit
+  sys.exit()
 #print("%sNombre de archivos, entrada:%s '%s'%s, salida:%s '%s'" % \
 #      (CO.AMARI, CO.FIN, nombArchEntCompleto, CO.AMARI, CO.FIN, \
 #        nombArchSalCompleto))
@@ -254,6 +254,14 @@ for linea in f:
         fecha = obtenerFecha(fechaConFormato)
         linea = linea[0:iDate] + fecha + \
                 linea[iParentesisCierra+1:].lstrip().rstrip()
+      # Eliminar la cadena '...chr(...)...'
+      while 'chr(' in linea.lower():
+        iChr = linea.lower().index('chr')
+        lInd = linea.rfind("'", 0, iChr)
+        rInd = linea.find("'", iChr, linea.find(',', iChr))
+        if lInd < iChr and 0 < lInd and \
+            rInd > iChr and len(linea)-1 > rInd:
+          linea = linea[0:lInd] + linea[rInd+1:]
     else:
       nInsert = False
       linUltValue.append(nLineas-1-restar) # El primer ele de lista es 0.
@@ -282,14 +290,14 @@ else:
   else:
     for linea in salida:
       print(linea.encode('utf-8'))
-  exit
+  sys.exit()
 #print(linUltValue)
 #print(nLineas)
 #print(linUltValue)
 
 print(strftime("%Y/%m/%d %H:%M:%S"))
-if not bControlPersonal:
-  ind = ES.entradaConLista(droid, 'Desea preparar la creacion'
+if not bControlPersonal and 'nomina_' == prefijoNombArch:
+  ind = ES.entradaConLista(droid, 'Desea preparar la creación'
             ' de controlpersonal', 'Seleccione', ['Si', 'No'])
   if not ((1 <= ind) or (0 > ind) or (None == ind)):	# Se asegura de tener el indice correcto.
     ind = 0
@@ -299,15 +307,19 @@ if not bControlPersonal:
     f.write(unicode(crearControlPersonal))
     f.write(unicode('INSERT INTO controlpersonal' + '_' + sufijoSalida \
                 + ' VALUES\n'))
-    ano, mes = sufijoSalida.split('_')
+    partes = sufijoSalida.split('_')
+    if 2 < len(partes): nExtra = partes[0].upper() + ' '
+    else: nExtra = ''
+    ano = partes[len(partes)-2]
+    mes = partes[len(partes)-1]
     valoresControlPersonal[0] = str(calendar.mdays[int(mes)]) + mes + ano
     valoresControlPersonal[3] = str(numeroLunes(int(ano), int(mes)))
-    valoresControlPersonal[10] += CO.meses[int(mes)] + ' ' + ano
+    valoresControlPersonal[10] += nExtra + CO.meses[int(mes)] + ' ' + ano
     valoresInsert = '('
     for valor in valoresControlPersonal:
       valoresInsert += "'" + valor + "', "
     valoresInsert = valoresInsert.rstrip(', ') + ');\n'
     f.write(unicode(valoresInsert))
     print('Se preparó la creación de controlpersonal_' + sufijoSalida)
-print(strftime("%Y/%m/%d %H:%M:%S"))
+  print(strftime("%Y/%m/%d %H:%M:%S"))
 # FIN Principal

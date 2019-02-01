@@ -1,5 +1,5 @@
 # libES: modulo para entrada y salida.
-#-*- coding:ISO-8859-1 -*-
+#-*- coding:UTF-8 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 import sys
 # raw_input desaparece en ver 3 y se convierte en input.
