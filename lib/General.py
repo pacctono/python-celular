@@ -21,7 +21,9 @@ if bMovil:
     import android
   droid = android.Android()
 else: droid = None
-from lib import ES
+
+if __name__ == '__main__' or 0 > __name__.find('lib'): import ES
+else: from lib import ES
 
 eliminarPuntos = lambda sCadena, sCad='.': sCadena.replace(sCad, '') # Cadena (solo digitos) del socio.
 cambiarAPunto  = lambda sCadena, sCad=',': sCadena.replace(sCad, '.')

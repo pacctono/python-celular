@@ -1,6 +1,7 @@
 # libCuota: Modulo para el manejo de cuota.
 #-*- coding:ISO-8859-1 -*-
-from lib import ES, Const as CO, General as FG
+if __name__ == '__main__': import ES, Const as CO, General as FG
+else: from lib import ES, Const as CO, General as FG
 
 def calCuota(rM, iN, rI=12):	# Monto (rM), numero de meses (iN) e interes anual (rI).
 	'''Calcula la cuota de un prestamo, segun el monto,
@@ -41,3 +42,6 @@ def cuota(droid=None, bImp=True):
 		return opc
 	return rM, iN, rI, c
 # funcion cuota
+
+if __name__ == '__main__':
+  cuota()

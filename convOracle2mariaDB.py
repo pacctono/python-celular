@@ -163,11 +163,21 @@ else:
                             sufijoEntrada[0:2]
     nombArchEntCompleto = prefijoNombArch + sufijoEntrada + '.sql'
     nombArchEnt = basename(nombArchEntCompleto)
-    nombArchSalCompleto = prefijoNombArch + sufijoSalida + '.sql'
+    nombArchSalCompleto = prefijoNombArch + sufijoSalida.replace('_', '-') + '.sql'
     nombArchSal = basename(nombArchSalCompleto)
   else:
     print("%sNo suministro el sufijo de entrada.%s" % (CO.ROJO, CO.FIN))
+    print("Ejecutar: %s%s <sufijo de entrada:mmaa> [[<sufijo de salida>|HOY('aaaa_mm')] "
+          "[<prefijo del nombre del archivo>|nomina_|_personal|_rac]]%s" %\
+          (CO.AMARI, basename(sys.argv[0]), CO.FIN))
     sys.exit()
+
+print("Archivo de entrada: %s%s%s" %
+      (CO.AZUL, nombArchEntCompleto, CO.FIN))
+print("Archivo de salida:  %s%s%s" %
+      (CO.AZUL, nombArchSalCompleto, CO.FIN))
+print("Inicio: %s%s%s" %
+      (CO.AZUL, strftime("%Y/%m/%d %H:%M:%S"), CO.FIN))
 
 if bMovil:
   nombArchEnt = buscarArchivo(lFiles)
@@ -186,14 +196,13 @@ if not f:
   print("%sNombre de archivo%s '%s' %serrado.%s" % (CO.ROJO, CO.FIN,
                               nombArchEntCompleto, CO.ROJO, CO.FIN))
   sys.exit()
-#print("%sNombre de archivos, entrada:%s '%s'%s, salida:%s '%s'" % \
-#      (CO.AMARI, CO.FIN, nombArchEntCompleto, CO.AMARI, CO.FIN, \
-#        nombArchSalCompleto))
+
 bControlPersonal = False
 salida  = []
 salida.append('SET GLOBAL max_allowed_packet=128*1024*1024;')
 nLineas = 1       # Numero de lineas
 nInsert = False   # No se ha encontrado un 'insert into'.
+tablaAnt = ''     # Tabla anterior en el 'insert into'.
 crearTabla = False
 linUltValue = []
 restar = 0        # Restar lineas sumadas con anticipacion.
@@ -203,7 +212,10 @@ for linea in f:
   if 'alter' in linea.lower() and \
      'triggers' in linea.lower(): continue   # set alter.*triggers
   if 'set define' in linea.lower(): continue   # set define
-  if 'prompt' in linea.lower(): continue       # prompt
+  if 'prompt' in linea.lower():             # prompt
+    if 'loading' in linea.lower() or 'records loaded' in linea.lower():
+      linea = '-- ' + linea.replace(sufijoEntrada, sufijoSalida)  # Comentar linea.
+    else: continue
   if 'commit' in linea.lower(): continue    # commit
   if 'NOMINA' in linea: linea = linea.replace('NOMINA', 'nomina')
   if 'PERSONAL' in linea:
@@ -231,11 +243,16 @@ for linea in f:
     linea = ireplace(linea, 'create unique index', \
                           'CREATE UNIQUE INDEX')
   if 'insert into' in linea.lower():
-    if not nInsert: # Mantener y cambiar primera linea con 'insert into'
+    if 'nomina' in linea.lower() or 'personal' in linea.lower() or \
+        'rac' in linea.lower() or 'controlpersonal' in linea.lower():
+      tabla = linea[12:linea.find('_')]   # len('insert into ') = 12.
+#    if not nInsert: # Mantener y cambiar primera linea con 'insert into'
+    if tablaAnt != tabla: # Mantener y cambiar 1ra linea de cada <tabla> con 'insert into'
       linea = linea.replace(sufijoEntrada, sufijoSalida)
       linea = ireplace(linea, '_ipaspudo', '')
       linea = ireplace(linea, 'insert into', 'INSERT INTO')
       linea = linea[0:linea.index('(')] + 'VALUES'
+      tablaAnt = tabla
       nInsert = True
       nLineas += 1    # El primer 'insert' por el continue
       restar += 1
@@ -265,6 +282,7 @@ for linea in f:
     else:
       nInsert = False
       linUltValue.append(nLineas-1-restar) # El primer ele de lista es 0.
+
   nLineas += 1
   restar = 0
   salida.append(linea)
@@ -295,7 +313,8 @@ else:
 #print(nLineas)
 #print(linUltValue)
 
-print(strftime("%Y/%m/%d %H:%M:%S"))
+print("Fin:    %s%s%s" %
+      (CO.AZUL, strftime("%Y/%m/%d %H:%M:%S"), CO.FIN))
 if not bControlPersonal and 'nomina_' == prefijoNombArch:
   ind = ES.entradaConLista(droid, 'Desea preparar la creación'
             ' de controlpersonal', 'Seleccione', ['Si', 'No'])
@@ -321,5 +340,6 @@ if not bControlPersonal and 'nomina_' == prefijoNombArch:
     valoresInsert = valoresInsert.rstrip(', ') + ');\n'
     f.write(unicode(valoresInsert))
     print('Se preparó la creación de controlpersonal_' + sufijoSalida)
-  print(strftime("%Y/%m/%d %H:%M:%S"))
+  print("Final:  %s%s%s" %
+        (CO.AZUL, strftime("%Y/%m/%d %H:%M:%S"), CO.FIN))
 # FIN Principal
