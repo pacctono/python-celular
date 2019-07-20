@@ -25,7 +25,8 @@ meses = [
 
 UT  = 1000	# Valor actual de la unidad tributaria
 UTA = 1000	# valor de la unidad tributaria del a#o anterior.
-anoDividendo = '2.016'
+IVA = 16	# Impuesto al valor agregado.
+anoDividendo = '2.018'
 
 UGENERAL = 'ipaspudo'	# Usuario general, devuelve info restringida: Cedula, Nombre, Nucleo, etc.
 SUPERUSU = 'ipas'		# Superusuario.
