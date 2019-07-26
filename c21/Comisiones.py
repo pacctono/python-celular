@@ -1,61 +1,78 @@
 # libComisiones: Modulo para el manejo de las comisiones.
 #-*- coding:ISO-8859-1 -*-
-if __name__ == '__main__': import ES, Const as CO, General as FG
-else: from lib import ES, Const as CO, General as FG
+import sys
+if __name__ == '__main__': sys.path.append('../')
+from lib import ES, Const as CO, General as FG
 
-def calComisiones(rPr, rCom, rIva=16.0, rXFranq=10.0, rXReCaNa=5.0, xRegalia=80.0,
-				xPorcCap=20.0, xPorcGer=10.0):
+def calComisiones(rPr, rCom, rIva=16.0, rXFranq=10.0, rXReCaNa=5.0, xPorcReg=80.0,
+				xPorcSan=5.0, xPorcCap=20.0, xPorcGer=10.0):
 	'''Calcula las comisiones de una venta, segun el precio,
 		porcentaje de comision e IVA y otros:
 		rPr:     Precio del inmueble (G)
 		rCom:    % de comision (H)
 		rIva:    % del IVA (J)
 		rXFranq: Porcentaje de franquicia
-		rXReCaNa: Porcentaje reportado a casa nacional
-		xRegalia: Porcentaje regalia
+		rXReCaNa: Porcentaje reportado a casa nacional (R)
+		xPorcReg: Porcentaje regalia
+		xPorcSan: Porcentaje Sanaf
+		xPorcCap: Porcentaje de comision para captador/cerrador
+		xPorcGer: Porcentaje de comision del gerente
 		'''
-	resSIva  = rPr * (rCom/100.0)				# Reserva sin IVA
-	resCIva  = (1.0 + rIva/100.0) * resSIva		# Reserva con IVA
-	compSIva = resSIva							# Compartido con otra oficina sin IVA
-	compCIva = resCIva							# Compartido con otra oficina con IVA
+	resSIva  = rPr * (rCom/100.0)				# (I) Reserva sin IVA
+	resCIva  = (1.0 + rIva/100.0) * resSIva		# (K) Reserva con IVA
+	compSIva = resSIva							# (M) Compartido con otra oficina sin IVA
+	compCIva = resCIva							# (L) Compartido con otra oficina con IVA
 
-	frqTSIva = (rXFranq/100.0) * resSIva	# Franquicia de reserva sin IVA. Aplicar. 2 lados
-	frqFSIva = (rXFranq/100.0) * resCIva	# Franquicia de reserva sin IVA. No aplicar. 2 lados
-	frnqCIva = (rXFranq/100.0) * resCIva	# Franquicia de reserva con IVA. Un calculo. 2 lados.
+	frnqSIva = (rXFranq/100.0) * resSIva	# (O) Franquicia de reserva sin IVA. Aplicar. 2 lados
+#	frqTSIva = (rXFranq/100.0) * resSIva	# Franquicia de reserva sin IVA. Aplicar. 2 lados
+#	frqFSIva = (rXFranq/100.0) * resCIva	# Franquicia de reserva sin IVA. No aplicar. 2 lados
+	frnqCIva = (rXFranq/100.0) * resCIva	# (P) Franquicia de reserva con IVA. Un calculo. 2 lados.
 
-	frqTPaRe = (rXFranq/100.0) * (rXReCaNa/100.0) * rPr	# Franquicia a pagar reportada. Aplicar. 2 lados
-	frqFPaRe = (rXFranq/100.0) * compSIva	# Franquicia a pagar reportada. No aplicar. 2 lados
+	frnqPaRe = (rXFranq/100.0) * (rXReCaNa/100.0) * rPr	# (Q) Franquicia a pagar reportada. Aplicar. 2 lados
+#	frqTPaRe = (rXFranq/100.0) * (rXReCaNa/100.0) * rPr	# Franquicia a pagar reportada. Aplicar. 2 lados
+#	frqFPaRe = (rXFranq/100.0) * compSIva	# Franquicia a pagar reportada. No aplicar. 2 lados
 
-	regaliaT = (xRegalia/100.0) * frqTPaRe	# Regalia. Aplicar para franquicia a pagar reportada.
-	regaliaF = (xRegalia/100.0) * frqFPaRe	# Regalia. No aplicar para franquicia a pagar reportada.
+	regaliaT = (xPorcReg/100.0) * frnqPaRe	# (S) Regalia. Aplicar para franquicia a pagar reportada.
+#	regaliaT = (xPorcReg/100.0) * frqTPaRe	# Regalia. Aplicar para franquicia a pagar reportada.
+#	regaliaF = (xPorcReg/100.0) * frqFPaRe	# Regalia. No aplicar para franquicia a pagar reportada.
 
-	sanfT5XC = (0.20 * frqTPaRe) - (0.001 * resSIva)		# Sanaf aplicar franquicia a pagar reportada. Ambos lados.
-	sanfT5XL = (0.20 * frqTPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf aplicar franquicia a pagar reportada. 1 lado.
-	sanfF5XC = (0.20 * frqFPaRe) - (0.001 * resSIva)		# Sanaf no aplicar franquicia a pagar reportada. Ambos lados.
-	sanfF5XL = (0.20 * frqFPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf no aplicar franquicia a pagar reportada. 1 lado.
+	sanfm5XC = ((xPorcSan/100.0) * frnqPaRe) - (0.001 * resSIva)		# (T) Sanaf aplicar franquicia a pagar reportada. Ambos lados.
+#	sanfm5XL = ((xPorcSan/100.0) * frqTPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf aplicar franquicia a pagar reportada. 1 lado.
+#	sanfT5XC = (0.20 * frqTPaRe) - (0.001 * resSIva)		# Sanaf aplicar franquicia a pagar reportada. Ambos lados.
+#	sanfT5XL = (0.20 * frqTPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf aplicar franquicia a pagar reportada. 1 lado.
+#	sanfF5XC = (0.20 * frqFPaRe) - (0.001 * resSIva)		# Sanaf no aplicar franquicia a pagar reportada. Ambos lados.
+#	sanfF5XL = (0.20 * frqFPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf no aplicar franquicia a pagar reportada. 1 lado.
 
-	ofBruTRT = compCIva - frqTPaRe			# Usando franquicia a pagar reportada con %% reportado a Casa Nacional y precio.
-	ofBruTRF = compCIva - frqFPaRe			# Usando franquicia a pagar reportada con monto compartido sin IVA.
-	ofBruFRT = compCIva - frqTSIva			# Usando franquicia de reserva sin IVA con monto de reserva sin IVA.
-	ofBruFRF = compCIva - frqFSIva			# Usando franquicia de reserva sin IVA con monto de reserva con IVA.
+	ofBruTRT = compCIva - frnqPaRe			# (U)=(L)-(Q) Oficina bruto real = compartido con otra oficina - franquicia a pagar reportada.
+#	ofBruTRT = compCIva - frqTPaRe			# Usando franquicia a pagar reportada con %% reportado a Casa Nacional y precio.
+#	ofBruTRF = compCIva - frqFPaRe			# Usando franquicia a pagar reportada con monto compartido sin IVA.
+#	ofBruFRT = compCIva - frqTSIva			# Usando franquicia de reserva sin IVA con monto de reserva sin IVA.
+#	ofBruFRF = compCIva - frqFSIva			# Usando franquicia de reserva sin IVA con monto de reserva con IVA.
 
-	baHonSoc = compCIva - frnqCIva			# Base de honorarios socios.
+	baHonSoc = compCIva - frnqCIva			# (V)=(L)-(P) Base de honorarios socios = compartido con otra oficina - franqquicia de reserva sin IVA.
 # Calculo del monto Base para honorarios:
-	baTPaHon = compSIva - frqTSIva			# Usando franquicia de reserva sin IVA con monto de reserva sin IVA.
-	baFPaHon = compSIva - frqFSIva			# Usando franquicia de reserva sin IVA con monto de reserva con IVA.
-	baTPaHoI = (compSIva - frqTSIva) / (1 + CO.IVA/100.0)	# Usando franquicia de reserva sin IVA con monto de reserva con IVA, cuando iva de la negociacion es 0.00.
-	baFPaHoI = (compSIva - frqFSIva) / (1 + CO.IVA/100.0)	# Usando franquicia de reserva sin IVA con monto de reserva con IVA, cuando iva de la negociacion es 0.00.
-# Calculo del monto de la comision del asesor captador/cerrador:
+	basPaHon = compSIva - frnqSIva			# (W)=(M)-(O) compartido con otrs oficina sin IVA - franquicia de reserva sin IVA.
+	basPaHsI = (compSIva - frnqSIva) / (1 + CO.IVA/100.0)	# (W)=(M)-(O) cuando iva = 0. Se divide entre 1.16.
+#	baTPaHon = compSIva - frqTSIva			# Usando franquicia de reserva sin IVA con monto de reserva sin IVA.
+#	baFPaHon = compSIva - frqFSIva			# Usando franquicia de reserva sin IVA con monto de reserva con IVA.
+#	baTPaHoI = (compSIva - frqTSIva) / (1 + CO.IVA/100.0)	# Usando franquicia de reserva sin IVA con monto de reserva con IVA, cuando iva de la negociacion es 0.00.
+#	baFPaHoI = (compSIva - frqFSIva) / (1 + CO.IVA/100.0)	# Usando franquicia de reserva sin IVA con monto de reserva con IVA, cuando iva de la negociacion es 0.00.
+# Calculo del monto de la comision del asesor captador(X)/cerrador(Z):
 	xFactCap = xPorcCap/100.0
-	capPBTTT = xFactCap * ofBruTRT
-	capPBTFT = xFactCap * ofBruTRF
-	capPBFTT = xFactCap * ofBruFRT
-	capPBFFT = xFactCap * ofBruFRF
-	capPBTTF = (xFactCap * baTPaHon) - (0.002 * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-	capPBTFF = (xFactCap * baFPaHon) - (0.002 * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-	capPBFTF = (xFactCap * baTPaHoI) - (0.002 * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-	capPBFFF = (xFactCap * baFPaHoI) - (0.002 * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-# Calculo del monto de la comision del gerente:
+	capCerSo = xFactCap * basPaSoc			# Si captador/cerrador es socio; porc captador/cerrador x base para honorarios socios.
+# Si captador/cerrador no es socio y se cobra IVA en la negociacion:
+	capCercI = (xFactCap * basPaHon) - ((xFactCap/100.0) * basPaHon) + ((rIva/100.0) * xFactCap * basPaHon)
+# Si captador/cerrador no es socio y se no cobra IVA en la negociacion:
+	capCersI = (xFactCap * basPaHoI) - ((xFactCap/100.0) * basPaHoI) + ((rIva/100.0) * xFactCap * basPaHoI)
+#	capPBTTT = xFactCap * ofBruTRT
+#	capPBTFT = xFactCap * ofBruTRF
+#	capPBFTT = xFactCap * ofBruFRT
+#	capPBFFT = xFactCap * ofBruFRF
+#	capPBTTF = (xFactCap * baTPaHon) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
+#	capPBTFF = (xFactCap * baFPaHon) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
+#	capPBFTF = (xFactCap * baTPaHoI) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
+#	capPBFFF = (xFactCap * baFPaHoI) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
+# Calculo del monto de la comision del gerente (Y):
 	xFactGer = xPorcGer/100.0
 	gerenTTT = xFactGer * ofBruTRT
 	gerenTFT = xFactGer * ofBruTRF
@@ -74,7 +91,7 @@ def calComisiones(rPr, rCom, rIva=16.0, rXFranq=10.0, rXReCaNa=5.0, xRegalia=80.
 			capPBTTT, capPBTFT, capPBFTT, capPBFFT, capPBTTF, capPBTFF, capPBFTF, capPBFFF,\
 			gerenTTT, gerenTFT, gerenFTT, gerenFFT, gerenTTF, gerenTFF, gerenFTF, gerenFFF
 # funcion calComisiones
-def comisiones(droid=None, bImp=True):
+def comisiones(droid=None, bImp=False):
 	rPr  = ES.entradaNumeroConLista(droid, 'Precio del inmueble',
 									'Introduzca el monto', CO.lMonto, False)
 	rCom = ES.entradaNumeroConLista(droid, 'Comision',
@@ -236,4 +253,4 @@ def comisiones(droid=None, bImp=True):
 # funcion comisiones
 
 if __name__ == '__main__':
-	comisiones()
+	comisiones(None, True)

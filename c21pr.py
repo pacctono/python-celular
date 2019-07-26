@@ -22,6 +22,7 @@ else: droid = None
 
 from c21 import Propiedades as PRO
 from c21 import Comun as COM
+from c21 import Comisiones as CMS
 from lib import ES, Cuota as CU, General as FG
 
 def leeValXDefecto():
@@ -36,14 +37,14 @@ def leeValXDefecto():
       lC21 = json.loads(sC21)
       sUXD = lC21[0]		# Usuario por defecto
       sCXD = lC21[1]		# Contraseña por defecto
-      cig  = lC21[2]		# Cedula por defecto. Esta linea es solo para mejorar la vista.
+      cog  = lC21[2]		# Codigo por defecto. Esta linea es solo para mejorar la vista.
     except: pass
     finally: fC21.close()
-  return cig, sUXD, sCXD
+  return cog, sUXD, sCXD
 # funcion leeValXDefecto
-def escValXDefecto(sUXD, sCXD, cig):
+def escValXDefecto(sUXD, sCXD, cog):
 
-  lC21 = [sUXD, sCXD, cig]
+  lC21 = [sUXD, sCXD, cog]
   fC21 = ES.abrir("c21pr.txt", 'w')
   if fC21:
     try: fC21.write(json.dumps(lC21))
@@ -52,21 +53,18 @@ def escValXDefecto(sUXD, sCXD, cig):
   else: print("No se grabaron los valores por defecto!")
 # funcion escValXDefecto
 def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
-  ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Cedula>,
+  ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Comisiones>,
     <Nombre> ..... y <Salir>. '''
 
   return FG.selOpcionMenu(
             COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
 # Funcion selFuncionInicial(nOpciones)
 def selFuncion(ci, nOpcion=6):
-  ''' Menu desplegado al suministrar una cedula o al encontrar la cedula de una
+  ''' Menu desplegado al suministrar un codigo o al encontrar el codigo de una
       parte de un nombre suministrado.
-      Eliminados: ['Calcular cuota', 'cuota'], ['Cedula del socio', 'cedula'],
-      ['Buscar cedula del socio', 'nombre'], ['Cheques', 'cheque'],
-      ['Deposito por fecha', 'depositos'] '''
-
+  '''
   lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las opciones generales + la opcion 'Volver'.
-  sTitulo    = str(ci) + ':' + COM.nombreSocio(COM.mNombre(ci))	# Titulo a desplegar con las opciones.
+  sTitulo    = str(ci) + ':' + COM.nombreProp(COM.mNombre(ci))	# Titulo a desplegar con las opciones.
   while True:
     try:
       func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
@@ -88,48 +86,49 @@ if droid:
   droid.dialogShow()
   droid.dialogSetCurrentProgress(15)
 else: print(esperar)
-AP.prepararListasDeTrabajo()
-ESF.prepararListasDeTrabajo()
+COM.prepararListasDeTrabajo()
+PRO.prepararListasDeTrabajo()
 if droid: droid.dialogSetCurrentProgress(60)
 else: print('Listas listas!')
-COM.prepararDiccionariosDeTrabajo()
+# COM.prepararDiccionariosDeTrabajo()
 if droid: droid.dialogSetCurrentProgress(90)
 else: print('Diccionarios listos!')
 
 ES.muestraInicio("Century21 Puente Real: J-12345678-x.")
 if droid: droid.dialogSetCurrentProgress(95)
 
-cig, sUXD, sCXD = leeValXDefecto()
+cog, sUXD, sCXD = leeValXDefecto()
 if droid:
   droid.dialogSetCurrentProgress(100)
   droid.dialogDismiss()
 
-nOp = 11
+nOp = 6
 while True:
   sOpcion = selFuncionInicial(nOp)
 
   if 'cuota' == sOpcion: CU.cuota(droid)
+  if 'comisiones' == sOpcion: CMS.Comisiones(droid)
   elif 'salir' == sOpcion or None == sOpcion: break
   elif isinstance(sOpcion, int) and 0 > int(sOpcion): break
-  elif 'cedula' == sOpcion:
-    ci, sNombre = COM.valSocio(cig)
-    if (0 < ci):
-      cig = ci
-      COM.mSocio(sNombre, ci)
-      selFuncion(ci, nOp)
+  elif 'codigo' == sOpcion:
+    co, sNombre = COM.valProp(cog)
+    if (0 < co):
+      cog = co
+      COM.mProp(sNombre, co)
+      selFuncion(co, nOp)
   elif 'nombre' == sOpcion:
-    ci, sNombre = COM.buscarNombre()
-    if (0 < ci):
-      if ci != cig:
-        COM.mSocio(sNombre, ci)
-        cig = ci
-      selFuncion(ci, nOp)
+    co, sNombre = COM.buscarNombre()
+    if (0 < co):
+      if co != cog:
+        COM.mProp(sNombre, co)
+        cog = co
+      selFuncion(co, nOp)
   else:
     func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
     else: break
 # Fin while True
 
-escValXDefecto(sUXD, sCXD, cig)
+escValXDefecto(sUXD, sCXD, cog)
 ES.muestraFin()
 # Fin del programa

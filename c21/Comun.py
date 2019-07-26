@@ -3,6 +3,7 @@
 import types
 import json
 from lib import ES, Const as CO, General as FG
+from c21 import propiedades as PRO
 
 try:
   from lib import DIR, LINEA, bMovil
@@ -19,15 +20,16 @@ if bMovil:
 else: droid = None
 
 '''lClasCheques = [
-          "Cheque", "Cedula", "Nombre", "Monto", "Estado", "Fecha", "Concepto"
+          "Cheque", "Codigo", "Nombre", "Monto", "Estado", "Fecha", "Concepto"
                ]
 '''
 lMenu = [
-          ['Calcular comision', 'comision'],              # 0
+          ['Calcular cuota', 'cuota'],                  # 0
+          ['Calcular comision', 'comisiones'],          # 1
           ['Asesor', 'asesor'], 
           ['Codigo de casa nacional', 'codigo'], 
           ['Reporte en casa nacional', 'reporte'], 
-          ['Montos totales', 'MT.chequeXCedula'],         # 4
+          ['Montos totales', 'MT.chequeXCodigo'],       # 5
           ['Salir', 'salir']
 		    ]
 
@@ -37,65 +39,59 @@ def lFecha(k="Sinca", sig=""):
   if "ServiFun" == sig: return sFecha[0:-3]
   else: return sFecha
 # Funcion lFecha
-def noCedula(ci):
-  return "La cedula %s no fue encontrada\n" % FG.formateaNumero(ci)
-# Funcion noCedula
-def cedulaI(ciAnt):
+def noCodigo(co):
+  return "El codigo %s no fue encontrado\n" % FG.formateaNumero(co)
+# Funcion noCodigo
+def codigoI(coAnt):
   
   while True:
-    ci = ES.entradaNumero(droid, "CEDULA DE IDENTIDAD",
-                "Cedula de identidad del socio", str(ciAnt), True, True, True)
-    if 0 == ci: return -1
-    if ci < 100000:
+    co = ES.entradaNumero(droid, "CODIGO DE CASA NACIONAL",
+                "Codigo de la propiedad", str(coAnt), True, True, True)
+    if 0 == co: return -1
+    if co < 100000:
       print('Debe introducir un número entero de 6 o más dígitos')
     else: break
-  return ci
-# Funcion cedulaI
-def extraeNombre(sNombre):
-  ''' Extrae el nombre de una cadena denominada nombre; pero, contiene:
-  		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador,
-      8 digitos), Disponibilidad (o No) y Extension ('A' o 'N'). Separados
-      por '|' en 'persona.txt'. Nombre en extension.txt y servifun.txt,
-      beneficiario y concepto en cheques.txt, solo contiene: Nombre,
-      Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
-  try:
-    sub = sNombre.rstrip(' \t\n\r')[0:sNombre.index('|', 0)] 
-  except ValueError:
-    sub = sNombre
-  return sub.rstrip(' \t\n\r')
-# Funcion nombreSocio
-def nombreSocio(sNombre):
-  ''' Extrae el nombre de una cadena denominada nombre; pero, contiene:
-  		Nombre, nucleo (primera letra), fecha de nacimiento (sin separador,
-      8 digitos), Disponibilidad (o No) y Extension ('A' o 'N'). Separados
-      por '|' en 'persona.txt'. Nombre en extension.txt y servifun.txt,
-      beneficiario y concepto en cheques.txt, solo contiene: Nombre,
-      Disponibilidad (o No) y Extension ('A' o 'N'). Separados pr '|'. '''
-  l = sNombre.rstrip(' \t\n\r').split('|')
-  return l[0].rstrip(' \t\n\r')
-# Funcion nombreSocio
-def mNombre(ci):
+  return co
+# Funcion codigoI
+def extraeNombre(fila):
+  ''' Extrae el nombre de una propiedad.
+      '''
+  return fila[5].strip(' "\t\n\r')
+# Funcion extraeNombre
+def nombreProp(fila):
+  ''' Retorna el nombre de una propiedad.
+      fila[0]: numero incremental.
+      fila[1]: Codigo casa nacional.
+      fila[2]: fecha de reserva.
+      fila[3]: fecha de firma.
+      fila[4]: Negociacion: Venta o Alquiler.
+      fila[5]: Nombre de la propiedad.
+  '''
+  return fila[5].strip(' "\t\n\r')
+# Funcion nombreProp
+def mNombre(co):
 
-  try:
-    sNombre = dPer.get(str(ci), "NO")
-  except UnicodeError:
-    sNombre = "UnicodeError: " + ci
+  sNombre = 'NO'
+  for l in PRO.lPro:
+    if (co != l[1]): continue
+    sNombre = l[5]
+    break
   if ("NO" == sNombre):
     sNombre = "NO ENCONTRE EL NOMBRE"
-    ES.alerta(droid, 'SOCIO ERROR', FG.formateaNumero(ci) + ', ' + sNombre)
+    ES.alerta(droid, 'PROP ERROR', FG.formateaNumero(co) + ', ' + sNombre)
   return sNombre
 # Funcion mNombre
-def valSocio(ciAnt = -1):
+def valProp(coAnt = -1):
 
-  ci = cedulaI(ciAnt)
+  co = codigoI(coAnt)
   try:
-    if 0 >= ci: return -1, 'Zero o negativo'
+    if 0 >= co: return -1, 'Zero o negativo'
   except:
-    return -1, 'La cedula debe ser un número entero'
+    return -1, 'El codigo debe ser un número entero de 66 digitos.'
   
-  return ci, mNombre(ci)    # Devuelve una tupla
+  return co, mNombre(co)    # Devuelve una tupla
 # Funcion valSocio
-def mSocio(Nombre, ci, bCadena=True):
+def mSocio(Nombre, co, bCadena=True):
   global dPer
 
   if (bCadena): l = Nombre.rstrip().split('|')	# Nombre, nucleo, fecha de nacimiento, Disponibilidad y Extension
@@ -105,8 +101,8 @@ def mSocio(Nombre, ci, bCadena=True):
   else: sFecha = Nombre[len(Nombre)-1]
   st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN +\
         lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL +\
-        "Cedula:".rjust(21) + CO.FIN 
-  if (bCadena): st += " %s" % (FG.formateaNumero(ci))
+        "Codigo:".rjust(21) + CO.FIN 
+  if (bCadena): st += " %s" % (FG.formateaNumero(co))
   else: st += " %s" % Nombre[0]
   nJustDerecha = 21
   if 0 < len(l) and '' != l[0]:
@@ -140,13 +136,13 @@ def mSocio(Nombre, ci, bCadena=True):
   opc = ES.imprime(st)
   return opc
 # Funcion mSocio
-def aSocio(lPer, ci):    # Esta funcion no se utiliza.
+def aSocio(lPer, co):    # Esta funcion no se utiliza.
   global dPer
 
   try:
-    sNombre = dPer.get(str(ci), "NO")
+    sNombre = dPer.get(str(co), "NO")
   except UnicodeError:
-    print('ERROR: ' + str(ci) + '|' + json.dumps(lPer))
+    print('ERROR: ' + str(co) + '|' + json.dumps(lPer))
     return False
   if ("NO" == sNombre):
     fPer = ES.abrir('persona.txt', 'a')
@@ -154,17 +150,17 @@ def aSocio(lPer, ci):    # Esta funcion no se utiliza.
     if fPer:
       try:
         if (6 <= len(lPer)):
-          fPer.write(str(ci) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' +\
+          fPer.write(str(co) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' +\
                         lPer[3] + '|' + lPer[4] + '|' + lPer[5][0:1] + "\n")
       except:
         pass
       fPer.close()
   return True
 # Funcion aSocio
-def mDividendo(ci):
+def mDividendo(co):
   global dDiv
   try:
-    sDiv = dDiv.get(str(ci), "0")
+    sDiv = dDiv.get(str(co), "0")
     if sDiv.isdigit(): rDividendo = float(int(sDiv)/100)
     else: rDividendo = -1.00
   except UnicodeError:
@@ -196,12 +192,12 @@ def buscarNombre():
   if None == nombre:
     return -10, None
   nombres = []
-  cedulas = []
+  codigos = []
   try:
     for k,v in dPer.items():
       if 0 <= v.lower().find(nombre.lower()):
         nombres.append(v)
-        cedulas.append(k)
+        codigos.append(k)
   except UnicodeError: pass
   if not nombres:
     ES.alerta(droid, nombre, "No hubo coincidencias!")
@@ -209,8 +205,23 @@ def buscarNombre():
   indice = ES.entradaConLista(droid, 'SOCIOS ENCONTRADOS',
                                               'Seleccione socio(a)', nombres)
   if None == indice or 0 > indice: return -10, None
-  return int(cedulas[indice]), nombres[indice]
+  return int(codigos[indice]), nombres[indice]
 # Funcion buscarNombre
+
+# Definir variables globales
+def prepararListasDeTrabajo():
+  global lAse
+
+  fC21 = ES.abrir("asesores.txt")
+  if not fC21:
+    lAse = []           # Lista de asesores.
+  else:
+    try:
+      sAse = fC21.read()
+      lAse = json.loads(sAse)
+    except: pass
+    finally: fC21.close()
+# Funcion prepararListasDeTrabajo
 
 # Definir variables globales
 def prepararDiccionariosDeTrabajo():
@@ -219,7 +230,7 @@ def prepararDiccionariosDeTrabajo():
   dBanco = ES.cargaDicc("bancos.txt")		# [0]Codigo; [1]Descripcion
   dConcepto = ES.cargaDicc("conceptos.txt")	# [0]Codigo; [1]Descripcion
   dFecha = ES.cargaDicc("control.txt")	# [0]Identificacion del proceso; [1]Fecha
-  dPer = ES.cargaDicc("persona.txt")		# [0]Cedula;
+  dPer = ES.cargaDicc("persona.txt")		# [0]Codigo;
   # [1]Nombre(Nombre|Nucleo|Fecha de nacimiento o P:personal|disponibilidad o No|A/N:extension)
-  dDiv = ES.cargaDicc("dividendos.txt")		# [0]Cedula; [1]Monto
+  dDiv = ES.cargaDicc("dividendos.txt")		# [0]Codigo; [1]Monto
 # Funcion prepararDiccionariosDeTrabajo
