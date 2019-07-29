@@ -3,7 +3,7 @@
 import types
 import json
 from lib import ES, Const as CO, General as FG
-from c21 import propiedades as PRO
+from c21 import Propiedades as PRO
 
 try:
   from lib import DIR, LINEA, bMovil
@@ -26,13 +26,52 @@ else: droid = None
 lMenu = [
           ['Calcular cuota', 'cuota'],                  # 0
           ['Calcular comision', 'comisiones'],          # 1
-          ['Asesor', 'asesor'], 
+          ['Asesor', 'ASE.asesor'], 
           ['Codigo de casa nacional', 'codigo'], 
           ['Reporte en casa nacional', 'reporte'], 
-          ['Montos totales', 'MT.chequeXCodigo'],       # 5
+          ['Montos totales', 'totales'],       # 5
           ['Salir', 'salir']
 		    ]
 
+lMsj  = {
+          "cedula":"Cedula de identidad",
+          "name":"Nombre",
+          "telefono":"Telefono",
+          "email":"Correo electronico",
+          "email_c21":"Correo electronico Century 21",
+          "licencia_mls":"Licencia MLS",
+          "fecha_ingreso":"Fecha de ingreso",
+          "fecha_nacimiento":"Fecha de nacimiento",
+          "sexo":"Sexo",
+          "estado_civil":"Estado civil",
+          "profesion":"Profesion",
+          "direccion":"Direccion",
+          "tCap":"Total captado",
+          "tCer":"Total cerrado",
+          "tCaptCer":"Total captado y cerrado",
+        }
+
+def prepLnMsj(dic, campo, tipo=0, lng='', dec=0):
+  '''
+    Prepara la linea a imprimir:
+    dic: Diccionario desde donde se tomara el valor a imprimir.    
+    campo: llave en el diccionario del campo a imprimir. Tambien, para lMsj.
+    tipo: tipo de campo. 0:cadena, 1:numero, 2:fecha, 3:telefono.
+    lng: longitud de caracteres, minimo, a mostrar del campo.
+    dec: numero de decimales, si el campo a imprimir es numerico.
+  '''
+  if not dic[campo]: return ''    
+  if (0 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n") %\
+                          (CO.AZUL, CO.FIN, dic[campo])
+  elif (1 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n")\
+                % (CO.AZUL, CO.FIN, FG.formateaNumero(dic[campo], dec))
+  elif (2 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n")\
+                % (CO.AZUL, CO.FIN, FG.formateaFecha(dic[campo][0:10]))
+  elif (3 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n")\
+              % (CO.AZUL, CO.FIN, FG.formateaNumeroTelefono(dic[campo]))
+  else: sMsj = ''
+  return sMsj
+# Funcion prepLnMsj
 def lFecha(k="Sinca", sig=""):
   global dFecha
   sFecha = sig + " " + dFecha.get(k, "No hay fecha.")
@@ -207,21 +246,6 @@ def buscarNombre():
   if None == indice or 0 > indice: return -10, None
   return int(codigos[indice]), nombres[indice]
 # Funcion buscarNombre
-
-# Definir variables globales
-def prepararListasDeTrabajo():
-  global lAse
-
-  fC21 = ES.abrir("asesores.txt")
-  if not fC21:
-    lAse = []           # Lista de asesores.
-  else:
-    try:
-      sAse = fC21.read()
-      lAse = json.loads(sAse)
-    except: pass
-    finally: fC21.close()
-# Funcion prepararListasDeTrabajo
 
 # Definir variables globales
 def prepararDiccionariosDeTrabajo():

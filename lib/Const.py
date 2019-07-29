@@ -94,6 +94,7 @@ ROJO    = color.RED		# Linea de error.
 SUBRAYADO  = color.UNDERLINE	# Subrayado
 FIN     = color.END
 
+lNoSi  = ['No', 'Si']
 lMonto = ['10000', '20000', '30000', '40000', '50000', '75000', '100000',
 			'150000', '250000', '500000', '600000', '700000', '1000000',
 			'1500000', '2000000', 'Otro']

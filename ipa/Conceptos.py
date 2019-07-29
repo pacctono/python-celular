@@ -84,4 +84,5 @@ def creaDicConceptos():
 
 if __name__ == '__main__':
   dConcepto = creaDicConceptos()
+  print(dConcepto)
   print('dConcepto[511]: ', dConcepto['511'])

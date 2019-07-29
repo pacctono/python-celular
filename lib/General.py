@@ -29,6 +29,8 @@ eliminarPuntos = lambda sCadena, sCad='.': sCadena.replace(sCad, '') # Cadena (s
 cambiarAPunto  = lambda sCadena, sCad=',': sCadena.replace(sCad, '.')
 formateaNumeroTelefono = lambda sNum: (sNum if (10!=len(sNum)) else
                                 "0%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:]))
+formateaFecha = lambda sNum: (sNum if (10>len(sNum)) else
+                                "%s-%s-%s" % (sNum[8:10], sNum[5:7], sNum[0:4]))
 #def formateaNumeroTelefono(sNum):
 #	if 10 != len(sNum): return sNum
 #	else: return "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:])
@@ -41,7 +43,7 @@ def esEntero(v):
 # Funcion esEntero
 def formateaNumero(sCad, dec=0):
   if (not isinstance(sCad, str) and not isinstance(sCad, float) and \
-      not isinstance(sCad, int)) and ((None != dec) and not dec.isinteger()):
+      not isinstance(sCad, int)) and ((None != dec) and not isinstance(dec, int)):
     return None
   if None == dec: dec = 0
   if isinstance(sCad, str): sCad = sCad.strip(' \t\n\r')

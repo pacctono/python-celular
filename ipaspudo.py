@@ -31,8 +31,9 @@ def leeValXDefecto():
 
   fIpa = ES.abrir("ipaspudo.txt")
   if not fIpa:
-    sUXD   = 'ipas'				# Usuario por defecto
-    sCXD   = 'ipas'				# Contraseña por defecto
+    cig    = 0  				# Cedula de identidad inicial
+    sUXD   = 'ipas'			# Usuario por defecto
+    sCXD   = 'ipas'			# Contraseña por defecto
   else:
     try:
       sIpa = fIpa.read()

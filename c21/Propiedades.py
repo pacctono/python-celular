@@ -1,5 +1,9 @@
 # libPropiedades: Modulo de Propiedades para Century 21 Puente Real
 #-*- coding:ISO-8859-1 -*-
+from __future__ import print_function # Para poder usar 'print' de version 3.
+
+import sys
+if __name__ == '__main__': sys.path.append('../')
 from lib import ES, Const as CO, General as FG
 
 def propiedades():
@@ -36,7 +40,7 @@ def propiedades():
 # funcion ganYperXmes
 
 # Definir variables globales
-def prepararListasDeTrabajo():
+def prepararListaDePropiedades(nbArchivo="propiedades.txt"):
   global lPro
 
   # Descripcion de las filas de propiedades.txt
@@ -58,11 +62,42 @@ def prepararListasDeTrabajo():
   # fila[15]: Lados.
   # fila[16]: Franquicia de reserva sin IVA.
   # fila[17]: Franquicia de reserva con IVA.
-  # fila[18]: Franquicia a pagar reportada.
-  # fila[19]: % reportado a casa nacional.
-  # fila[20]: Regalia.
-  # fila[21]: Sanaf - 5%.
-  # ...
-  # fila[7x]: Comentarios.
-  lPro = ES.cargaLista("propiedades.txt")
-# Funcion prepararListasDeTrabajo
+  # fila[18]: % Franquicia.
+  # fila[19]: Franquicia a pagar reportada.
+  # fila[20]: % reportado a casa nacional.
+  # fila[21]: % Regalia.
+  # fila[22]: Regalia.
+  # fila[23]: Sanaf - 5%.
+  # fila[24]: Bruto real de la oficina.
+  # fila[25]: Base para honorario de los socios.
+  # fila[26]: Base para honorario.
+  # fila[27]: Id del asesor captador.
+  # fila[28]: Nombre del asesor captador otra oficina.
+  # fila[29]: % Comision del captador.
+  # fila[30]: Comision del captador PrBr.
+  # fila[31]: % Comision del gerente.
+  # fila[32]: Comision del gerente.
+  # fila[33]: Id del asesor cerrador.
+  # fila[34]: Nombre del asesor cerrador otra oficina.
+  # fila[35]: % Comision del cerrador PrBr.
+  # fila[36]: Comision del cerrador.
+  # fila[37]: % Bonificacion.
+  # fila[38]: Bonificacion.
+  # fila[39]: Comision bancaria.
+  # fila[40]: Ingreso neto de la oficina.
+  # fila[41]: Numero de recibo.
+  # 42 y 43:  Pago y factura gerente.
+  # 44 y 45:  Pago y factura asesores.
+  # fila[46]: Pago otra oficina.
+  # fila[47]: Pagado a Casa Nacional.
+  # fila[48]: Status C21.
+  # fila[49]: Reporte Casa Nacional.
+  # fila[50]: Factura A&S.
+  # fila[51]: Comentarios.
+  lPro = ES.cargaLista(nbArchivo)
+# Funcion prepararListaDePropiedades
+
+if __name__ == '__main__':
+  prepararListaDePropiedades("../data/propiedades.txt")
+  for l in lPro:
+    if (40 < len(l)): print(l[0], l[27], l[30], l[33], l[36], l[41], l[42], l[44], l[46], sep='|')

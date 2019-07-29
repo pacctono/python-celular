@@ -4,253 +4,195 @@ import sys
 if __name__ == '__main__': sys.path.append('../')
 from lib import ES, Const as CO, General as FG
 
-def calComisiones(rPr, rCom, rIva=16.0, rXFranq=10.0, rXReCaNa=5.0, xPorcReg=80.0,
-				xPorcSan=5.0, xPorcCap=20.0, xPorcGer=10.0):
+def calComisiones(rPr, rCom, rIva=16.0, lados=2, xPReCaNa=5.0,
+					asCapSoc=False, asCerSoc=False, xPorcBon=0.00,
+					xPorcCap=20.0, xPorcCer=20.0, comBanca=0.00,
+					xPorcGer=10.0, xPcFranq=10.0, xPorcReg=80.0,
+					xPorcSan=20.0):
 	'''Calcula las comisiones de una venta, segun el precio,
 		porcentaje de comision e IVA y otros:
 		rPr:     Precio del inmueble (G)
 		rCom:    % de comision (H)
 		rIva:    % del IVA (J)
-		rXFranq: Porcentaje de franquicia
-		rXReCaNa: Porcentaje reportado a casa nacional (R)
+		lados:	 Numero de la dos de la oficina (1 o 2)
+		asCapSoc: Es el asesor captador un socio
+		asCerSoc: Es el asesor cerrador un socio
+		xPorcBon: Porcentaje de comision para bonificacion
+		xPorcCap: Porcentaje de comision para captador
+		xPorcCer: Porcentaje de comision para cerrador
+		comBanca: Comision bancaria descontada
+		xPorcGer: Porcentaje de comision del gerente
+		xPcFranq: Porcentaje de franquicia
+		xPReCaNa: Porcentaje reportado a casa nacional (R)
 		xPorcReg: Porcentaje regalia
 		xPorcSan: Porcentaje Sanaf
-		xPorcCap: Porcentaje de comision para captador/cerrador
-		xPorcGer: Porcentaje de comision del gerente
 		'''
+	IVA = 16.0
 	resSIva  = rPr * (rCom/100.0)				# (I) Reserva sin IVA
 	resCIva  = (1.0 + rIva/100.0) * resSIva		# (K) Reserva con IVA
-	compSIva = resSIva							# (M) Compartido con otra oficina sin IVA
-	compCIva = resCIva							# (L) Compartido con otra oficina con IVA
+	if (2 == lados): div = 1
+	else: div = 2
+	compSIva = resSIva/div						# (M) Compartido con otra oficina sin IVA
+	compCIva = resCIva/div						# (L) Compartido con otra oficina con IVA
 
-	frnqSIva = (rXFranq/100.0) * resSIva	# (O) Franquicia de reserva sin IVA. Aplicar. 2 lados
-#	frqTSIva = (rXFranq/100.0) * resSIva	# Franquicia de reserva sin IVA. Aplicar. 2 lados
-#	frqFSIva = (rXFranq/100.0) * resCIva	# Franquicia de reserva sin IVA. No aplicar. 2 lados
-	frnqCIva = (rXFranq/100.0) * resCIva	# (P) Franquicia de reserva con IVA. Un calculo. 2 lados.
+	frnqSIva = (xPcFranq/100.0) * compSIva	# (O) Franquicia de reserva sin IVA. Aplicar. 2 lados
+	frnqCIva = (xPcFranq/100.0) * compCIva	# (P) Franquicia de reserva con IVA. Un calculo. 2 lados.
 
-	frnqPaRe = (rXFranq/100.0) * (rXReCaNa/100.0) * rPr	# (Q) Franquicia a pagar reportada. Aplicar. 2 lados
-#	frqTPaRe = (rXFranq/100.0) * (rXReCaNa/100.0) * rPr	# Franquicia a pagar reportada. Aplicar. 2 lados
-#	frqFPaRe = (rXFranq/100.0) * compSIva	# Franquicia a pagar reportada. No aplicar. 2 lados
+	frnqPaRe = (xPcFranq/100.0) * (xPReCaNa/100.0) * rPr / div	# (Q) Franquicia a pagar reportada. Aplicar. 2 lados
 
-	regaliaT = (xPorcReg/100.0) * frnqPaRe	# (S) Regalia. Aplicar para franquicia a pagar reportada.
-#	regaliaT = (xPorcReg/100.0) * frqTPaRe	# Regalia. Aplicar para franquicia a pagar reportada.
-#	regaliaF = (xPorcReg/100.0) * frqFPaRe	# Regalia. No aplicar para franquicia a pagar reportada.
+	regalia  = (xPorcReg/100.0) * frnqPaRe	# (S) Regalia. Aplicar para franquicia a pagar reportada.
 
-	sanfm5XC = ((xPorcSan/100.0) * frnqPaRe) - (0.001 * resSIva)		# (T) Sanaf aplicar franquicia a pagar reportada. Ambos lados.
-#	sanfm5XL = ((xPorcSan/100.0) * frqTPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf aplicar franquicia a pagar reportada. 1 lado.
-#	sanfT5XC = (0.20 * frqTPaRe) - (0.001 * resSIva)		# Sanaf aplicar franquicia a pagar reportada. Ambos lados.
-#	sanfT5XL = (0.20 * frqTPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf aplicar franquicia a pagar reportada. 1 lado.
-#	sanfF5XC = (0.20 * frqFPaRe) - (0.001 * resSIva)		# Sanaf no aplicar franquicia a pagar reportada. Ambos lados.
-#	sanfF5XL = (0.20 * frqFPaRe/2.0) - (0.001 * resSIva / 2.0)	# Sanaf no aplicar franquicia a pagar reportada. 1 lado.
+	sanfm5XC = ((xPorcSan/100.0) * frnqPaRe) -\
+				((0.5/100.0) * (xPorcSan/100.0) * compSIva)		# (T) Sanaf aplicar franquicia a pagar reportada. Ambos lados.
 
-	ofBruTRT = compCIva - frnqPaRe			# (U)=(L)-(Q) Oficina bruto real = compartido con otra oficina - franquicia a pagar reportada.
-#	ofBruTRT = compCIva - frqTPaRe			# Usando franquicia a pagar reportada con %% reportado a Casa Nacional y precio.
-#	ofBruTRF = compCIva - frqFPaRe			# Usando franquicia a pagar reportada con monto compartido sin IVA.
-#	ofBruFRT = compCIva - frqTSIva			# Usando franquicia de reserva sin IVA con monto de reserva sin IVA.
-#	ofBruFRF = compCIva - frqFSIva			# Usando franquicia de reserva sin IVA con monto de reserva con IVA.
+	ofBruRea = compCIva - frnqPaRe			# (U)=(L)-(Q) Oficina bruto real = compartido con otra oficina - franquicia a pagar reportada.
 
-	baHonSoc = compCIva - frnqCIva			# (V)=(L)-(P) Base de honorarios socios = compartido con otra oficina - franqquicia de reserva sin IVA.
+	basHoSoc = compCIva - frnqCIva			# (V)=(L)-(P) Base de honorarios socios = compartido con otra oficina - franqquicia de reserva sin IVA.
 # Calculo del monto Base para honorarios:
-	basPaHon = compSIva - frnqSIva			# (W)=(M)-(O) compartido con otrs oficina sin IVA - franquicia de reserva sin IVA.
-	basPaHsI = (compSIva - frnqSIva) / (1 + CO.IVA/100.0)	# (W)=(M)-(O) cuando iva = 0. Se divide entre 1.16.
-#	baTPaHon = compSIva - frqTSIva			# Usando franquicia de reserva sin IVA con monto de reserva sin IVA.
-#	baFPaHon = compSIva - frqFSIva			# Usando franquicia de reserva sin IVA con monto de reserva con IVA.
-#	baTPaHoI = (compSIva - frqTSIva) / (1 + CO.IVA/100.0)	# Usando franquicia de reserva sin IVA con monto de reserva con IVA, cuando iva de la negociacion es 0.00.
-#	baFPaHoI = (compSIva - frqFSIva) / (1 + CO.IVA/100.0)	# Usando franquicia de reserva sin IVA con monto de reserva con IVA, cuando iva de la negociacion es 0.00.
-# Calculo del monto de la comision del asesor captador(X)/cerrador(Z):
+	if (0.00 < rIva): basPaHon = compSIva - frnqSIva	# (W)=(M)-(O) compartido con otrs oficina sin IVA - franquicia de reserva sin IVA.
+	else: basPaHon = (compSIva - frnqSIva) / (1 + IVA/100.0)	# (W)=(M)-(O) cuando iva = 0. Se divide entre 1.16.
+# Calculo del monto de la comision del asesor captador(X).
 	xFactCap = xPorcCap/100.0
-	capCerSo = xFactCap * basPaSoc			# Si captador/cerrador es socio; porc captador/cerrador x base para honorarios socios.
-# Si captador/cerrador no es socio y se cobra IVA en la negociacion:
-	capCercI = (xFactCap * basPaHon) - ((xFactCap/100.0) * basPaHon) + ((rIva/100.0) * xFactCap * basPaHon)
-# Si captador/cerrador no es socio y se no cobra IVA en la negociacion:
-	capCersI = (xFactCap * basPaHoI) - ((xFactCap/100.0) * basPaHoI) + ((rIva/100.0) * xFactCap * basPaHoI)
-#	capPBTTT = xFactCap * ofBruTRT
-#	capPBTFT = xFactCap * ofBruTRF
-#	capPBFTT = xFactCap * ofBruFRT
-#	capPBFFT = xFactCap * ofBruFRF
-#	capPBTTF = (xFactCap * baTPaHon) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-#	capPBTFF = (xFactCap * baFPaHon) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-#	capPBFTF = (xFactCap * baTPaHoI) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
-#	capPBFFF = (xFactCap * baFPaHoI) - ((xFactCap/100.0) * baTPaHon) + ((rIva/100.0) * xFactCap * baTPaHon)
+	if (asCapSoc): captador = xFactCap * basHoSoc	# Si captador es socio; porc captador x base para honorarios socios.
+	else:
+		captador = (xFactCap * basPaHon) - ((1.0/100.0) * xFactCap *\
+						basPaHon) + ((IVA/100.0) * xFactCap * basPaHon)
 # Calculo del monto de la comision del gerente (Y):
 	xFactGer = xPorcGer/100.0
-	gerenTTT = xFactGer * ofBruTRT
-	gerenTFT = xFactGer * ofBruTRF
-	gerenFTT = xFactGer * ofBruFRT
-	gerenFFT = xFactGer * ofBruFRF
-	gerenTTF = xFactGer * baTPaHon
-	gerenTFF = xFactGer * baFPaHon
-	gerenFTF = xFactGer * baTPaHoI
-	gerenFFF = xFactGer * baFPaHoI
+	gerente  = xFactGer * basHoSoc			# (Y) = % * (V)
+# Calculo del monto de la comision del asesor cerrador(Z):
+	xFactCer = xPorcCer/100.0
+	if (asCerSoc): cerrador = xFactCer * basHoSoc	# Si cerrador es socio; porc cerrador x base para honorarios socios.
+	else:
+		cerrador = (xFactCer * basPaHon) - ((1.0/100.0) * xFactCer *\
+						basPaHon) + ((IVA/100.0) * xFactCer * basPaHon)
+	bonifica = (xPorcBon/100.0) * basPaHon			# (AA) = % * (W)
+	netoOfic = compCIva - frnqPaRe - captador - gerente -\
+				cerrador - bonifica - comBanca
 
-	return resSIva, resCIva, compSIva, compCIva, frqTSIva, frqFSIva, frnqCIva,\
-			frqTPaRe, frqFPaRe, regaliaT, regaliaF,\
-			sanfT5XC, sanfT5XL, sanfF5XC, sanfF5XL,\
-			ofBruTRT, ofBruTRF, ofBruFRT, ofBruFRF, baHonSoc,\
-			baTPaHon, baFPaHon, baTPaHoI, baFPaHoI,\
-			capPBTTT, capPBTFT, capPBFTT, capPBFFT, capPBTTF, capPBTFF, capPBFTF, capPBFFF,\
-			gerenTTT, gerenTFT, gerenFTT, gerenFFT, gerenTTF, gerenTFF, gerenFTF, gerenFFF
+	return resSIva, resCIva, compSIva, compCIva, frnqSIva, frnqCIva,\
+			frnqPaRe, regalia, sanfm5XC, ofBruRea, basHoSoc,\
+			basPaHon, captador, gerente, cerrador, bonifica, netoOfic
 # funcion calComisiones
-def comisiones(droid=None, bImp=False):
-	rPr  = ES.entradaNumeroConLista(droid, 'Precio del inmueble',
-									'Introduzca el monto', CO.lMonto, False)
-	rCom = ES.entradaNumeroConLista(droid, 'Comision',
-									'Introduzca el porc de comision', CO.lComis, False)
-	rIva = ES.entradaNumeroConLista(droid, 'Impuesto al valor agregado',
-									'Introduzca el IVA', CO.lIva, False, True)
-	(resSIva, resCIva, compSIva, compCIva, frqTSIva, frqFSIva, frnqCIva,
-			frqTPaRe, frqFPaRe, regaliaT, regaliaF,
-			sanfT5XC, sanfT5XL, sanfF5XC, sanfF5XL,
-			ofBruTRT, ofBruTRF, ofBruFRT, ofBruFRF, baHonSoc,
-			baTPaHon, baFPaHon, baTPaHoI, baFPaHoI,
-			capPBTTT, capPBTFT, capPBFTT, capPBFFT, capPBTTF, capPBTFF, capPBFTF, capPBFFF,
-			gerenTTT, gerenTFT, gerenFTT, gerenFFT, gerenTTF, gerenTFF, gerenFTF, gerenFFF) =\
-														calComisiones(rPr, rCom, rIva)
+def comisiones(droid=None, bImp=True):
+	rPr = rCom = rIva = lados = xPReCaNa = asCapSoc = asCerSoc = None
+	xPorcBon = xPorcCap = xPorcCer = comBanca = None
+	while (None == rPr):
+		rPr  = ES.entradaNumeroConLista(droid, 'Precio del inmueble',
+							'Introduzca el monto', CO.lMonto, False)
+	while (None == rCom):
+		rCom = ES.entradaNumeroConLista(droid, 'Comision',
+					'Introduzca el porc de comision', CO.lComis, False)
+	while (None == rIva):
+		rIva = ES.entradaNumeroConLista(droid, 'Impuesto al valor '
+				'agregado', 'Introduzca el IVA', CO.lIva, False, True)
+	while (None == lados):
+		lados = ES.entradaNumero(droid, 'Numero de lados',
+							'Cuantos lados, 1 o 2?', '2')
+		if (None != lados):
+			if (1 > lados) or (2 < lados): lados = None
+	while (None == xPReCaNa):
+		xPReCaNa = ES.entradaNumeroConLista(droid,
+				'Porcentaje reportada a Casa Nacional', '% Reportado a '
+				'Casa Nacional?', ['5.0', '4.9', '4.8', '4.7', '4.6',
+				'4.5', '4.4', '4.3', '4.2', '4.1', 'Otro'], False, True)
+	while (None == asCapSoc):
+		asCapSoc = ES.entradaConLista(droid,
+		'El asesor captador es socio', 'Captador es socio?', CO.lNoSi)
+		if (1 == asCapSoc): asCapSoc = True
+		else: asCapSoc = False
+	while (None == asCerSoc):
+		asCerSoc = ES.entradaConLista(droid,
+		'El asesor cerrador es socio', 'Cerrador es socio?', CO.lNoSi)
+		if (1 == asCerSoc): asCapSoc = True
+		else: asCerSoc = False
+	while (None == xPorcBon):
+		xPorcBon = ES.entradaNumeroConLista(droid,
+				'Porcentaje de bonificacion', '% de bonificacion?',
+				['0.00', '2.5', '5.0', '10.0', 'Otro'], False, True)
+	xPorcCap = ES.entradaNumero(droid, 'Comision captador',
+				'% de la comision del captador?', '20.00', False, True)
+	if (None == xPorcCap): xPorcCap = 20.00
+	xPorcCer = ES.entradaNumero(droid, 'Comision cerrador',
+				'% de la comision del cerrador?', '20.00', False, True)
+	if (None == xPorcCer): xPorcCer = 20.00
+	comBanca = ES.entradaNumero(droid, 'Comision bancaria',
+				'Monto de la comision bancaria?', '0.00', False, True)
+	if (None == comBanca): comBanca = 0.00
+	xPorcGer = 10.0
+	xPcFranq = 10.0
+	xPorcReg = 80.0
+	xPorcSan = 20.0
+	(resSIva, resCIva, compSIva, compCIva, frnqSIva, frnqCIva,\
+		frnqPaRe, regalia, sanfm5XC, ofBruRea, basHoSoc, basPaHon,\
+		captador, gerente, cerrador, bonifica, netoOfic) =\
+	calComisiones(rPr, rCom, rIva, lados, xPReCaNa, asCapSoc, asCerSoc,
+					xPorcBon, xPorcCap, xPorcCer, comBanca, xPorcGer,
+					xPcFranq, xPorcReg, xPorcSan)
 
 	if bImp:
 		if CO.bPantAmplia:
-			sFormCuota = ("%sPrecio:%s %s, %sComision:%s %s%%, %sIVA:%s %s%%\n")
+			sFormCuota = ("%sPrecio:%s %s, %sComision:%s %s%%, %sIVA:%s"
+							" %s%%, %d %slado(s)%s\n")
 		else: sFormCuota = "%sPr:%s%s,%s%%Com:%s%s%%,%sIVA:%s%s%%\n"
-		sMsj = sFormCuota % (CO.AZUL, CO.FIN, FG.formateaNumero(rPr, 2), CO.AZUL,
-								CO.FIN, FG.formateaNumero(rCom, 2), CO.AZUL,
-								CO.FIN, FG.formateaNumero(rIva, 2))
+		sMsj = sFormCuota % (CO.AZUL, CO.FIN, FG.formateaNumero(rPr, 2),
+						CO.AZUL, CO.FIN, FG.formateaNumero(rCom, 2),
+						CO.AZUL, CO.FIN, FG.formateaNumero(rIva, 2),
+						lados, CO.AZUL, CO.FIN)
 		sMsj += ("%sReserva sin IVA:%s %s\n") % (CO.AZUL, CO.FIN,
 				FG.formateaNumero(resSIva, 2))
 		sMsj += ("%sReserva con IVA:%s %s\n") % (CO.AZUL, CO.FIN,
 				FG.formateaNumero(resCIva, 2))
-		sMsj += ("%sCompartido con otra oficina sin IVA:%s %s [%s]\n") % (CO.AZUL,
-					CO.FIN, FG.formateaNumero(compSIva, 2),
-					FG.formateaNumero(compSIva/2.0, 2))
-		sMsj += ("%sCompartido con otra oficina con IVA:%s %s [%s]\n") % (CO.AZUL,
-					CO.FIN, FG.formateaNumero(compCIva, 2),
-					FG.formateaNumero(compCIva/2.0, 2))
-		sMsj += ("%sFranquicia de reserva sin IVA:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando monto de reserva sin IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(frqTSIva, 2), FG.formateaNumero(frqTSIva/2, 2))
-		sMsj += ("\t%sUsando monto de reserva con IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(frqFSIva, 2), FG.formateaNumero(frqFSIva/2, 2))
-		sMsj += ("%sFranquicia de reserva con IVA:%s %s [%s]\n") % (CO.AZUL,
-				 CO.FIN, FG.formateaNumero(frnqCIva, 2),
-				 FG.formateaNumero(frnqCIva/2, 2))
-		sMsj += ("%sFranquicia a pagar reportada:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando %% reportado a Casa Nacional y precio:"
-				 "%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				 FG.formateaNumero(frqTPaRe, 2), FG.formateaNumero(frqTPaRe/2, 2))
-		sMsj += ("\t%sUsando monto compartido sin IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				 FG.formateaNumero(frqFPaRe, 2), FG.formateaNumero(frqFPaRe/2.0, 2))
-		sMsj += ("%sRegalia:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia a pagar reportada calculada con precio:%s "
-				 "%s [%s]\n") % (CO.CYAN, CO.FIN,
-				 FG.formateaNumero(regaliaT, 2), FG.formateaNumero(regaliaT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia a pagar reportada calculada con monto compartido"
-				 " sin IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				 FG.formateaNumero(regaliaT, 2), FG.formateaNumero(regaliaT/2.0, 2))
-		sMsj += ("%sSanaf menos 5 por ciento:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia a pagar reportada con %% repeportado"
-				 " a Casa Nacional: %s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(sanfT5XC, 2), FG.formateaNumero(sanfT5XL, 2))
-		sMsj += ("\t%sUsando precio y lado:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(sanfF5XC, 2), FG.formateaNumero(sanfF5XL, 2))
-		sMsj += ("%sOficina bruto real:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia a pagar reportada con %% reportado a Casa "
-				 "Nacional y precio:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(ofBruTRT, 2), FG.formateaNumero(ofBruTRT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia a pagar reportada con monto compartido sin IVA"
-				 ":%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(ofBruTRF, 2), FG.formateaNumero(ofBruTRF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva sin "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(ofBruFRT, 2), FG.formateaNumero(ofBruFRT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(ofBruFRF, 2), FG.formateaNumero(ofBruFRF/2.0, 2))
+		sMsj += ("%sCompartido con otra oficina con IVA:%s %s\n") %\
+				(CO.AZUL, CO.FIN, FG.formateaNumero(compCIva, 2))
+		sMsj += ("%sCompartido con otra oficina sin IVA:%s %s\n") %\
+				(CO.AZUL, CO.FIN, FG.formateaNumero(compSIva, 2))
+		sMsj += ("%sFranquicia de reserva sin IVA:%s %s (%s%%)\n") %\
+				(CO.AZUL, CO.FIN, FG.formateaNumero(frnqSIva, 2),
+				FG.formateaNumero(xPcFranq, 2))
+		sMsj += ("%sFranquicia de reserva con IVA:%s %s (%s%%)\n") %\
+				(CO.AZUL, CO.FIN, FG.formateaNumero(frnqCIva, 2),
+				FG.formateaNumero(xPcFranq, 2))
+		sMsj += ("%sFranquicia a pagar reportada:%s %s (%s%%)\n") %\
+				(CO.AZUL, CO.FIN, FG.formateaNumero(frnqPaRe, 2),
+				FG.formateaNumero(xPReCaNa, 2))
+		sMsj += ("%sRegalia:%s %s (%s%%)\n") % (CO.AZUL, CO.FIN,
+				FG.formateaNumero(regalia, 2),
+				FG.formateaNumero(xPorcReg, 2))
+		sMsj += ("%sSanaf menos 5 por ciento:%s %s (%s%%)\n") % (CO.AZUL,
+				CO.FIN, FG.formateaNumero(sanfm5XC, 2),
+				FG.formateaNumero(xPorcSan, 2))
+		sMsj += ("%sOficina bruto real:%s %s\n") % (CO.AZUL, CO.FIN,
+				 FG.formateaNumero(ofBruRea, 2))
 		sMsj += ("%sBase honorarios socios:%s %s\n") % (CO.AZUL, CO.FIN,
-				FG.formateaNumero(baHonSoc, 2))
-		sMsj += ("%sBase para honorarios:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva sin "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(baTPaHon, 2), FG.formateaNumero(baTPaHon/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(baFPaHon, 2), FG.formateaNumero(baFPaHon/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA, cuando iva de la negociacion es 0.00:%s %s "
-				 "[%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(baTPaHoI, 2), FG.formateaNumero(baTPaHoI/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA, cuando iva de la negociacion es 0.00:%s %s "
-				 "[%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(baFPaHoI, 2), FG.formateaNumero(baFPaHoI/2.0, 2))
-		sMsj += ("%s1) Comision del captador/cerrador como un %% del monto bruto real de "
-				 "la oficina:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia a pagar reportada con %% reportado a Casa "
-				 "Nacional y precio:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBTTT, 2), FG.formateaNumero(capPBTTT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia a pagar reportada con monto compartido sin IVA"
-				 ":%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBTFT, 2), FG.formateaNumero(capPBTFT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva sin "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBFTT, 2), FG.formateaNumero(capPBFTT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBFFT, 2), FG.formateaNumero(capPBFFT/2.0, 2))
-		sMsj += ("%s2) Comision del captador/cerrador como una expresion del monto base "
-				 "para honorarios:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva sin "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBTTF, 2), FG.formateaNumero(capPBTTF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBTFF, 2), FG.formateaNumero(capPBTFF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA, cuando iva de la negociacion es 0.00:%s %s "
-				 "[%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBFTF, 2), FG.formateaNumero(capPBFTF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA, cuando iva de la negociacion es 0.00:%s %s "
-				 "[%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(capPBFFF, 2), FG.formateaNumero(capPBFFF/2.0, 2))
-		sMsj += ("%s1) Comision del gerente como un %% del monto bruto real de "
-				 "la oficina:%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia a pagar reportada con %% reportado a Casa "
-				 "Nacional y precio:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenTTT, 2), FG.formateaNumero(gerenTTT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia a pagar reportada con monto compartido sin IVA"
-				 ":%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenTFT, 2), FG.formateaNumero(gerenTFT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva sin "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenFTT, 2), FG.formateaNumero(gerenFTT/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenFFT, 2), FG.formateaNumero(gerenFFT/2.0, 2))
-		sMsj += ("%s2) Comision del gerente como un %% del monto base para honorarios"
-				 ":%s\n") % (CO.AZUL, CO.FIN)
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva sin "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenTTF, 2), FG.formateaNumero(gerenTTF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA:%s %s [%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenTFF, 2), FG.formateaNumero(gerenTFF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA, cuando iva de la negociacion es 0.00:%s %s "
-				 "[%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenFTF, 2), FG.formateaNumero(gerenFTF/2.0, 2))
-		sMsj += ("\t%sUsando franquicia de reserva sin IVA con monto de reserva con "
-				 "IVA, cuando iva de la negociacion es 0.00:%s %s "
-				 "[%s]\n") % (CO.CYAN, CO.FIN,
-				FG.formateaNumero(gerenFFF, 2), FG.formateaNumero(gerenFFF/2.0, 2))
+				FG.formateaNumero(basHoSoc, 2))
+		sMsj += ("%sBase para honorarios:%s %s\n") % (CO.AZUL, CO.FIN,
+				FG.formateaNumero(basPaHon, 2))
+		sMsj += ("%sComision del captador:%s %s (%s%%)\n") % (CO.AZUL,
+				CO.FIN, FG.formateaNumero(captador, 2),
+				FG.formateaNumero(xPorcCap, 2))
+		sMsj += ("%sComision del gerente:%s %s (%s%%)\n") % (CO.AZUL,
+				CO.FIN, FG.formateaNumero(gerente, 2),
+				FG.formateaNumero(xPorcGer, 2))
+		sMsj += ("%sComision del cerrador:%s %s (%s%%)\n") % (CO.AZUL,
+				CO.FIN, FG.formateaNumero(cerrador, 2),
+				FG.formateaNumero(xPorcCer, 2))
+		if (0.00 != xPorcBon):
+			sMsj += ("%sBonificacion:%s %s (%s%%)\n") % (CO.AZUL,
+					CO.FIN, FG.formateaNumero(bonifica, 2),
+					FG.formateaNumero(xPorcBon, 2))
+		if (0.00 != comBanca):
+			sMsj += ("%sComision bancaria:%s %s\n") % (CO.AZUL, CO.FIN,
+					FG.formateaNumero(comBanca, 2))
+		sMsj += ("%sIngreso neto de la oficina:%s %s\n") % (CO.AZUL,
+				CO.FIN, FG.formateaNumero(netoOfic, 2))
 		opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
 		return opc
-	return rPr, rCom, rIva, resSIva, resCIva, compSIva, compCIva, frqTSIva,\
-			frqFSIva, frnqCIva, frqTPaRe, frqFPaRe, regaliaT, regaliaF,\
-			sanfT5XC, sanfT5XL, sanfF5XC, sanfF5XL,\
-			ofBruTRT, ofBruTRF, ofBruFRT, ofBruFRF, baHonSoc,\
-			baTPaHon, baFPaHon, baTPaHoI, baFPaHoI,\
-			capPBTTT, capPBTFT, capPBFTT, capPBFFT, capPBTTF, capPBTFF, capPBFTF, capPBFFF,\
-			gerenTTT, gerenTFT, gerenFTT, gerenFFT, gerenTTF, gerenTFF, gerenFTF, gerenFFF
+	return rPr, rCom, rIva, lados, resSIva, resCIva, compSIva,\
+		compCIva, frnqSIva, frnqCIva, frnqPaRe, regalia, sanfm5XC,\
+		ofBruRea, basHoSoc, basPaHon, captador, gerente, cerrador,\
+		bonifica, comBanca, netoOfic
 # funcion comisiones
 
 if __name__ == '__main__':
-	comisiones(None, True)
+	comisiones()

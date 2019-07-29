@@ -98,11 +98,11 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
       print(titulo)
       resultado = input(mensaje + '[' + str(porDefecto) + ']: ')
       if '' == resultado or None == resultado: resultado = str(porDefecto)
-      if resultado.isdigit(): break
+      if patron.match(resultado): break
   if None == resultado: return None
-  resultado = resultado.replace('.', '')
+# resultado = resultado.replace('.', '')
   bMatch = patron.match(resultado)
-  if None == bMatch: return bMatch
+  if None == bMatch: return None
   elif (not bZero) and (0 == float(resultado)): return None
   elif (not bNegativo) and (0 > float(resultado)): return None
   elif bEntero:
