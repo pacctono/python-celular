@@ -3,7 +3,6 @@
 import types
 import json
 from lib import ES, Const as CO, General as FG
-from c21 import Propiedades as PRO
 
 try:
   from lib import DIR, LINEA, bMovil
@@ -27,13 +26,15 @@ lMenu = [
           ['Calcular cuota', 'cuota'],                  # 0
           ['Calcular comision', 'comisiones'],          # 1
           ['Asesor', 'ASE.asesor'], 
-          ['Codigo de casa nacional', 'codigo'], 
-          ['Reporte en casa nacional', 'reporte'], 
-          ['Montos totales', 'totales'],       # 5
+          ['Todas las propiedades', 'PRO.propiedades'], 
+          ['Propiedades X Asesor', 'PRO.xAsesor'],
+          ['Codigo de casa nacional', 'PRO.xCodigo'], 
+          ['Reporte en casa nacional', 'PRO.xReporte'], 
+          ['Montos totales', 'PRO.totales'],            # 6
           ['Salir', 'salir']
 		    ]
 
-lMsj  = {
+dMsj  = {
           "cedula":"Cedula de identidad",
           "name":"Nombre",
           "telefono":"Telefono",
@@ -49,26 +50,118 @@ lMsj  = {
           "tCap":"Total captado",
           "tCer":"Total cerrado",
           "tCaptCer":"Total captado y cerrado",
+          "0":"Numero incremental",
+          "1":"Codigo casa nacional",
+          "2":"fecha de reserva",
+          "3":"fecha de firma",
+          "4":"Negociacion:",
+          "5":"Nombre de la propiedad",
+          "6":"Status",
+          "7":"Moneda",
+          "8":"Precio",
+          "9":"Comision",
+          "10":"Monto de la reserva sin IVA",
+          "11":"IVA",
+          "12":"Monto de la reserva con IVA",
+          "13":"Monto compartido con otra oficina con IVA",
+          "14":"Monto compartido con otra oficina sin IVA",
+          "15":"Lados",
+          "16":"Franquicia de reserva sin IVA",
+          "17":"Franquicia de reserva con IVA",
+          "18":"Porcentaje Franquicia",
+          "19":"Franquicia a pagar reportada",
+          "20":"Porcentaje reportado a casa nacional",
+          "21":"Porcentaje Regalia",
+          "22":"Regalia",
+          "23":"Sanaf - 5%",
+          "24":"Bruto real de la oficina",
+          "25":"Base para honorario de los socios",
+          "26":"Base para honorario",
+          "27":"Id del asesor captador",
+          "28":"Nombre del asesor captador",
+          "29":"Porcentaje Comision del captador",
+          "30":"Comision del captador PrBr",
+          "31":"Porcentaje Comision del gerente",
+          "32":"Comision del gerente",
+          "33":"Id del asesor cerrador",
+          "34":"Nombre del asesor cerrador",
+          "35":"Porcentaje Comision del cerrador PrBr",
+          "36":"Comision del cerrador",
+          "37":"Porcentaje Bonificacion",
+          "38":"Bonificacion",
+          "39":"Comision bancaria",
+          "40":"Ingreso neto de la oficina",
+          "41":"Numero de recibo",
+          "42":"Forma de pago al gerente",
+          "43":"Factura gerente",
+          "44":"Forma de pago a los asesores",
+          "45":"Factura asesores",
+          "46":"Pago otra oficina",
+          "47":"Pagado a Casa Nacional",
+          "48":"Status C21",
+          "49":"Reporte Casa Nacional",
+          "50":"Factura A&S",
+          "51":"Comentarios"
         }
 
+def prepLnCad(desc, cad, ln=''):
+  try:    
+    if ('' != cad): return ("%s" + desc + ":%s %" + ln + "s\n")\
+                        % (CO.AZUL, CO.FIN, cad)
+    else: return ''
+  except: return ''
+# Funcion prepLnCad
+def prepLnNum(desc, num, dec=0, ln=''):
+  try:    
+    if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
+                        % (CO.AZUL, CO.FIN, FG.formateaNumero(num, dec))
+    else: return ''
+  except: return ''
+# Funcion prepLnNum
+def prepLnFec(desc, fec, ln=''):
+  try:    
+    if ('' != fec): return ("%s" + desc + ":%s %" + ln + "s\n")\
+                        % (CO.AZUL, CO.FIN, FG.formateaFecha(fec))
+    else: return ''
+  except: return ''
+# Funcion prepLnFec
+def prepLnTel(desc, tel, ln=''):
+  try:    
+    if ('' != tel): return ("%s" + desc + ":%s %" + ln + "s\n")\
+                % (CO.AZUL, CO.FIN, FG.formateaNumeroTelefono(tel))
+    else: return ''
+  except: return ''
+# Funcion prepLnTel
+def prepLnMon(desc, num, dec=0, mon='$', ln=''):
+  try:    
+    if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
+                        % (CO.AZUL, CO.FIN, FG.numeroMon(num, dec, mon))
+    else: return ''
+  except: return ''
+# Funcion prepLnMon
+def prepLnPorc(desc, num, dec=0, ln=''):
+  try:    
+    if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
+                        % (CO.AZUL, CO.FIN, FG.numeroPorc(num, dec))
+    else: return ''
+  except: return ''
+# Funcion prepLnPorc
 def prepLnMsj(dic, campo, tipo=0, lng='', dec=0):
   '''
     Prepara la linea a imprimir:
     dic: Diccionario desde donde se tomara el valor a imprimir.    
-    campo: llave en el diccionario del campo a imprimir. Tambien, para lMsj.
-    tipo: tipo de campo. 0:cadena, 1:numero, 2:fecha, 3:telefono.
+    campo: llave en el diccionario del campo a imprimir. Tambien, para dMsj.
+    tipo: tipo de campo. 0:cadena, 1:numero, 2:fecha, 3:telefono, 4:moneda, 5:porcentaje
     lng: longitud de caracteres, minimo, a mostrar del campo.
     dec: numero de decimales, si el campo a imprimir es numerico.
   '''
   if not dic[campo]: return ''    
-  if (0 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n") %\
-                          (CO.AZUL, CO.FIN, dic[campo])
-  elif (1 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n")\
-                % (CO.AZUL, CO.FIN, FG.formateaNumero(dic[campo], dec))
-  elif (2 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n")\
-                % (CO.AZUL, CO.FIN, FG.formateaFecha(dic[campo][0:10]))
-  elif (3 == tipo): sMsj = ("%s" + lMsj[campo] + ":%s %" + lng + "s\n")\
-              % (CO.AZUL, CO.FIN, FG.formateaNumeroTelefono(dic[campo]))
+  if (0 == tipo): sMsj = prepLnCad(dMsj[campo], dic[campo], lng)
+  elif (1 == tipo): sMsj = prepLnNum(dMsj[campo], dic[campo], dec, lng)
+  elif (2 == tipo): sMsj = prepLnFec(dMsj[campo], dic[campo][0:10], lng)
+  elif (3 == tipo): sMsj = prepLnTel(dMsj[campo], dic[campo], lng)
+  elif (4 == tipo): sMsj = prepLnMon(dMsj[campo], dic[campo], lng)
+  elif (5 == tipo): sMsj = prepLnPorc(dMsj[campo], dic[campo], lng)
   else: sMsj = ''
   return sMsj
 # Funcion prepLnMsj
@@ -108,10 +201,10 @@ def nombreProp(fila):
   '''
   return fila[5].strip(' "\t\n\r')
 # Funcion nombreProp
-def mNombre(co):
+def mNombre(co, lPro):
 
   sNombre = 'NO'
-  for l in PRO.lPro:
+  for l in lPro:
     if (co != l[1]): continue
     sNombre = l[5]
     break
@@ -248,13 +341,45 @@ def buscarNombre():
 # Funcion buscarNombre
 
 # Definir variables globales
-def prepararDiccionariosDeTrabajo():
-  global dPro, dPer
+def prepararDiccionarios(dir=''):
+  global dNeg, dMon, dEst, dSC21
 
-  dBanco = ES.cargaDicc("bancos.txt")		# [0]Codigo; [1]Descripcion
-  dConcepto = ES.cargaDicc("conceptos.txt")	# [0]Codigo; [1]Descripcion
-  dFecha = ES.cargaDicc("control.txt")	# [0]Identificacion del proceso; [1]Fecha
-  dPer = ES.cargaDicc("persona.txt")		# [0]Codigo;
-  # [1]Nombre(Nombre|Nucleo|Fecha de nacimiento o P:personal|disponibilidad o No|A/N:extension)
-  dDiv = ES.cargaDicc("dividendos.txt")		# [0]Codigo; [1]Monto
-# Funcion prepararDiccionariosDeTrabajo
+  dNeg = ES.cargaJson(dir+'negociacion.txt')
+  if not dNeg: dNeg = {}
+  dMon = ES.cargaJson(dir+'moneda.txt')
+  if not dMon: dMon = {}
+  dEst = ES.cargaJson(dir+'estatus.txt')
+  if not dEst: dEst = {}
+  dSC21 = ES.cargaJson(dir+'estatus_sistema_c21.txt')
+  if not dSC21: dSC21 = {}
+# Funcion prepararDiccionarios
+
+#Variables globales
+iCodCN = 1                # Indice del codigo a Casa Nacional.
+iFeRes = 2                # Indice de la fecha de reserva.
+iFeFir = 3                # Indice de la fecha firma.
+iNegoc = 4                # Indice de la negociacion.
+iNombr = 5                # Indice del nombre de la propiedad.
+iStatu = 6                # Indice del estatus.
+iMoned = 7                # Indice de la moneda.
+iPreci = 8                # Indice del precio.
+iComis = 9                # Indice de la comision de la negociacion.
+iIVA   = 11               # Indice del IVA usado en la negociacion.
+iLados = 15               # Indice de lados.
+iPoFra = 18               # Indice del porcentaje de franquicia.
+iPoRCN = 20               # Indice del porcentaje de Reporte a Casa Nacional.
+iPoReg = 21               # Indice del porcentaje de Regalia.
+iRegal = 22               # Indice de la regalia.
+iIdCap = 27               # Indice del userId del asesor captador.
+iNbCap = 28               # Indice del nombre del asesor captador. Inicialmente, cuando es de otra oficina.
+iPoCap = 29               # Indice del porcentaje del asesor captador.
+iCoCap = 30               # Indice de la comision del asesor captador.
+iPoGer = 31               # Indice del porcentaje del asesor gerente.
+iCoGer = 32               # Indice de la comision del gerente.
+iIdCer = 33               # Indice del userId del asesor cerrador.
+iNbCer = 34               # Indice del nombre del asesor cerrador. Inicialmente, cuando es de otra oficina.
+iPoCer = 35               # Indice del porcentaje del asesor cerrador.
+iCoCer = 36               # Indice de la comision del asesor cerrador.
+iNetos = 40               # Indice del neto.
+iStC21 = 48               # Indice del estatus del sistema Century 21.
+iRepCN = 49               # Indice del reporte a Casa Nacional.

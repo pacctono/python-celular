@@ -54,7 +54,7 @@ def escValXDefecto(sUXD, sCXD, cog):
     finally: fC21.close()
   else: print("No se grabaron los valores por defecto!")
 # funcion escValXDefecto
-def selFuncionInicial(nOpciones=6):		# nOpciones: Primeras opciones de lMenu a desplegar.
+def selFuncionInicial(nOpciones=7):		# nOpciones: Primeras opciones de lMenu a desplegar.
   ''' Menu desplegado al inicio. nOpciones = 6: <Cuota>, <Comisiones>,
     <Nombre> ..... y <Salir>. '''
 
@@ -90,12 +90,14 @@ if droid:
 else: print(esperar)
 ASE.prepararListaDeAsesores()
 PRO.prepararListaDePropiedades()
+PRO.prepararListas()
 if droid: droid.dialogSetCurrentProgress(60)
 else: print('Listas listas!')
-# COM.prepararDiccionariosDeTrabajo()
+COM.prepararDiccionarios()
 if droid: droid.dialogSetCurrentProgress(90)
 else: print('Diccionarios listos!')
 
+FG.limpiarPantalla()
 ES.muestraInicio("Century21 Puente Real: J-12345678-x.")
 if droid: droid.dialogSetCurrentProgress(95)
 
@@ -104,7 +106,7 @@ if droid:
   droid.dialogSetCurrentProgress(100)
   droid.dialogDismiss()
 
-nOp = 6
+nOp = len(COM.lMenu) - 1
 while True:
   sOpcion = selFuncionInicial(nOp)
 

@@ -15,6 +15,7 @@ if bMovil:
     import android
   droid = android.Android()
 else:
+  droid = None    
   from os.path import abspath
 
 import sys
@@ -45,21 +46,14 @@ oMySQL = MySQL.cMySQL()
 # socio
 # created_at
 # updated_at
-def prepararListaDeAsesores(nbArchivo="asesores.txt"):
+def prepararListaDeAsesores(dir=''):
   global lAse, lNAs
 
-  fC21 = ES.abrir(nbArchivo)
-  if not fC21:
+  lAse = ES.cargaJson(dir+'asesores.txt')
+  if not lAse:
     lAse = []           # Lista de asesores.
     return
-  else:
-    try:
-      sAse = fC21.read()
-      lAse = json.loads(sAse)
-    except:
-      pass
-      return
-    finally: fC21.close()
+
   lNAs = []
   for l in lAse:
     if (1 == l['id']): continue    
@@ -137,36 +131,45 @@ def creaLstAsesores():
   return dPersona
 # FIN funcion creaLstAsesores
 
-def asesor(droid=None, bImp=True):
+def asesor(bImp=True):
+  global droid    
   global lNAs
 
   id = FG.selOpcionMenu(lNAs + [['Volver', -2]], 'Asesor')
   if (0 > id): return id
 
+  resp = ES.siNo(droid, 'propiedades', 'Desea mostrar las propiedades'
+                ' de '+ lAse[id-1]['name'], False)
+  #print(resp)
   tCap = tCer = 0.00
+  nF = nV = tLados = 0
+  bImpar = True
+  if ('S' == resp): st = PRO.titulo('Captado', 10, 'Cerrado', 10)
+  else: st = ''
   for l in PRO.lPro:
     if (40 < len(l)):
-      '''if (not l[27].isdigit()) or (not l[33].isdigit()):    
-        print('id del asesor:', l[0], l[1], l[27], l[33], sep=';')
-        print(l)
-        break
-      try:
-        a = float(l[30])
-        a = float(l[36])
-      except:
-        print('ccomision del asesor:', l[0], l[1], l[30], l[36], sep=';')
-        print(l)
-        break'''
-#     if (id == int(l[27])) or (id == int(l[33])):
-#       print(l[0], l[1], l[30], l[36], sep=';')
-      if (l[27].isdigit()) and (id == int(l[27])):
+      if not (isinstance(l[iIdCap], int)) or not (isinstance(l[iIdCer], int)):
+        continue    
+      if (id != l[iIdCap]) and (id != l[iIdCer]): continue
+      if ('S' != l[iStatu]) and (id == l[iIdCap]):
         try:
-          tCap += float(l[30])    
+          tCap += float(l[iCoCap])    
         except: pass
-      if (l[33].isdigit()) and (id == int(l[33])):
+      if ('S' != l[iStatu]) and (id == l[iIdCer]):
         try:
-          tCer += float(l[36])    
+          tCer += float(l[iCoCer])    
         except: pass
+      nF += 1
+      if ('S' != l[iStatu]):
+        nV += 1
+        tLados += l[iLados]
+      if ('S' == resp):
+        sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+        st += PRO.detalles(l, sColor, True, iCoCap, 10, 27, id,
+                            iCoCer, 10, 33, id)
+  # Fin for
+  st += CO.AMARI + FG.formateaNumero(nF) + ' negociaciones [' +\
+        FG.formateaNumero(nV) + ' validas].' + CO.FIN + '\n'
 
   dic = {'tCap':tCap, 'tCer':tCer, 'tCaptCer':tCap+tCer}
   if bImp:
@@ -189,7 +192,10 @@ def asesor(droid=None, bImp=True):
     sMsj += COM.prepLnMsj(lAse[ind], 'profesion')
     sMsj += COM.prepLnMsj(lAse[ind], 'direccion')
     if (lAse[ind]['socio']):
-      sMsj += ("%sAsesor socio%s\n") % (CO.AZUL, CO.FIN)
+      sMsj += ("%sAsesor socio%s\n") % (CO.AMARI, CO.FIN)
+
+    if (0 < nF): sMsj += st    # Las propiedades donde ha participado el asesor.
+
     sMsj += COM.prepLnMsj(dic, 'tCap', 1, '22', 2)
     sMsj += COM.prepLnMsj(dic, 'tCer', 1, '22', 2)
     sMsj += COM.prepLnMsj(dic, 'tCaptCer', 1, '12', 2)
@@ -197,7 +203,36 @@ def asesor(droid=None, bImp=True):
   return ind, opc
 # FIN funcion asesor
 
+#Variables globales
+iCodCN = COM.iCodCN
+iFeRes = COM.iFeRes
+iFeFir = COM.iFeFir
+iNegoc = COM.iNegoc
+iNombr = COM.iNombr
+iStatu = COM.iStatu
+iMoned = COM.iMoned
+iPreci = COM.iPreci
+iComis = COM.iComis
+iIVA   = COM.iIVA
+iLados = COM.iLados
+iPoFra = COM.iPoFra
+iPoRCN = COM.iPoRCN
+iPoReg = COM.iPoReg
+iRegal = COM.iRegal
+iIdCap = COM.iIdCap
+iNbCap = COM.iNbCap
+iPoCap = COM.iPoCap
+iCoCap = COM.iCoCap
+iPoGer = COM.iPoGer
+iCoGer = COM.iCoGer
+iIdCer = COM.iIdCer
+iNbCer = COM.iNbCer
+iPoCer = COM.iPoCer
+iCoCer = COM.iCoCer
+iNetos = COM.iNetos
+iStC21 = COM.iStC21
+iRepCN = COM.iRepCN
 if __name__ == '__main__':
-  prepararListaDeAsesores("../data/asesores.txt")
-  PRO.prepararListaDePropiedades("../data/propiedades.txt")
+  prepararListaDeAsesores("../data/")
+  PRO.prepararListaDePropiedades("../data/")
   asesor()

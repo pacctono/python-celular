@@ -101,3 +101,25 @@ def selOpcionMenu(lOpciones, sTitulo='Que desea hacer'):	# Devuelve una de las o
   if None == indice or 0 > indice: return -11
   return lFuncion[indice]
 # funcion selOpcionMenu(lOpciones)
+def limpiarPantalla():
+  import os
+
+  if 'posix' == os.name:
+    os.system('clear')
+  elif os.name in ('ce', 'nt', 'dos'):
+    os.name('cls')
+# funcion limpiarPantalla
+def numeroPorc(num, dec=0):
+  cad = ''    
+  try:    
+    if (0 != num): cad = formateaNumero(num, dec=3) + '%'
+  except: pass
+  return cad
+# Funcion numeroPorc
+def numeroMon(num, dec=0, mon='$'):
+  cad = ''    
+  try:    
+    if (0 != num): cad = mon + formateaNumero(num, dec=0)
+  except: pass
+  return cad
+# Funcion numeroMon

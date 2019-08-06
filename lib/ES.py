@@ -22,6 +22,7 @@ except:
 import re
 patron = re.compile(r"\d+(\.\d+)?$")	# Valida un numero entero o de punto flotante.
 #pat = re.compile(r"\d{1,3}")	        # Expresion regular: 1 o mas dig (\d+) y tres dig al final (\d{3}).
+import json
 
 from time import time, localtime, strftime, sleep
 if 0 > __name__.find('lib'): import Const as CO
@@ -63,19 +64,48 @@ def esEntero(v):
     return v=='0' or (v if v.find('..') > -1 else \
                             v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
 # Funcion esEntero
-def alerta(droid, titulo, valor=''):
+def alerta(droid, titulo, mensaje=''):
 
   if droid:
-    droid.dialogCreateAlert(titulo, valor)
+    droid.dialogCreateAlert(titulo, mensaje)
     droid.dialogSetPositiveButtonText('Aceptar')
     droid.dialogSetNegativeButtonText('Cancelar')
     droid.dialogShow()
     resultado = droid.dialogGetResponse().result
     droid.dialogDismiss()
   else:
-    print(titulo, valor, sep=':')
+    print(titulo, mensaje, sep=':')
     resultado = True
   return resultado
+# funcion alerta
+def siNo(droid, titulo, mensaje='', neutral=True, si='Si', no='No'):
+
+  if droid:
+    droid.dialogCreateAlert(titulo, mensaje)
+    droid.dialogSetPositiveButtonText(si)
+    droid.dialogSetNegativeButtonText(no)
+    if (neutral): droid.dialogSetNeutralButtonText('Cancelar')
+    droid.dialogShow()
+    resultado = droid.dialogGetResponse().result['which']
+    droid.dialogDismiss()
+    if (resultado in ('positive', 'negative', 'neutral')):
+      if ('positive' == resultado): resp = 'S'    # Boton si.
+      elif ('negative' == resultado): resp = 'N'  # Boton no.
+      else: resp = 'C'                            # Boton 'Cancelar'.
+    else: resp = 'C'
+  else:
+    print(titulo)
+    print(mensaje)
+    lst = ['Si', 'No', 'Cancelar']
+    i = 0
+    for item in lst:
+      print(i, item, sep='.-')
+      i += 1
+    indice = -1
+    while (0 > indice) or (len(lst) <= indice):
+      indice = entradaNumero(droid, '', 'Introduzca un número', 0, True, True)
+    resp = lst[indice][0]
+  return resp
 # funcion alerta
 def mostrarValor(droid, valor):
 
@@ -122,8 +152,8 @@ def entradaNombre(droid, titulo = 'Entrada de datos',
     droid.dialogDismiss()
   else:
     print(titulo)
-    resultado = porDefecto
-    resultado = input(mensaje + ': ')
+    resultado = input(mensaje + '[' + porDefecto + ']: ')
+    if ('' == resultado) or (None == resultado): resultado = porDefecto
   return resultado
 # funcion entradaNombre
 def entradaContrasena(droid, titulo = 'Contrasena',
@@ -226,6 +256,37 @@ def cLineas(aNb):
   f.close()
   return nLineas
 # funcion cLineas
+def cargaJson(aNb):
+  '''Lee una cadena de caracteres desde un archivo que es una
+      representacion Json y devuelve la instancia correspondiente.'''
+  f = abrir(aNb)
+  if not f: return False
+  try:
+    cad = f.read()
+    lst = json.loads(cad)
+  except: pass
+  finally: f.close()
+  return lst
+# funcion cargaJson
+def cargaListaJson(aNb):
+  '''Lee una cadena de caracteres, en cada archivo de un archivo; la
+      cual, es una representacion Json y devuelve la lista de la
+      instancia correspondiente.'''
+  f = abrir(aNb)
+  if not f: return []
+  try:
+    lst = [json.loads(linea) for linea in f] # List comprehension
+  except IOError as err:
+    print("[ES]Error E/S: {0}".format(err))
+  except UnicodeDecodeError as err:
+    print("[ES]Error decodificando unicode: {0}".format(err))
+  except:
+    print("[ES]Error inesperado:", sys.exc_info()[0])
+    raise
+  finally: f.close()
+  if 'lst' in locals(): return lst
+  else: return []
+# funcion cargaListaJson
 def cargaLista(aNb):
   'Abre para leer, el archivo cuyo nombre es el valor de aNb y crea una lista'
   f = abrir(aNb)
@@ -239,8 +300,7 @@ def cargaLista(aNb):
   except:
     print("[ES]Error inesperado:", sys.exc_info()[0])
     raise
-  finally:
-    f.close()
+  finally: f.close()
   if 'lista' in locals(): return lista
   else: return []
 # funcion cargaLista
