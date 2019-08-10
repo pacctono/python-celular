@@ -98,7 +98,7 @@ if droid: droid.dialogSetCurrentProgress(90)
 else: print('Diccionarios listos!')
 
 FG.limpiarPantalla()
-ES.muestraInicio("Century21 Puente Real: J-12345678-x.")
+ES.muestraInicio("Century21 Puente Real: J-40589955-7.")
 if droid: droid.dialogSetCurrentProgress(95)
 
 cog, sUXD, sCXD = leeValXDefecto()

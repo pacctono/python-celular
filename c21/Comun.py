@@ -27,6 +27,8 @@ lMenu = [
           ['Calcular comision', 'comisiones'],          # 1
           ['Asesor', 'ASE.asesor'], 
           ['Todas las propiedades', 'PRO.propiedades'], 
+          ['Propiedades X Estatus', 'PRO.xEstatus'],
+          ['Propiedades X Nombre', 'PRO.xNombre'],
           ['Propiedades X Asesor', 'PRO.xAsesor'],
           ['Codigo de casa nacional', 'PRO.xCodigo'], 
           ['Reporte en casa nacional', 'PRO.xReporte'], 
@@ -366,7 +368,10 @@ iPreci = 8                # Indice del precio.
 iComis = 9                # Indice de la comision de la negociacion.
 iIVA   = 11               # Indice del IVA usado en la negociacion.
 iLados = 15               # Indice de lados.
+iFRsIv = 16               # Indice de la Franquicia de Reserva sin IVA.
+iFRcIv = 17               # Indice de la Franquicia de Reserva con IVA.
 iPoFra = 18               # Indice del porcentaje de franquicia.
+iFraPR = 19               # Indice de la Franquicia a Pagar Reportada.
 iPoRCN = 20               # Indice del porcentaje de Reporte a Casa Nacional.
 iPoReg = 21               # Indice del porcentaje de Regalia.
 iRegal = 22               # Indice de la regalia.

@@ -15,7 +15,7 @@ if bMovil:
     import android
   droid = android.Android()
 else:
-  droid = None    
+  droid = None
   from os.path import abspath
 
 import sys
@@ -87,16 +87,16 @@ def prepararListaDePropiedades(dir=''):
     if not (isinstance(lPro[i][iIdCap], int)) or\
        not (isinstance(lPro[i][iIdCer], int)):
       continue
-    if (1 < lPro[i][iIdCap]):                         # El asesor captador es de la oficina. 
+    if (1 < lPro[i][iIdCap]):                         # El asesor captador es de la oficina.
       lPro[i][iNbCap] = lAse[lPro[i][iIdCap]-1]['name']   # Colocar el nombre del asesor captador de la oficina.
-    if (1 < lPro[i][iIdCer]):                         # El asesor cerrador es de la oficina. 
+    if (1 < lPro[i][iIdCer]):                         # El asesor cerrador es de la oficina.
       lPro[i][iNbCer] = lAse[lPro[i][iIdCer]-1]['name']   # Colocar el nombre del asesor cerrador de la oficina.
 # Funcion prepararListaDePropiedades
 def titulo(*par):
-  tCol = ''    
+  tCol = ''
   if (2 <= len(par)):
     for n in range(0, len(par), 2):
-      tCol += par[n].rjust(par[n+1])    
+      tCol += par[n].rjust(par[n+1])
   return CO.AZUL + "Codigo".ljust(7) + "Fechas".ljust(17) +\
             " Nombre".ljust(21) + "L".rjust(2) + "N".rjust(2) +\
             "Precio".rjust(13) + "S".rjust(2) +\
@@ -119,7 +119,7 @@ def detalles(l, sColor, bCaidas=True, *col):
 # con el valor en el cuarto parametro. Si la comparacion es # verdadera;
 # el campo identificacado en el 1er valor se mostrara en CYAN.
     for n in range(0, len(col), 4):
-      sCol = FG.formateaNumero(l[col[n]], 2).rjust(col[n+1])    
+      sCol = FG.formateaNumero(l[col[n]], 2).rjust(col[n+1])
       if ('S' != l[iStatu]):
         if ((n+3) <= len(col)):
           if (col[n+3] == l[col[n+2]]):
@@ -150,21 +150,26 @@ def mPropiedad(lCod, titOpc):
   prop = lPro[id]
   sMsj = ''
   for n in range(0, len(prop)):
-    p = prop[n]    
-    if (iMoned == n): mon = p    
+    p = prop[n]
+    if (iMoned == n): mon = p
     elif (iPreci == n):
       sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 0, mon))
     elif (iComis == n):
       sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroPorc(p, 3) +\
             CO.AZUL + ' IVA: ' + CO.FIN + FG.numeroPorc(prop[iIVA], 2))
-    elif (n in (iPoFra, iPoRCN)):
-      sMsj += COM.prepLnPorc(COM.dMsj[str(n)], p, 3)
+    elif (n in (iFRsIv, iFRcIv)):
+      sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 2, mon) +\
+                              ' [' + FG.numeroPorc(prop[iPoFra], 3) + ']')
+    elif (n == iFraPR):
+      sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 2, mon) +\
+                              ' [' + FG.numeroPorc(prop[iPoRCN], 3) + ']')
     elif (n in (iRegal, iCoCap, iCoGer, iCoCer)):
       sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 2, mon) +\
-                              ' [' + FG.numeroPorc(prop[n-1], 2) + ']')
-    elif (n in (iIVA, iPoReg, iPoCap, iPoGer, iPoCer)): continue
+                              ' [' + FG.numeroPorc(prop[n-1], 3) + ']')
+    elif (n in (iIVA, iPoFra, iPoRCN, iPoReg, iPoCap, iPoGer, iPoCer)):
+      continue
     elif (n in (iIdCap, iIdCer)):         # id del asesor captador y cerrador.
-      continue    
+      continue
     elif (isinstance(p, str)):
       if (iNegoc == n): p = dNeg.get(p, 'Codigo errado:'+p)
       elif (iStatu == n): p = dEst.get(p, 'Codigo errado:'+p)
@@ -210,7 +215,61 @@ def propiedades(bCaidas=True):
 
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion propiedades
+def xEstatus():
+  global iCodCN, iNombr, iStatu
+  global lPro
+  lEst = [(COM.dEst[key], key) for key in COM.dEst]
 
+  st = FG.selOpcionMenu(lEst + [['Volver', 'v']], 'Estatus')
+  if ('v' == st): return st
+
+  lCod = []
+  for l in lPro:
+    if (st != l[iStatu]): continue
+    lst = (l[iCodCN]+'-'+l[iNombr], l[0]-1)
+    lCod.append(lst)
+  # for l in lPro
+
+  mPropiedad(lCod, COM.dEst[st])
+# Funcion xEstatus
+def xNegociacion():
+  global iCodCN, iNombr, iStatu
+  global lPro
+  lNeg = [(COM.dNeg[key], key) for key in COM.dNeg]
+
+  ng = FG.selOpcionMenu(lNeg + [['Volver', 'v']], 'Negociacion')
+  if ('v' == ng): return ng
+
+  lCod = []
+  for l in lPro:
+    if (ng != l[iNegoc]): continue
+    if ('S' == l[iStatu]): caida = 'Caida: '
+    else: caida = ''
+    lst = (l[iCodCN]+'-'+l[iNombr], l[0]-1)
+    lCod.append(lst)
+  # for l in lPro
+
+  mPropiedad(lCod, COM.dNeg[ng])
+# Funcion xNegociacion
+def xNombre():
+  global iNombr, iStatu, iCodCN
+  global lPro
+
+  cod = ES.entradaNombre(droid, 'Nombre de la propiedad',
+                      'Introduzca el nombre o parte de el', lPro[0][iNombr])
+  lCod = []
+  for l in lPro:
+    nombre = l[iNombr]
+    if (l[iNombr]) and (0 <= nombre.lower().find(cod.lower())):
+#   if (l[iNombr]) and (cod.lower() in nombre.lower()):
+      if ('S' == l[iStatu]): caida = 'Caida: '
+      else: caida = ''
+      lst = (caida+l[iCodCN]+'-'+l[iNombr], l[0]-1)
+      lCod.append(lst)
+  # for l in lPro
+
+  mPropiedad(lCod, 'Nombre de la propiedad:'+cod)
+# Funcion xNombre
 def xAsesor():
   global iIdCap, iNbCap, iIdCer, iNbCer
   global lPro
@@ -225,15 +284,15 @@ def xAsesor():
       continue
     if (id != l[iIdCap]) and (id != l[iIdCer]): continue
     if ('S' == l[iStatu]): caida = 'Caida: '
-    else: caida = ''    
+    else: caida = ''
     lst = (caida+l[iCodCN]+'-'+l[iNombr], l[0]-1)
     lCod.append(lst)
   # for l in lPro
-  
+
   mPropiedad(lCod, ASE.lAse[id-1]['name'])
 # Funcion xAsesor
 def xCodigo():
-  global droid    
+  global droid
   global lPro
 
   codigo = ES.entradaNumero(droid, 'Codigo de Casa Nacional',
@@ -243,11 +302,11 @@ def xCodigo():
   for l in lPro:
     if cod in l[iCodCN]:
       if ('S' == l[iStatu]): caida = 'Caida: '
-      else: caida = ''    
+      else: caida = ''
       lst = (caida+l[iCodCN]+'-'+l[iNombr], l[0]-1)
       lCod.append(lst)
   # for l in lPro
-  
+
   mPropiedad(lCod, 'Codigo CN:'+cod)
 # Funcion xCodigo
 def xReporte():
@@ -260,11 +319,11 @@ def xReporte():
   for l in lPro:
     if (l[iRepCN]) and (cod in l[iRepCN]):
       if ('S' == l[iStatu]): caida = 'Caida: '
-      else: caida = ''    
+      else: caida = ''
       lst = (caida+l[iRepCN]+'-'+l[iNombr], l[0]-1)
       lCod.append(lst)
   # for l in lPro
-  
+
   mPropiedad(lCod, 'Reporte CN:'+cod)
 # Funcion xReporte
 def totales():
@@ -275,15 +334,15 @@ def totales():
   sMsj = ("%d %snegociaciones validas%s\n") % (lTot[0], CO.AZUL, CO.FIN)
   sMsj += ("%sTOTALES:%s\n") % (CO.AZUL, CO.FIN)
   sMsj += COM.prepLnNum("Precio", lTot[1], 2)
-  sMsj += COM.prepLnNum("Compartido con IVA", lTot[2], 2)
-  sMsj += COM.prepLnNum("Lados", lTot[3])
+  sMsj += COM.prepLnNum("Compartido con IVA", lTot[3], 2)
+  sMsj += COM.prepLnNum("Lados", lTot[2])
   sMsj += COM.prepLnNum("Franquicia a pagar reportada", lTot[6], 2)
   sMsj += COM.prepLnNum("Asesor captador PrBr", lTot[12], 2)
   sMsj += COM.prepLnNum("Gerente", lTot[13], 2)
   sMsj += COM.prepLnNum("Asesor cerrador PrBr", lTot[14], 2)
   sMsj += COM.prepLnNum("Bonificaciones", lTot[15], 2)
-  sMsj += COM.prepLnNum("Comisiones bancarias", lTot[16], 2)
-  sMsj += COM.prepLnNum("Ingreso neto de la oficina", lTot[17], 2)
+  sMsj += COM.prepLnNum("Comisiones bancarias", lTot[17], 2)
+  sMsj += COM.prepLnNum("Ingreso neto de la oficina", lTot[16], 2)
   opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
 
 # Funcion propiedades
@@ -306,7 +365,10 @@ iPreci = COM.iPreci
 iComis = COM.iComis
 iIVA   = COM.iIVA
 iLados = COM.iLados
+iFRsIv = COM.iFRsIv
+iFRcIv = COM.iFRcIv
 iPoFra = COM.iPoFra
+iFraPR = COM.iFraPR
 iPoRCN = COM.iPoRCN
 iPoReg = COM.iPoReg
 iRegal = COM.iRegal
@@ -324,7 +386,7 @@ iNetos = COM.iNetos
 iStC21 = COM.iStC21
 iRepCN = COM.iRepCN
 if __name__ == '__main__':
-  lng = 52    
+  lng = 52
   COM.prepararDiccionarios('../data/')
   ASE.prepararListaDeAsesores('../data/')
   prepararListaDePropiedades('../data/')

@@ -263,10 +263,11 @@ def cargaJson(aNb):
   if not f: return False
   try:
     cad = f.read()
-    lst = json.loads(cad)
+    obj = json.loads(cad)
   except: pass
   finally: f.close()
-  return lst
+  if 'obj' in locals(): return obj
+  else: return False      # Si 'obj' no esta entre las variables locales de la funcion, no ha sido definida.
 # funcion cargaJson
 def cargaListaJson(aNb):
   '''Lee una cadena de caracteres, en cada archivo de un archivo; la
@@ -285,7 +286,7 @@ def cargaListaJson(aNb):
     raise
   finally: f.close()
   if 'lst' in locals(): return lst
-  else: return []
+  else: return []      # Si 'lst' no esta entre las variables locales de la funcion, no ha sido definida.
 # funcion cargaListaJson
 def cargaLista(aNb):
   'Abre para leer, el archivo cuyo nombre es el valor de aNb y crea una lista'

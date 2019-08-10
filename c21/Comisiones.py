@@ -97,14 +97,14 @@ def comisiones(droid=None, bImp=True):
 				'Casa Nacional?', ['5.0', '4.9', '4.8', '4.7', '4.6',
 				'4.5', '4.4', '4.3', '4.2', '4.1', 'Otro'], False, True)
 	while (None == asCapSoc):
-		asCapSoc = ES.entradaConLista(droid,
-		'El asesor captador es socio', 'Captador es socio?', CO.lNoSi)
-		if (1 == asCapSoc): asCapSoc = True
+		resp = ES.siNo(droid, 'El asesor captador es socio',
+								'El Captador es socio PrBr?', CO.lNoSi)
+		if ('S' == resp): asCapSoc = True
 		else: asCapSoc = False
 	while (None == asCerSoc):
-		asCerSoc = ES.entradaConLista(droid,
-		'El asesor cerrador es socio', 'Cerrador es socio?', CO.lNoSi)
-		if (1 == asCerSoc): asCapSoc = True
+		resp = ES.siNo(droid, 'El asesor cerrador es socio',
+								'El Cerrador es socio PrBr?', CO.lNoSi)
+		if ('S' == resp): asCerSoc = True
 		else: asCerSoc = False
 	while (None == xPorcBon):
 		xPorcBon = ES.entradaNumeroConLista(droid,
