@@ -60,7 +60,15 @@ def prepararListaDeAsesores(dir=''):
     lNAs.append([l['name'], l['id']])    
   return
 # Funcion prepararListaDeAsesores
+def nombreAsesor(i, restar=0):
+  global lAse
 
+  try: i = int(i) - restar
+  except: return 'Indice no es numero'
+  if (0 > i) or (len(lAse) <= i):
+    return 'Indice(' + str(i) + ') nombr err'
+  return lAse[int(i)].get('name', 'Nombre no encontrado')
+# Funcion nombreAsesor
 def poblarLstAsesores(ci, nb, nu='', fnac='P', ds='No', ex='N'):
       return {'ci':ci, 'nb':nb, 'nu':nu, 'fnac':fnac, 'dsp':ds, 'ex':ex}	# Codigo, desc,
 # nu: primera letra del nucleo (socios) o digito (personal).

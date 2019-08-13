@@ -135,7 +135,6 @@ def detalles(l, sColor, bCaidas=True, *col):
 def mPropiedad(lCod, titOpc):
   global iIdCap, iNbCap, iIdCer, iNbCer
   global lPro
-  lAse = ASE.lAse
   dNeg = COM.dNeg
   dEst = COM.dEst
   dSC21 = COM.dSC21
@@ -243,8 +242,6 @@ def xNegociacion():
   lCod = []
   for l in lPro:
     if (ng != l[iNegoc]): continue
-    if ('S' == l[iStatu]): caida = 'Caida: '
-    else: caida = ''
     lst = (l[iCodCN]+'-'+l[iNombr], l[0]-1)
     lCod.append(lst)
   # for l in lPro
@@ -326,6 +323,54 @@ def xReporte():
 
   mPropiedad(lCod, 'Reporte CN:'+cod)
 # Funcion xReporte
+def totAsesor():
+  global lTAs
+
+  titTot = CO.AZUL + "Asesor".ljust(21) +\
+            "Lad".rjust(4) + "Comisiones".rjust(14) +\
+            "Comision Captado".rjust(19) +\
+            "Comision Cerrado".rjust(19) +\
+            CO.FIN + "\n"
+  st = titTot
+  bImpar = True
+  tLdCa = tLdCe = 0
+  tCap = tCer = 0.00
+  for l in lTAs:
+    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+    try:
+      st += sColor + ASE.nombreAsesor(l[0], 1).ljust(21) +\
+            FG.formateaNumero(l[21]+l[22]).rjust(4) +\
+            FG.formateaNumero(l[19]+l[20], 2).rjust(14) +\
+            (FG.formateaNumero(l[19], 2) + '(' +\
+            FG.formateaNumero(l[21]) + ')').rjust(19) +\
+            (FG.formateaNumero(l[20], 2) + '(' +\
+            FG.formateaNumero(l[22]) + ')').rjust(19) + CO.FIN + "\n"
+    except TypeError:
+      print('ERROR detalle:')
+      print(l)
+    try:
+      if (1 < int(l[0])):
+        tCap  += l[19]
+        tCer  += l[20]
+        tLdCa += l[21]
+        tLdCe += l[22]
+    except:
+      print('ERROR totales:')
+      print(l[1], l[19], l[20], l[21], l[22])
+  try:
+    st += CO.AMARI + 'Totales Oficina'.ljust(21) +\
+          FG.formateaNumero(tLdCa+tLdCe).rjust(4) +\
+          FG.formateaNumero(tCap+tCer, 2).rjust(14) +\
+          (FG.formateaNumero(tCap, 2) + '(' +\
+          FG.formateaNumero(tLdCa) + ')').rjust(19) +\
+          (FG.formateaNumero(tCer, 2) + '(' +\
+          FG.formateaNumero(tLdCe) + ')').rjust(19) + CO.FIN + "\n"
+  except:
+    print('ERROR linea totales:')
+    print(tNg, tCap, tCer, tLdCa, tLdCe)
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
+# Funcion totAsesor
 def totales():
   global lTot
 
@@ -345,12 +390,20 @@ def totales():
   sMsj += COM.prepLnNum("Ingreso neto de la oficina", lTot[16], 2)
   opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
 
+  return opc
 # Funcion propiedades
 def prepararListas(dir=''):
-  global lTot
+  global lTot, lTAs
 
-  lTot = ES.cargaJson(dir+'totales.txt')
-  if not lTot: lTot = []
+  lTot = []
+  lTAs = []
+  lst = ES.cargaListaJson(dir+'totales.txt')
+  if not lst: lst = []
+  for l in lst:
+    if ('A' == l.pop(0)):     # Elimina el primer elemento (indice 0) de 'l' y devuelve su valor.
+      lTAs.append(l)
+    elif ('T' == l.pop(0)):   # Elimina el 2do item de 'l' y devuelve su valor. Anteriormente se elimino el 1ro.
+      lTot = l
 # Funcion prepararListas
 
 #Variables globales
@@ -393,11 +446,14 @@ if __name__ == '__main__':
   prepararListas('../data/')
   propiedades()
   print(lTot)
+  print(lTAs)
   print(COM.dNeg)
   print(COM.dMon)
   print(COM.dEst)
   print(COM.dSC21)
   print(lPro[0:1])
+  totAsesor()
+  totales()
   print('\n')
   print('**** Las propiedades con longitud diferente a %d: ****' % lng)
   for l in lPro:

@@ -32,6 +32,7 @@ lMenu = [
           ['Propiedades X Asesor', 'PRO.xAsesor'],
           ['Codigo de casa nacional', 'PRO.xCodigo'], 
           ['Reporte en casa nacional', 'PRO.xReporte'], 
+          ['Totales X Asesor', 'PRO.totAsesor'],            # 6
           ['Montos totales', 'PRO.totales'],            # 6
           ['Salir', 'salir']
 		    ]
