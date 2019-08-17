@@ -25,17 +25,21 @@ else: droid = None
 lMenu = [
           ['Calcular cuota', 'cuota'],                  # 0
           ['Calcular comision', 'comisiones'],          # 1
-          ['Asesor', 'ASE.asesor'], 
-          ['Todas las propiedades', 'PRO.propiedades'], 
+          ['Asesor', 'ASE.asesor'],
+          ['Todas las propiedades', 'PRO.propiedades'],
           ['Propiedades X Estatus', 'PRO.xEstatus'],
           ['Propiedades X Nombre', 'PRO.xNombre'],
           ['Propiedades X Asesor', 'PRO.xAsesor'],
-          ['Codigo de casa nacional', 'PRO.xCodigo'], 
-          ['Reporte en casa nacional', 'PRO.xReporte'], 
-          ['Totales X Asesor', 'PRO.totAsesor'],            # 6
-          ['Montos totales', 'PRO.totales'],            # 6
+          ['Codigo de casa nacional', 'PRO.xCodigo'],
+          ['Reporte en casa nacional', 'PRO.xReporte'],
+          ['Totales X Asesor', 'PRO.totAsesor'],        # 9
+          ['Totales X Mes', 'PRO.totMes'],              # 10
+          ['Totales X Estatus', 'PRO.totEst'],              # 10
+          ['Totales X Asesor X Mes', 'PRO.totAsesorMes'],   # 11
+          ['Totales X Mes X Asesor', 'PRO.totMesAsesor'],   # 11
+          ['Montos totales', 'PRO.totales'],            # 12
           ['Salir', 'salir']
-		    ]
+	    ]
 
 dMsj  = {
           "cedula":"Cedula de identidad",
@@ -108,42 +112,42 @@ dMsj  = {
         }
 
 def prepLnCad(desc, cad, ln=''):
-  try:    
+  try:
     if ('' != cad): return ("%s" + desc + ":%s %" + ln + "s\n")\
                         % (CO.AZUL, CO.FIN, cad)
     else: return ''
   except: return ''
 # Funcion prepLnCad
 def prepLnNum(desc, num, dec=0, ln=''):
-  try:    
+  try:
     if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
                         % (CO.AZUL, CO.FIN, FG.formateaNumero(num, dec))
     else: return ''
   except: return ''
 # Funcion prepLnNum
 def prepLnFec(desc, fec, ln=''):
-  try:    
+  try:
     if ('' != fec): return ("%s" + desc + ":%s %" + ln + "s\n")\
                         % (CO.AZUL, CO.FIN, FG.formateaFecha(fec))
     else: return ''
   except: return ''
 # Funcion prepLnFec
 def prepLnTel(desc, tel, ln=''):
-  try:    
+  try:
     if ('' != tel): return ("%s" + desc + ":%s %" + ln + "s\n")\
                 % (CO.AZUL, CO.FIN, FG.formateaNumeroTelefono(tel))
     else: return ''
   except: return ''
 # Funcion prepLnTel
 def prepLnMon(desc, num, dec=0, mon='$', ln=''):
-  try:    
+  try:
     if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
                         % (CO.AZUL, CO.FIN, FG.numeroMon(num, dec, mon))
     else: return ''
   except: return ''
 # Funcion prepLnMon
 def prepLnPorc(desc, num, dec=0, ln=''):
-  try:    
+  try:
     if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
                         % (CO.AZUL, CO.FIN, FG.numeroPorc(num, dec))
     else: return ''
@@ -152,13 +156,13 @@ def prepLnPorc(desc, num, dec=0, ln=''):
 def prepLnMsj(dic, campo, tipo=0, lng='', dec=0):
   '''
     Prepara la linea a imprimir:
-    dic: Diccionario desde donde se tomara el valor a imprimir.    
+    dic: Diccionario desde donde se tomara el valor a imprimir.
     campo: llave en el diccionario del campo a imprimir. Tambien, para dMsj.
     tipo: tipo de campo. 0:cadena, 1:numero, 2:fecha, 3:telefono, 4:moneda, 5:porcentaje
     lng: longitud de caracteres, minimo, a mostrar del campo.
     dec: numero de decimales, si el campo a imprimir es numerico.
   '''
-  if not dic[campo]: return ''    
+  if not dic[campo]: return ''
   if (0 == tipo): sMsj = prepLnCad(dMsj[campo], dic[campo], lng)
   elif (1 == tipo): sMsj = prepLnNum(dMsj[campo], dic[campo], dec, lng)
   elif (2 == tipo): sMsj = prepLnFec(dMsj[campo], dic[campo][0:10], lng)
@@ -168,6 +172,11 @@ def prepLnMsj(dic, campo, tipo=0, lng='', dec=0):
   else: sMsj = ''
   return sMsj
 # Funcion prepLnMsj
+def descEstatus(llave):
+  global dEst
+
+  return dEst.get(llave, 'Estatus no existe:'+llave)[0:20]
+# Funcion nombreAsesor
 def lFecha(k="Sinca", sig=""):
   global dFecha
   sFecha = sig + " " + dFecha.get(k, "No hay fecha.")
@@ -178,7 +187,7 @@ def noCodigo(co):
   return "El codigo %s no fue encontrado\n" % FG.formateaNumero(co)
 # Funcion noCodigo
 def codigoI(coAnt):
-  
+
   while True:
     co = ES.entradaNumero(droid, "CODIGO DE CASA NACIONAL",
                 "Codigo de la propiedad", str(coAnt), True, True, True)
@@ -223,7 +232,7 @@ def valProp(coAnt = -1):
     if 0 >= co: return -1, 'Zero o negativo'
   except:
     return -1, 'El codigo debe ser un número entero de 66 digitos.'
-  
+
   return co, mNombre(co)    # Devuelve una tupla
 # Funcion valSocio
 def mSocio(Nombre, co, bCadena=True):
@@ -236,7 +245,7 @@ def mSocio(Nombre, co, bCadena=True):
   else: sFecha = Nombre[len(Nombre)-1]
   st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN +\
         lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL +\
-        "Codigo:".rjust(21) + CO.FIN 
+        "Codigo:".rjust(21) + CO.FIN
   if (bCadena): st += " %s" % (FG.formateaNumero(co))
   else: st += " %s" % Nombre[0]
   nJustDerecha = 21

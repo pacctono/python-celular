@@ -132,6 +132,33 @@ def detalles(l, sColor, bCaidas=True, *col):
         FG.formateaNumero(l[iPreci])).rjust(12) + l[iStatu].rjust(2) +\
         sPor + CO.FIN + "\n"
 # Funcion detalles
+def titTotales(tipo='Asesor', tam=21):
+  return CO.AZUL + tipo.ljust(tam) + "Lad".rjust(4) + \
+          "Comisiones".rjust(14) + "Comision Captado".rjust(19) +\
+          "Comision Cerrado".rjust(19) + CO.FIN + "\n"
+# Funcion titTotales
+def detTotales(cad, lados, cap, cer, lCap, lCer, bImpar, tam=21):
+  if (0 == lados) and (0 == cap) and (0 == cer) and (0 == lCap) and\
+      (0 == lCer):
+    return bImpar, ''
+  sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+  return bImpar, sColor + cad.ljust(tam) +\
+        FG.formateaNumero(lados).rjust(4) +\
+        FG.formateaNumero(cap+cer, 2).rjust(14) +\
+        (FG.formateaNumero(cap, 2) + '(' +\
+        FG.formateaNumero(lCap) + ')').rjust(19) +\
+        (FG.formateaNumero(cer, 2) + '(' +\
+        FG.formateaNumero(lCer) + ')').rjust(19) + CO.FIN + "\n"
+# Funcion detTotales
+def totTotales(tipoTot, tLados, tCap, tCer, tLaCap, tLaCer, tam=21):
+  return CO.AMARI + tipoTot.ljust(tam) +\
+        FG.formateaNumero(tLados).rjust(4) +\
+        FG.formateaNumero(tCap+tCer, 2).rjust(14) +\
+        (FG.formateaNumero(tCap, 2) + '(' +\
+        FG.formateaNumero(tLaCap) + ')').rjust(19) +\
+        (FG.formateaNumero(tCer, 2) + '(' +\
+        FG.formateaNumero(tLaCer) + ')').rjust(19) + CO.FIN + "\n"
+# Funcion totTotales
 def mPropiedad(lCod, titOpc):
   global iIdCap, iNbCap, iIdCer, iNbCer
   global lPro
@@ -326,58 +353,212 @@ def xReporte():
 def totAsesor():
   global lTAs
 
-  titTot = CO.AZUL + "Asesor".ljust(21) +\
-            "Lad".rjust(4) + "Comisiones".rjust(14) +\
-            "Comision Captado".rjust(19) +\
-            "Comision Cerrado".rjust(19) +\
-            CO.FIN + "\n"
-  st = titTot
+  st = titTotales('Asesor', 21)
   bImpar = True
-  tLdCa = tLdCe = 0
+  tLaCap = tLaCer = 0
   tCap = tCer = 0.00
   for l in lTAs:
-    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
     try:
-      st += sColor + ASE.nombreAsesor(l[0], 1).ljust(21) +\
-            FG.formateaNumero(l[21]+l[22]).rjust(4) +\
-            FG.formateaNumero(l[19]+l[20], 2).rjust(14) +\
-            (FG.formateaNumero(l[19], 2) + '(' +\
-            FG.formateaNumero(l[21]) + ')').rjust(19) +\
-            (FG.formateaNumero(l[20], 2) + '(' +\
-            FG.formateaNumero(l[22]) + ')').rjust(19) + CO.FIN + "\n"
+      bImpar, cad = detTotales(ASE.nombreAsesor(l[0], 1), l[21]+l[22],
+                              l[19], l[20], l[21], l[22], bImpar, 21)
+      st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
       if (1 < int(l[0])):
-        tCap  += l[19]
-        tCer  += l[20]
-        tLdCa += l[21]
-        tLdCe += l[22]
+        tCap   += l[19]
+        tCer   += l[20]
+        tLaCap += l[21]
+        tLaCer += l[22]
     except:
       print('ERROR totales:')
       print(l[1], l[19], l[20], l[21], l[22])
   try:
-    st += CO.AMARI + 'Totales Oficina'.ljust(21) +\
-          FG.formateaNumero(tLdCa+tLdCe).rjust(4) +\
-          FG.formateaNumero(tCap+tCer, 2).rjust(14) +\
-          (FG.formateaNumero(tCap, 2) + '(' +\
-          FG.formateaNumero(tLdCa) + ')').rjust(19) +\
-          (FG.formateaNumero(tCer, 2) + '(' +\
-          FG.formateaNumero(tLdCe) + ')').rjust(19) + CO.FIN + "\n"
+    st += totTotales('Total Oficina', tLaCap + tLaCer, tCap, tCer,
+                      tLaCap, tLaCer, 21)
   except:
     print('ERROR linea totales:')
-    print(tNg, tCap, tCer, tLdCa, tLdCe)
+    print(tCap, tCer, tLaCap, tLaCer)
   opc = ES.imprime(st.rstrip(' \t\n\r'))
   return opc
 # Funcion totAsesor
+def totMes():
+  global lTMe
+
+  st = titTotales('Agno Mes', 16)
+  bImpar = True
+  tLados = tLaCap = tLaCer = 0
+  tCap = tCer = 0.00
+  for l in lTMe:
+    try:
+      bImpar, cad = detTotales(l[0][0:4]+' '+CO.meses[int(l[0][5:])],
+                          l[3], l[13], l[15], l[21], l[22], bImpar, 16)
+      st += cad
+    except TypeError:
+      print('ERROR detalle:')
+      print(l)
+    try:
+      tCap   += l[13]
+      tCer   += l[15]
+      tLados += l[3]
+      tLaCap += l[21]
+      tLaCer += l[22]
+    except:
+      print('ERROR totales:')
+      print(l[1], l[3], l[13], l[15], l[21], l[22])
+  try:
+    st += totTotales('Total Oficina', tLados, tCap, tCer, tLaCap,
+                      tLaCer, 16)
+  except:
+    print('ERROR linea totales:')
+    print(tCap, tCer, tLados, tLaCap, tLaCer)
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
+# Funcion totMes
+def totEst():
+  global lTEs
+
+  st = titTotales('Estatus', 21)
+  bImpar = True
+  tLados = tLaCap = tLaCer = 0
+  tCap = tCer = 0.00
+  for l in lTEs:
+    try:
+      bImpar, cad = detTotales(COM.descEstatus(l[0]), l[3], l[13],
+                                l[15], l[21], l[22], bImpar, 21)
+      st += cad
+    except TypeError:
+      print('ERROR detalle:')
+      print(l)
+    try:
+      tCap   += l[13]
+      tCer   += l[15]
+      tLados += l[3]
+      tLaCap += l[21]
+      tLaCer += l[22]
+    except:
+      print('ERROR totales:')
+      print(l[1], l[3], l[13], l[15], l[21], l[22])
+  try:
+    st += totTotales('Total Oficina', tLados, tCap, tCer, tLaCap,
+                      tLaCer, 21)
+  except:
+    print('ERROR linea totales:')
+    print(tCap, tCer, tLados, tLaCap, tLaCer)
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
+# Funcion totEst
+def totAsesorMes():
+  global lTAM
+
+  st = titTotales('Agno Mes', 16)
+  bImpar = True
+  tAsLados = tAsLaCap = tAsLaCer = 0
+  tLados = tLaCap = tLaCer = 0
+  tAsCap = tAsCer = tCap = tCer = 0.00
+  idAse = 0
+  for l in lTAM:
+    try:
+      if (idAse != l[0]):
+        if (0 < idAse):
+          st += totTotales('Total Asesor', tAsLaCap + tAsLaCer, tAsCap,
+                            tAsCer, tAsLaCap, tAsLaCer, 16)
+        idAse = l[0]
+        st += CO.CYAN + ASE.nombreAsesor(l[0], 1) + CO.FIN + '\n'
+        tAsLados = tAsLaCap = tAsLaCer = 0
+        tAsCap = tAsCer = 0.00
+      bImpar, cad = detTotales(l[1][0:4]+' '+CO.meses[int(l[1][5:])],
+                  l[22] + l[23], l[20], l[21], l[22], l[23], bImpar, 16)
+      st += cad
+    except TypeError:
+      print('ERROR detalle:')
+      print(l)
+    try:
+      tAsCap   += l[20]
+      tAsCer   += l[21]
+      tAsLados += l[22] + l[23]
+      tAsLaCap += l[22]
+      tAsLaCer += l[23]
+      if (1 < int(l[0])):
+        tCap   += l[20]
+        tCer   += l[21]
+        tLados += l[22] + l[23]
+        tLaCap += l[22]
+        tLaCer += l[23]
+    except:
+      print('ERROR totales:')
+      print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23])
+  try:
+    st += totTotales('Total Asesor', tAsLaCap + tAsLaCer, tAsCap,
+                      tAsCer, tAsLaCap, tAsLaCer, 16)
+    st += totTotales('Total Oficina', tLaCap + tLaCer, tCap, tCer,
+                      tLaCap, tLaCer, 16)
+  except:
+    print('ERROR linea totales:')
+    print(tAsLaCap, tAsLaCer, tAsCap, tAsCer, tLados, tCap, tCer, tLaCap, tLaCer)
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
+# Funcion totAsesorMes
+def totMesAsesor():
+  global lTMA
+
+  st = titTotales('Asesor', 21)
+  bImpar = True
+  tMeLados = tMeLaCap = tMeLaCer = 0
+  tLados = tLaCap = tLaCer = 0
+  tMeCap = tMeCer = tCap = tCer = 0.00
+  idMes = ''
+  for l in lTMA:
+    try:
+      if (idMes != l[0]):
+        if ('' != idMes):
+          st += totTotales('Total mes ' + idMes, tMeLaCap + tMeLaCer,
+                            tMeCap, tMeCer, tMeLaCap, tMeLaCer, 21)
+        idMes = l[0]
+        st += CO.CYAN + l[0] + CO.FIN + '\n'
+        tMeLados = tMeLaCap = tMeLaCer = 0
+        tMeCap = tMeCer = 0.00
+      bImpar, cad = detTotales(ASE.nombreAsesor(l[1], 1), l[22] + l[23],
+                        l[20], l[21], l[22], l[23], bImpar, 21)
+      st += cad
+    except TypeError:
+      print('ERROR detalle:')
+      print(l)
+    try:
+      if (1 < int(l[1])):
+        tMeCap   += l[20]
+        tMeCer   += l[21]
+        tMeLados += l[22] + l[23]
+        tMeLaCap += l[22]
+        tMeLaCer += l[23]
+        tCap   += l[20]
+        tCer   += l[21]
+        tLados += l[22] + l[23]
+        tLaCap += l[22]
+        tLaCer += l[23]
+    except:
+      print('ERROR totales:')
+      print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23])
+  try:
+    st += totTotales('Total mes ' + idMes, tMeLaCap + tMeLaCer,
+                      tMeCap, tMeCer, tMeLaCap, tMeLaCer, 21)
+    st += totTotales('Total Oficina', tLaCap + tLaCer, tCap, tCer,
+                      tLaCap, tLaCer, 21)
+  except:
+    print('ERROR linea totales:')
+    print(tMeLaCap, tMeLaCer, tMeCap, tMeCer, tLados, tCap, tCer,
+          tLaCap, tLaCer)
+  opc = ES.imprime(st.rstrip(' \t\n\r'))
+  return opc
+# Funcion totMesAsesor
 def totales():
   global lTot
 
   if not lTot: return
 
   sMsj = ("%d %snegociaciones validas%s\n") % (lTot[0], CO.AZUL, CO.FIN)
-  sMsj += ("%sTOTALES:%s\n") % (CO.AZUL, CO.FIN)
+  sMsj += ("%sTOTALES:%s\n") % (CO.CYAN, CO.FIN)
   sMsj += COM.prepLnNum("Precio", lTot[1], 2)
   sMsj += COM.prepLnNum("Compartido con IVA", lTot[3], 2)
   sMsj += COM.prepLnNum("Lados", lTot[2])
@@ -391,19 +572,32 @@ def totales():
   opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
 
   return opc
-# Funcion propiedades
+# Funcion totales
 def prepararListas(dir=''):
-  global lTot, lTAs
+  global lTot, lTAs, lTMe, lTEs, lTAM, lTMA
 
   lTot = []
   lTAs = []
+  lTMe = []
+  lTEs = []
+  lTAM = []
+  lTMA = []
   lst = ES.cargaListaJson(dir+'totales.txt')
   if not lst: lst = []
   for l in lst:
-    if ('A' == l.pop(0)):     # Elimina el primer elemento (indice 0) de 'l' y devuelve su valor.
-      lTAs.append(l)
-    elif ('T' == l.pop(0)):   # Elimina el 2do item de 'l' y devuelve su valor. Anteriormente se elimino el 1ro.
-      lTot = l
+    tipo = l.pop(0)         # Elimina el primer elemento (indice 0) de 'l' y devuelve su valor.
+    if ('A' == tipo):       # 'tipo' contiene el valor devuelto por pop. Totales por asesor.
+      lTAs.append(l)        # El primer elemento de esta lista es el 'id' del asesor.
+    elif ('M' == tipo):     # 'tipo' contiene el valor devuelto por pop. Totales por mes.
+      lTMe.append(l)        # El primer elemento (0) de esta lista es el 'aaaa-mm'.
+    elif ('E' == tipo):     # 'tipo' contiene el valor devuelto por pop. Totales por mes.
+      lTEs.append(l)        # El primer elemento (0) de esta lista es el 'aaaa-mm'.
+    elif ('AM' == tipo):    # 'tipo' contiene el valor devuelto por pop. Totales por asesor y por mes.
+      lTAM.append(l)        # El primer elemento (0) de esta lista es el 'id' del asesor y el 2do (1) 'aaaa-mm'.
+    elif ('MA' == tipo):    # 'tipo' contiene el valor devuelto por pop. Totales por mes y por asesor.
+      lTMA.append(l)        # El primer elemento (0) de esta lista es 'aaaa-mm' y el 2do es el 'id' del asesor.
+    elif ('T' == l.pop(0)): # Elimina el 2do item de 'l' y devuelve su valor. Anteriormente se elimino el 1ro.
+      lTot = l              # El primer elemento (0) pasa a ser el numero total de negociaciones.
 # Funcion prepararListas
 
 #Variables globales
@@ -445,16 +639,19 @@ if __name__ == '__main__':
   prepararListaDePropiedades('../data/')
   prepararListas('../data/')
   propiedades()
-  print(lTot)
-  print(lTAs)
-  print(COM.dNeg)
-  print(COM.dMon)
-  print(COM.dEst)
-  print(COM.dSC21)
-  print(lPro[0:1])
+  #print(lTot)
+  #print(lTAs)
+  #print(COM.dNeg)
+  #print(COM.dMon)
+  #print(COM.dEst)
+  #print(COM.dSC21)
+  #print(lPro[0:1])
   totAsesor()
+  totMes()
+  totEst()
+  totAsesorMes()
+  totMesAsesor()
   totales()
-  print('\n')
   print('**** Las propiedades con longitud diferente a %d: ****' % lng)
   for l in lPro:
     if (40 < len(l)) and (52 != len(l)):
