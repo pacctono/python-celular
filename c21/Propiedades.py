@@ -137,11 +137,13 @@ def titTotales(tipo='Asesor', tam=21):
           "Comisiones".rjust(14) + "Comision Captado".rjust(19) +\
           "Comision Cerrado".rjust(19) + CO.FIN + "\n"
 # Funcion titTotales
-def detTotales(cad, lados, cap, cer, lCap, lCer, bImpar, tam=21):
+def detTotales(cad, lados, cap, cer, lCap, lCer, bImpar, tam=21,
+                color=False):
   if (0 == lados) and (0 == cap) and (0 == cer) and (0 == lCap) and\
       (0 == lCer):
     return bImpar, ''
-  sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+  (sColor, bImpar) = (color, not bImpar) if (color) else\
+                                        ES.colorLinea(bImpar, CO.VERDE)
   return bImpar, sColor + cad.ljust(tam) +\
         FG.formateaNumero(lados).rjust(4) +\
         FG.formateaNumero(cap+cer, 2).rjust(14) +\
@@ -150,9 +152,10 @@ def detTotales(cad, lados, cap, cer, lCap, lCer, bImpar, tam=21):
         (FG.formateaNumero(cer, 2) + '(' +\
         FG.formateaNumero(lCer) + ')').rjust(19) + CO.FIN + "\n"
 # Funcion detTotales
-def totTotales(tipoTot, tLados, tCap, tCer, tLaCap, tLaCer, tam=21):
-  return CO.AMARI + tipoTot.ljust(tam) +\
-        FG.formateaNumero(tLados).rjust(4) +\
+def totTotales(tipoTot, tLados, tCap, tCer, tLaCap, tLaCer, tam=21,
+                subrayar=False):
+  return CO.AMARI + (CO.SUBRAYADO if subrayar else '') +\
+        tipoTot.ljust(tam) + FG.formateaNumero(tLados).rjust(4) +\
         FG.formateaNumero(tCap+tCer, 2).rjust(14) +\
         (FG.formateaNumero(tCap, 2) + '(' +\
         FG.formateaNumero(tLaCap) + ')').rjust(19) +\
@@ -337,7 +340,7 @@ def xReporte():
   global lPro
 
   cod = ES.entradaNombre(droid, 'Reporte de Casa Nacional',
-                      'Introduzca el reporte o parte de el', lPro[0][iRepCN])
+                'Introduzca el reporte o parte de el', lPro[0][iRepCN])
   lCod = []
   #print(cod, lPro[0][iRepCN])
   for l in lPro:
@@ -367,10 +370,8 @@ def totAsesor():
       print(l)
     try:
       if (1 < int(l[0])):
-        tCap   += l[19]
-        tCer   += l[20]
-        tLaCap += l[21]
-        tLaCer += l[22]
+        tCap, tCer = tCap+l[19], tCer+l[20]
+        tLaCap, tLaCer = tLaCap+l[21], tLaCer+l[22]
     except:
       print('ERROR totales:')
       print(l[1], l[19], l[20], l[21], l[22])
@@ -399,11 +400,8 @@ def totMes():
       print('ERROR detalle:')
       print(l)
     try:
-      tCap   += l[13]
-      tCer   += l[15]
-      tLados += l[3]
-      tLaCap += l[21]
-      tLaCer += l[22]
+      tCap, tCer = tCap+l[13], tCer+l[15]
+      tLaCap, tLaCer, tLados = tLaCap+l[21], tLaCer+l[22], tLados+l[3]
     except:
       print('ERROR totales:')
       print(l[1], l[3], l[13], l[15], l[21], l[22])
@@ -426,17 +424,16 @@ def totEst():
   for l in lTEs:
     try:
       bImpar, cad = detTotales(COM.descEstatus(l[0]), l[3], l[13],
-                                l[15], l[21], l[22], bImpar, 21)
+                                l[15], l[21], l[22], bImpar, 21,
+                                CO.ROJO if ('S'==l[0]) else False)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
-      tCap   += l[13]
-      tCer   += l[15]
-      tLados += l[3]
-      tLaCap += l[21]
-      tLaCer += l[22]
+      if ('S' != l[0]):
+        tCap, tCer = tCap+l[13], tCer+l[15]
+        tLaCap, tLaCer, tLados = tLaCap+l[21], tLaCer+l[22], tLados+l[3]
     except:
       print('ERROR totales:')
       print(l[1], l[3], l[13], l[15], l[21], l[22])
@@ -475,23 +472,19 @@ def totAsesorMes():
       print('ERROR detalle:')
       print(l)
     try:
-      tAsCap   += l[20]
-      tAsCer   += l[21]
-      tAsLados += l[22] + l[23]
-      tAsLaCap += l[22]
-      tAsLaCer += l[23]
+      tAsCap, tAsCer = tAsCap+l[20], tAsCer+l[21]
+      tAsLaCap, tAsLaCer, tAsLados = tAsLaCap+l[22], tAsLaCer+l[23],\
+                                tAsLados+l[22]+l[23]
       if (1 < int(l[0])):
-        tCap   += l[20]
-        tCer   += l[21]
-        tLados += l[22] + l[23]
-        tLaCap += l[22]
-        tLaCer += l[23]
+        tCap, tCer = tCap+l[20], tCer+l[21]
+        tLaCap, tLaCer, tLados = tLaCap+l[22], tLaCer+l[23],\
+                                  tLados+l[22]+l[23]
     except:
       print('ERROR totales:')
       print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23])
   try:
     st += totTotales('Total Asesor', tAsLaCap + tAsLaCer, tAsCap,
-                      tAsCer, tAsLaCap, tAsLaCer, 16)
+                      tAsCer, tAsLaCap, tAsLaCer, 16, True)
     st += totTotales('Total Oficina', tLaCap + tLaCer, tCap, tCer,
                       tLaCap, tLaCer, 16)
   except:
@@ -527,22 +520,18 @@ def totMesAsesor():
       print(l)
     try:
       if (1 < int(l[1])):
-        tMeCap   += l[20]
-        tMeCer   += l[21]
-        tMeLados += l[22] + l[23]
-        tMeLaCap += l[22]
-        tMeLaCer += l[23]
-        tCap   += l[20]
-        tCer   += l[21]
-        tLados += l[22] + l[23]
-        tLaCap += l[22]
-        tLaCer += l[23]
+        tMeCap, tMeCer = tMeCap+l[20], tMeCer+l[21]
+        tMeLaCap, tMeLaCer, tMeLados = tMeLaCap+l[22], tMeLaCer+l[23],\
+                                  tMeLados+l[22]+l[23]
+        tCap, tCer = tCap+l[20], tCer+l[21]
+        tLaCap, tLaCer, tLados = tLaCap+l[22], tLaCer+l[23],\
+                                  tLados+l[22]+l[23]
     except:
       print('ERROR totales:')
       print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23])
   try:
     st += totTotales('Total mes ' + idMes, tMeLaCap + tMeLaCer,
-                      tMeCap, tMeCer, tMeLaCap, tMeLaCer, 21)
+                      tMeCap, tMeCer, tMeLaCap, tMeLaCer, 21, True)
     st += totTotales('Total Oficina', tLaCap + tLaCer, tCap, tCer,
                       tLaCap, tLaCer, 21)
   except:
@@ -576,14 +565,9 @@ def totales():
 def prepararListas(dir=''):
   global lTot, lTAs, lTMe, lTEs, lTAM, lTMA
 
-  lTot = []
-  lTAs = []
-  lTMe = []
-  lTEs = []
-  lTAM = []
-  lTMA = []
+  lTot, lTAs, lTMe, lTEs, lTAM, lTMA = [], [], [], [], [], []
   lst = ES.cargaListaJson(dir+'totales.txt')
-  if not lst: lst = []
+  lst = lst if lst else []
   for l in lst:
     tipo = l.pop(0)         # Elimina el primer elemento (indice 0) de 'l' y devuelve su valor.
     if ('A' == tipo):       # 'tipo' contiene el valor devuelto por pop. Totales por asesor.
