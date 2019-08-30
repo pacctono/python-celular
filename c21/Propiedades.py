@@ -18,7 +18,7 @@ else:
   droid = None
   from os.path import abspath
 
-import sys
+import sys, types
 if __name__ == '__main__': sys.path.append('../')
 from lib import ES, Const as CO, General as FG
 from c21 import Comun as COM
@@ -29,57 +29,6 @@ def prepararListaDePropiedades(dir=''):
   global iIdCap, iNbCap, iIdCer, iNbCer
   global lPro
 
-  # Descripcion de las filas de propiedades.txt
-  # fila[0]: numero incremental.
-  # fila[1]: Codigo casa nacional.
-  # fila[2]: fecha de reserva.
-  # fila[3]: fecha de firma.
-  # fila[4]: Negociacion: Venta o Alquiler.
-  # fila[5]: Nombre de la propiedad.
-  # fila[6]: Status.
-  # fila[7]: Moneda.
-  # fila[8]: Precio.
-  # fila[9]: Comision.
-  # fila[10]: Monto de la reserva sin IVA.
-  # fila[11]: IVA.
-  # fila[12]: Monto de la reserva con IVA.
-  # fila[13]: Monto de compartido con otra oficina con IVA.
-  # fila[14]: Monto de compartido con otra oficina sin IVA.
-  # fila[15]: Lados.
-  # fila[16]: Franquicia de reserva sin IVA.
-  # fila[17]: Franquicia de reserva con IVA.
-  # fila[18]: % Franquicia.
-  # fila[19]: Franquicia a pagar reportada.
-  # fila[20]: % reportado a casa nacional.
-  # fila[21]: % Regalia.
-  # fila[22]: Regalia.
-  # fila[23]: Sanaf - 5%.
-  # fila[24]: Bruto real de la oficina.
-  # fila[25]: Base para honorario de los socios.
-  # fila[26]: Base para honorario.
-  # fila[27]: Id del asesor captador.
-  # fila[28]: Nombre del asesor captador otra oficina.
-  # fila[29]: % Comision del captador.
-  # fila[30]: Comision del captador PrBr.
-  # fila[31]: % Comision del gerente.
-  # fila[32]: Comision del gerente.
-  # fila[33]: Id del asesor cerrador.
-  # fila[34]: Nombre del asesor cerrador otra oficina.
-  # fila[35]: % Comision del cerrador PrBr.
-  # fila[36]: Comision del cerrador.
-  # fila[37]: % Bonificacion.
-  # fila[38]: Bonificacion.
-  # fila[39]: Comision bancaria.
-  # fila[40]: Ingreso neto de la oficina.
-  # fila[41]: Numero de recibo.
-  # 42 y 43:  Pago y factura gerente.
-  # 44 y 45:  Pago y factura asesores.
-  # fila[46]: Pago otra oficina.
-  # fila[47]: Pagado a Casa Nacional.
-  # fila[48]: Status C21.
-  # fila[49]: Reporte Casa Nacional.
-  # fila[50]: Factura A&S.
-  # fila[51]: Comentarios.
   lPro = ES.cargaListaJson(dir+'propiedades.txt')
   if not lPro: lPro = []
   lAse = ASE.lAse
@@ -116,7 +65,7 @@ def detalles(l, sColor, bCaidas=True, *col):
 # Cada columna a agregar podria tener dos o cuatro valores:
 # indice de la lista del campo a agregar, longitud de ese campo.
 # Si se agregan 4 valores: se compara el tercero (indice de la lista)
-# con el valor en el cuarto parametro. Si la comparacion es # verdadera;
+# con el valor en el cuarto parametro. Si la comparacion es verdadera;
 # el campo identificacado en el 1er valor se mostrara en CYAN.
     for n in range(0, len(col), 4):
       sCol = FG.formateaNumero(l[col[n]], 2).rjust(col[n+1])
@@ -244,13 +193,132 @@ def propiedades(bCaidas=True):
 
   ES.imprime(st.rstrip(' \t\n\r'))
 # funcion propiedades
+def lstXEstatus():
+  global iStatu, iNeto
+  global lPro
+
+  est = COM.selEstatus()
+  if ('v' == est): return -1
+
+  nvaLst = []
+  for l in lPro:
+    if (est != l[iStatu]): continue
+    nvaLst.append(l)
+  # for l in lPro
+
+  nV = tLados = 0
+  tPrecios = tNetos = 0.00
+  bImpar = True
+  st = CO.CYAN + COM.dEst[est] + CO.FIN + '\n'
+  st += titulo("Neto ofic.", 11)
+  for l in nvaLst:
+    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+    st += detalles(l, sColor, True, iNetos, 11)
+    nV += 1
+    tLados += l[iLados]
+    tPrecios += l[iPreci]
+    tNetos += l[iNetos]
+  # for l in nvaLst
+  st += CO.AMARI + 'TOTALES:' + FG.formateaNumero(tLados).rjust(39) +\
+        FG.formateaNumero(tPrecios).rjust(15) +\
+        FG.formateaNumero(tNetos, 2).rjust(13) + CO.FIN + "\n"
+  st += FG.formateaNumero(len(nvaLst)) + ' negociaciones'
+
+  ES.imprime(st.rstrip(' \t\n\r'))
+# Funcion lstXEstatus
+def lstXAsesor():
+  global iIdCap, iIdCer, iCoCap, iCoCer
+  global lPro
+
+  id = FG.selOpcionMenu(ASE.lNAs + [['Volver', -2]], 'Asesor')
+  if (0 > id): return id
+
+  nvaLst = []
+  for l in lPro:
+    if not (isinstance(l[iIdCap], int)) or \
+       not (isinstance(l[iIdCer], int)) or \
+       ((id != l[iIdCap]) and (id != l[iIdCer])):
+      continue
+    nvaLst.append(l)
+  # for l in lPro
+
+  tPrecios = tCap = tCer = 0.00
+  nF = nV = tLados = 0
+  bImpar = True
+  st = CO.CYAN + ASE.lAse[id-1]['name'] + CO.FIN + '\n'
+  st += titulo("Captado", 10, "Cerrado", 10)
+  for l in nvaLst:
+    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+    st += detalles(l, sColor, True, iCoCap, 10, iIdCap, id,
+                        iCoCer, 10, iIdCer, id)
+    if ('S' == l[iStatu]): continue
+    nV += 1
+    tLados += l[iLados]
+    tPrecios += l[iPreci]
+    if (id == l[iIdCap]):
+      try: tCap += float(l[iCoCap])    
+      except: pass
+    if (id == l[iIdCer]):
+      try: tCer += float(l[iCoCer])    
+      except: pass
+  # Fin for
+  st += CO.AMARI + 'TOTALES:' + FG.formateaNumero(tLados).rjust(39) +\
+        FG.formateaNumero(tPrecios).rjust(15) +\
+        FG.formateaNumero(tCap, 2).rjust(12) +\
+        FG.formateaNumero(tCer, 2).rjust(10) + CO.FIN + "\n"
+  st += CO.AMARI + FG.formateaNumero(len(nvaLst)) +\
+        ' negociaciones [' + FG.formateaNumero(nV) + ' validas]. ' +\
+        'Total captado y cerrado: ' + FG.formateaNumero(tCap+tCer, 2) +\
+        CO.FIN
+
+  ES.imprime(st.rstrip(' \t\n\r'))
+# Funcion lstXAsesor
+def lstXMes():
+
+  agno, mes = COM.selMes(lTMe)
+  if ('v' == agno): return -1
+  
+  nvaLst = []
+  for l in lPro:
+    if ('00' == mes) and (("" == l[iFeRes]) or ("" == l[iFeFir])):
+      nvaLst.append(l)
+      continue
+    if (("" != l[iFeFir]) and (10 == len(l[iFeFir])) and\
+        (agno == l[iFeFir][-4:]) and (mes == l[iFeFir][3:5])) or\
+       (("" != l[iFeRes]) and (10 == len(l[iFeRes])) and\
+        (agno == l[iFeRes][-4:]) and (mes == l[iFeRes][3:5])):
+      nvaLst.append(l)
+  # for l in lPro
+  nV = tLados = 0
+  tPrecios = tNetos = 0.00
+  bImpar = True
+  st = CO.CYAN + agno + ' ' + CO.meses[int(mes)] + CO.FIN + '\n'
+  st += titulo("Neto ofic.", 11)
+  for l in nvaLst:
+    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+    st += detalles(l, sColor, True, iNetos, 11)
+    if ('S' != l[iStatu]):
+      nV += 1
+      tLados += l[iLados]
+      tPrecios += l[iPreci]
+      tNetos += l[iNetos]
+  # for l in nvaLst
+  st += CO.AMARI + 'TOTALES:' + FG.formateaNumero(tLados).rjust(39) +\
+        FG.formateaNumero(tPrecios).rjust(15) +\
+        FG.formateaNumero(tNetos, 2).rjust(13) + CO.FIN + "\n"
+  st += CO.AMARI + FG.formateaNumero(len(nvaLst)) + ' negociaciones ['\
+        + FG.formateaNumero(nV) + ' validas].' + CO.FIN
+  ES.imprime(st.rstrip(' \t\n\r'))
+# Funcion lstXMes
+def LstPropPor():
+  return COM.selOpcion(COM.lMenuLstPro, 'Listar propiedades')
+# Funcion LstPropPor
 def xEstatus():
   global iCodCN, iNombr, iStatu
   global lPro
-  lEst = [(COM.dEst[key], key) for key in COM.dEst]
 
-  st = FG.selOpcionMenu(lEst + [['Volver', 'v']], 'Estatus')
-  if ('v' == st): return st
+  st = COM.selEstatus()
+  if ('v' == st): return -1
 
   lCod = []
   for l in lPro:
@@ -298,7 +366,7 @@ def xNombre():
   mPropiedad(lCod, 'Nombre de la propiedad:'+cod)
 # Funcion xNombre
 def xAsesor():
-  global iIdCap, iNbCap, iIdCer, iNbCer
+  global iIdCap, iIdCer, iStatu, iCodCN, iNombr
   global lPro
 
   id = FG.selOpcionMenu(ASE.lNAs + [['Volver', -2]], 'Asesor')
@@ -353,6 +421,9 @@ def xReporte():
 
   mPropiedad(lCod, 'Reporte CN:'+cod)
 # Funcion xReporte
+def buscProp():
+  return COM.selOpcion(COM.lMenuProEsp, 'Buscar una propiedad especifica')
+# Funcion BuscProp
 def totAsesor():
   global lTAs
 
@@ -541,6 +612,9 @@ def totMesAsesor():
   opc = ES.imprime(st.rstrip(' \t\n\r'))
   return opc
 # Funcion totMesAsesor
+def totPor():
+  return COM.selOpcion(COM.lMenuTot, 'Totalizar')
+# Funcion totPor
 def totales():
   global lTot
 
@@ -623,13 +697,6 @@ if __name__ == '__main__':
   prepararListaDePropiedades('../data/')
   prepararListas('../data/')
   propiedades()
-  #print(lTot)
-  #print(lTAs)
-  #print(COM.dNeg)
-  #print(COM.dMon)
-  #print(COM.dEst)
-  #print(COM.dSC21)
-  #print(lPro[0:1])
   totAsesor()
   totMes()
   totEst()

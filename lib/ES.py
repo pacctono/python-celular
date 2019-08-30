@@ -341,10 +341,30 @@ def llenarCadena(nCar, sCad='-+'):
   return sCadena
 # funcion llenarCadena(nCar, sCad='-+')
 def imprime(st):
-  print(st)
+# print(st)
+  lineas = st.split('\n')
+  nLineas = len(lineas)
+  n, maxLong = 0, 0
+  try:
+    nLineasPant = CO.LINEAS         # Numero de lineas a mostrar cada vez, por pantalla.
+  except NameError:
+    nLineasPant = 25                # Numero de lineas a mostrar cada vez, por pantalla.
+  nLinTecladoVirtual = 5            # # de lineas, aprox. que quita el teclado virtual en el celular.
+  if bMovil: nLineasPant -= nLinTecladoVirtual
+  for linea in lineas:
+    n += 1
+    print(linea)
+    nCarEsp = len(linea.split('\033'))        # Numero de caracteres especiales (color) en la linea.
+    if maxLong < (len(linea) - nCarEsp): maxLong = len(linea) - nCarEsp
+    if (nLineasPant < n and nLineas > n):
+      tecla = input('Presione <ENTER> para continuar o <s><ENTER> para terminar ...')
+      if (0 < len(tecla)): break
+      n = 0
+  maxLong = maxLong if maxLong < (CO.leenCarMostrar() - 1)\
+                    else CO.leenCarMostrar() - 1
   sFin     = ' F I N '										# 7 caracteres.
   sFinLin  = '-->'											# 3 caracteres.
-  nCarJust = int(CO.leenCarMostrar() - len(sFin+sFinLin) - 1)	# ' F I N ' = 7 cars + '-->' = 3 cars. Queda 1 espacio al final.
+  nCarJust = int(maxLong - len(sFin) - len(sFinLin) - 1)	# ' F I N ' = 7 cars + '-->' = 3 cars. Queda 1 espacio al final.
   if par(nCarJust): nEspIzq  = ''							# Si es par no agregar espacio a la izquierda.
   else:
     nEspIzq   = ' '

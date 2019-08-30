@@ -25,12 +25,20 @@ else: droid = None
 if __name__ == '__main__' or 0 > __name__.find('lib'): import ES
 else: from lib import ES
 
-eliminarPuntos = lambda sCadena, sCad='.': sCadena.replace(sCad, '') # Cadena (solo digitos) del socio.
-cambiarAPunto  = lambda sCadena, sCad=',': sCadena.replace(sCad, '.')
-formateaNumeroTelefono = lambda sNum: (sNum if (10!=len(sNum)) else
-                                "0%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:]))
-formateaFecha = lambda sNum: (sNum if (10>len(sNum)) else
-                                "%s-%s-%s" % (sNum[8:10], sNum[5:7], sNum[0:4]))
+eliminarPuntos = lambda cadena, cad='.': cadena.replace(cad, '') # Cadena (solo digitos) del socio.
+cambiarAPunto  = lambda cadena, cad=',': cadena.replace(cad, '.')
+formateaNumeroTelefono = lambda cad: (cad if (10!=len(cad)) else
+                                "0%s-%s-%s" % (cad[0:3], cad[3:6], cad[6:]))
+formateaFecha = lambda cad: (cad if (10>len(cad)) else
+                                "%s-%s-%s" % (cad[8:10], cad[5:7], cad[0:4]))
+def descomponeFecha(fec):
+  from datetime import date
+
+  ano = int(formateaFecha(fec)[-4:])
+  mes = int(formateaFecha(fec)[3:5])
+  dia = int(formateaFecha(fec)[0:2])
+  diaSem = date(ano, mes, dia).weekday()
+  return ano, mes, dia, diaSem
 #def formateaNumeroTelefono(sNum):
 #	if 10 != len(sNum): return sNum
 #	else: return "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:])
@@ -41,26 +49,26 @@ def esEntero(v):
     return v=='0' or (v if v.find('..') > -1 else \
                             v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
 # Funcion esEntero
-def formateaNumero(sCad, dec=0):
-  if (not isinstance(sCad, str) and not isinstance(sCad, float) and \
-      not isinstance(sCad, int)) and ((None != dec) and not isinstance(dec, int)):
+def formateaNumero(cad, dec=0):
+  if (not isinstance(cad, str) and not isinstance(cad, float) and \
+      not isinstance(cad, int)) and ((None != dec) and not isinstance(dec, int)):
     return None
   if None == dec: dec = 0
-  if isinstance(sCad, str): sCad = sCad.strip(' \t\n\r')
+  if isinstance(cad, str): cad = cad.strip(' \t\n\r')
 
-  if isinstance(sCad, float) or isinstance(sCad, int): sCad = str(sCad)
+  if isinstance(cad, float) or isinstance(cad, int): cad = str(cad)
   try:
-    fCad = float(sCad)
+    fCad = float(cad)
     fCad = round(fCad, dec)
 #    signo = ''
 #    if 0 > fCad:
 #      signo = '-'
 #      fCad  = -fCad
-    sCad = str(fCad)
+    cad = str(fCad)
   except:
     return None
 
-  x = sCad.split('.')		# Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
+  x = cad.split('.')		# Divide el numero en parte entera (x[0]) y parte decimal (x[1]).
   x0 = int(x[0])	      # x0 es la parte entera
   if 1 < len(x):        # Esta y las prox 6 lineas parecen innecesarias por 'round' arriba.
     x2 = x[1]           # x2 es la parte decimal.
@@ -110,15 +118,15 @@ def limpiarPantalla():
     os.name('cls')
 # funcion limpiarPantalla
 def numeroPorc(num, dec=0):
-  cad = ''    
-  try:    
+  cad = ''
+  try:
     if (0 != num): cad = formateaNumero(num, dec=3) + '%'
   except: pass
   return cad
 # Funcion numeroPorc
 def numeroMon(num, dec=0, mon='$'):
-  cad = ''    
-  try:    
+  cad = ''
+  try:
     if (0 != num): cad = mon + formateaNumero(num, dec=0)
   except: pass
   return cad

@@ -31,19 +31,20 @@ from lib import ES, Const as CO, General as FG
 from urllib.request import urlopen
 from time import time, localtime, strftime, ctime
 from os import stat
-from datetime import datetime
+from datetime import date
 
-lSitios = ["Puente Real", "Portatil", "Casa", "Otro", "Salir"]
-lIPs    = ["192.168.0.100", "192.168.0.200", "192.168.1.200", ""]
+lSitios = ["Puente Real", "Portatil Barcelona", "Portatil Casa",
+			"Otro", "Salir"]
+lIPs    = ["192.168.0.101", "192.168.0.200", "192.168.1.200", ""]
 lDATA = [
 		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
 		 'asesores.txt',
+		 'estatus.txt',
+		 'estatus_sistema_c21.txt',
+		 'moneda.txt',
+		 'negociacion.txt',
 		 'propiedades.txt',
 		 'totales.txt',
-		 'estatus.txt',
-		 'negociacion.txt',
-		 'moneda.txt',
-		 'estatus_century_21.txt',
 		]
 
 def getNetworkIP():
@@ -67,7 +68,7 @@ if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or \
 IPServ = lIPs[ind]
 if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
 	IPServ = ES.entradaNombre(droid, 'IP del servidor',
-								'Introduzca IP del servidor', '192.168.0.')
+								'Introduzca IP del servidor', IPServ[0:10])
 print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], IPServ))
 if droid:
 	decip = droid.wifiGetConnectionInfo().result['ip_address']
@@ -90,21 +91,24 @@ except ValueError:						# La funcion rindex (busca indece desde el final de la c
 
 # Se trata de saber, cuando se actualizo por ultima vez un archivo. En el nuevo control.txt,
 # ademas de la informacion del sistema, tambien se guardara la fecha de descarga de cada archivo.
-dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibir el nuevo.
+# dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibir el nuevo. No implementado 27/08/2019.
 
-URL = "http://" + IPServ + '/public/storage/'
+URL = "http://" + IPServ + '/archC21pr/'
 bImpar  = True
 dHoy = strftime("%Y%m%d", localtime())
+''' No se ha implementado la revision de la fecha de los archivos.
 try:
 	f = open(DIR + 'control.txt', "r")
 	data = f.read()
 	lControl = [linea.strip().split(';')
-									for linea in data.rstrip().split('\n')]
+								for linea in data.rstrip().split('\n')]
 except:
 	lControl = [['0', nombArch] for nombArch in lDATA]
 dControl = {linea[1].strip():[linea[0].strip(), linea[0].strip()]
 					for linea in lControl if FG.esEntero(linea[0].strip())}
+'''
 for DATA in lDATA:
+	''' No se ha implementado la revision de la fecha de los archivos.
 	if 'control.txt' != DATA:
 		(timeAnterior, timeNuevo) = dControl.get(DATA, ['0', '-1'])
 	else: timeAnterior = timeNuevo = 0
@@ -118,6 +122,10 @@ for DATA in lDATA:
 								(DATA, sColor, CO.FIN, ES.cLineas(DATA),
 													ctime(int(timeAnterior))))
 			continue
+	Por ahora, se usan las sos lineas a continuacion.'''
+	print(URL)
+	sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
+	print("%sLeyendo%s %s remoto." % (sColor, CO.FIN, DATA))
 	try:
 		data = urlopen(URL + DATA, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
 		bLeido = True												# No hubo error de lectura desde el servidor.
@@ -126,6 +134,7 @@ for DATA in lDATA:
 															CO.ROJO, CO.FIN))
 		bLeido = False
 	if bLeido:														# Si no hubo error de lectura desde el servidor.
+		''' Igual que antes, no se está controlando las fechas de modificacion de los archivo.
 		if 'control.txt' == DATA:
 			lControl = [linea.strip().split(';')
 									for linea in data.rstrip().split('\n')]
@@ -164,7 +173,7 @@ for DATA in lDATA:
 			else:
 				ES.muestraFin()
 				sys.exit()
-		# Fin if 'control.txt' == DATA
+		# Fin if 'control.txt' == DATA'''
 		try:
 			f = open(DIR + DATA, "w")
 			bAbierto = True											# No hubo error al abrir para escribir en archivo local.
@@ -190,11 +199,12 @@ for DATA in lDATA:
 			# Fin if bEscrito
 		# Fin if bAbierto
 	# Fin if bLeido
+	'''
 	elif 'control.txt' == DATA:		# El primer archivo a leer, no se pudo descargar.
 		print(("%sPARECIERA QUE EXISTE ALGUN PROBLEMA CON INTERNET O LOS "
 				"ARCHIVOS NO EXISTEN.%s") % (CO.ROJO, CO.FIN))
 		ES.muestraFin()
-		sys.exit()
+		sys.exit()'''
 # Fin for
 ES.muestraFin()
 # Fin del programa

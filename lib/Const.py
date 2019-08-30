@@ -22,6 +22,15 @@ meses = [
 	'NOVIEMBRE',
 	'DICIEMBRE'
 ]
+semana = [
+    'Lunes',
+    'Martes',
+    'Miercoles',
+    'Jueves',
+    'Viernes',
+    'Sabado',
+    'Domingo'
+]
 
 UT  = 1000	# Valor actual de la unidad tributaria
 UTA = 1000	# valor de la unidad tributaria del a#o anterior.
@@ -221,7 +230,7 @@ try:
 	if (0 == nCarLin): nCarLin = LINEA		# Numero de caracteres por linea del terminal.
 except:
 	nCarLin = 42					# Valor por defecto en caso de no poderse calcular o de no estar definido.
-  
+
 if nCarLin > 60: bPantAmplia = True
 else: bPantAmplia = False
 
@@ -233,7 +242,7 @@ def maxLongitudCadena(lista=[], ind=0):
 # Fin maxLongitudCadena(lista=[], ind=0)
 def carPorCampo(lista=[], ind=0, nOffset=0):
 	global nCarLin, nCarMostrar
-	
+
 	nCarCampo = nCarLin - nOffset - 1					# Numero de caracteres (espacio total), donde se mostrara el campo.
 	maxLongCad = maxLongitudCadena(lista, ind)			# numero maximo de caracteres del campo especificado.
 	if maxLongCad < nCarCampo: nCarCampo = maxLongCad	# > longitud maxima de la cadena a mostrar en el campo.

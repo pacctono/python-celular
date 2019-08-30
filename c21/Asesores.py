@@ -15,7 +15,7 @@ if bMovil:
     import android
   droid = android.Android()
 else:
-  droid = None    
+  droid = None
   from os.path import abspath
 
 import sys
@@ -28,24 +28,26 @@ from c21 import Propiedades as PRO
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()
 
+# 'id':Id,
+# 'cedula':'Cedula de identidad',
+# 'name':'Nombre',
+# 'telefono':'Telefono',
+# 'email':'Correo electronico',
+# 'email_c21':'Correo electronico Century 21',
+# 'licencia_mls':'Licencia MLS',
+# 'fecha_ingreso':'Fecha de ingreso',
+# 'fecha_nacimiento':'Fecha de nacimiento',
+# 'sexo':'Sexo',
+# 'estado_civil':'Estado civil',
+# 'profesion':'Profesion',
+# 'direccion':'Direccion',
+# 'is_admin':'Administrador del sistema',
+# 'socio':'Socio',
+# 'activo':'Activo en la oficina',
+# 'updated_at':'Datos sel asesor modificados el',
+# 'created_at':'Datos sel asesor creados el',
+
 # Preparar lista de asesores
-# id
-# cedula
-# name
-# telefono
-# email
-# email_c21
-# licencia_mls
-# fecha_ingreso
-# fecha_nacimiento
-# sexo
-# estado_civil
-# profesion
-# direccion
-# is_admin
-# socio
-# created_at
-# updated_at
 def prepararListaDeAsesores(dir=''):
   global lAse, lNAs
 
@@ -56,8 +58,8 @@ def prepararListaDeAsesores(dir=''):
 
   lNAs = []
   for l in lAse:
-    if (1 == l['id']): continue    
-    lNAs.append([l['name'], l['id']])    
+    if (1 == l['id']): continue
+    lNAs.append([l['name'], l['id']])
   return
 # Funcion prepararListaDeAsesores
 def nombreAsesor(i, restar=0):
@@ -84,7 +86,7 @@ def creaLstAsesores():
       c = -1
       dPer = ES.cargaDicc(archTexto)
       for k,v in dPer.items():
-        c = k    
+        c = k
         (nb, nu, fnac, ds, ex) = v.split('|')
         dPersona[k] = poblarLstAsesores(k, nb, nu, fnac, ds, ex)
       return dPersona
@@ -139,8 +141,52 @@ def creaLstAsesores():
   return dPersona
 # FIN funcion creaLstAsesores
 
+def calcProxMes(fec=None):
+  from datetime import date, timedelta
+  from calendar import mdays
+
+  if not fec: fec = date.today()
+  enUnMes = fec + timedelta(mdays[fec.month])
+  return enUnMes.day, enUnMes.month, enUnMes.year, enUnMes
+# FIN funcion proxFecha
+
+def cumpleanos(mostrar=True):
+  from datetime import date
+  global lAse
+
+  hoy = date.today()
+  proxDia, proxMes, proxAno, enUnMes = calcProxMes()
+  bImpar = True
+  titulo = CO.CYAN + 'Proximos cumpleaneros' + CO.FIN + '\n'
+  st = ''
+  indices = []
+  for l in lAse:
+    if not l['fecha_nacimiento']: continue
+    fecNac = FG.formateaFecha(l['fecha_nacimiento'])
+    anoNac, mesNac, diaNac, dSemNac =\
+                              FG.descomponeFecha(l['fecha_nacimiento'])
+    fecCump = date(proxAno, mesNac, diaNac)
+    diaSem  = CO.semana[fecCump.weekday()]
+    if fecCump == hoy:
+      indices.append([l['name'], fecCump])
+      if mostrar:
+        st += CO.AMARI + l['name'] + ': ' + 'HOY, ' + diaSem + ' ' +\
+              fecNac[0:2] + ' de ' + CO.meses[mesNac] + CO.FIN + '\n'
+    elif hoy < fecCump <= enUnMes:
+      if mostrar:
+        sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+        st += sColor + l['name'] + ': ' + diaSem + ' ' +\
+              fecNac[0:2] + ' de ' + CO.meses[mesNac] + CO.FIN + '\n'
+  if mostrar:
+    if (st): st = titulo + st
+    else: st = CO.CYAN + 'No hay cumpleaneros proximamente.' +\
+                CO.FIN + '\n'
+    return ES.imprime(st.rstrip(' \t\n\r'))
+  else: return indices
+# FIN funcion cumpleanos
+
 def asesor(bImp=True):
-  global droid    
+  global droid
   global lNAs
 
   id = FG.selOpcionMenu(lNAs + [['Volver', -2]], 'Asesor')
@@ -157,15 +203,15 @@ def asesor(bImp=True):
   for l in PRO.lPro:
     if (40 < len(l)):
       if not (isinstance(l[iIdCap], int)) or not (isinstance(l[iIdCer], int)):
-        continue    
+        continue
       if (id != l[iIdCap]) and (id != l[iIdCer]): continue
       if ('S' != l[iStatu]) and (id == l[iIdCap]):
         try:
-          tCap += float(l[iCoCap])    
+          tCap += float(l[iCoCap])
         except: pass
       if ('S' != l[iStatu]) and (id == l[iIdCer]):
         try:
-          tCer += float(l[iCoCer])    
+          tCer += float(l[iCoCer])
         except: pass
       nF += 1
       if ('S' != l[iStatu]):
@@ -173,11 +219,12 @@ def asesor(bImp=True):
         tLados += l[iLados]
       if ('S' == resp):
         sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-        st += PRO.detalles(l, sColor, True, iCoCap, 10, 27, id,
-                            iCoCer, 10, 33, id)
+        st += PRO.detalles(l, sColor, True, iCoCap, 10, iIdCap, id,
+                            iCoCer, 10, iIdCer, id)
   # Fin for
-  st += CO.AMARI + FG.formateaNumero(nF) + ' negociaciones [' +\
-        FG.formateaNumero(nV) + ' validas].' + CO.FIN + '\n'
+  st += CO.AMARI + 'Tiene ' + FG.formateaNumero(nF) +\
+        ' negociaciones [' + FG.formateaNumero(nV) + ' validas].' +\
+        CO.FIN + '\n'
 
   dic = {'tCap':tCap, 'tCer':tCer, 'tCaptCer':tCap+tCer}
   if bImp:
@@ -185,28 +232,18 @@ def asesor(bImp=True):
       sMsj = ("%sID:%s %2d\n") % (CO.AZUL, CO.FIN, id)
     else: sMsj = ''
     ind  = id - 1
-#   sMsj += ("%sCedula de identidad:%s %s\n") % (CO.AZUL, CO.FIN,
-#           FG.formateaNumero(lAse[ind]['cedula']))
-    sMsj += COM.prepLnMsj(lAse[ind], 'cedula', 1)
-    sMsj += COM.prepLnMsj(lAse[ind], 'name')
-    sMsj += COM.prepLnMsj(lAse[ind], 'telefono', 3)
-    sMsj += COM.prepLnMsj(lAse[ind], 'email')
-    sMsj += COM.prepLnMsj(lAse[ind], 'email_c21')
-    sMsj += COM.prepLnMsj(lAse[ind], 'licencia_mls')
-    sMsj += COM.prepLnMsj(lAse[ind], 'fecha_ingreso', 2)
-    sMsj += COM.prepLnMsj(lAse[ind], 'fecha_nacimiento', 2)
-    sMsj += COM.prepLnMsj(lAse[ind], 'sexo')
-    sMsj += COM.prepLnMsj(lAse[ind], 'estado_civil')
-    sMsj += COM.prepLnMsj(lAse[ind], 'profesion')
-    sMsj += COM.prepLnMsj(lAse[ind], 'direccion')
-    if (lAse[ind]['socio']):
-      sMsj += ("%sAsesor socio%s\n") % (CO.AMARI, CO.FIN)
+# prepLnMsj(dic, campo, tipo=0, lng='', dec=0)
+    #print(lAse[ind])
+    for ll in COM.dMsj:
+      if not COM.dMsj[ll]: continue
+      if 'tCap' == ll: break
+      sMsj += COM.prepLnMsj(lAse[ind], ll)
 
     if (0 < nF): sMsj += st    # Las propiedades donde ha participado el asesor.
 
-    sMsj += COM.prepLnMsj(dic, 'tCap', 1, '22', 2)
-    sMsj += COM.prepLnMsj(dic, 'tCer', 1, '22', 2)
-    sMsj += COM.prepLnMsj(dic, 'tCaptCer', 1, '12', 2)
+    sMsj += COM.prepLnMsj(dic, 'tCap', 'n', '22', 2)
+    sMsj += COM.prepLnMsj(dic, 'tCer', 'n', '22', 2)
+    sMsj += COM.prepLnMsj(dic, 'tCaptCer', 'n', '12', 2)
     opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
   return ind, opc
 # FIN funcion asesor

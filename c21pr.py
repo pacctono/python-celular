@@ -114,19 +114,6 @@ while True:
   elif 'comisiones' == sOpcion: CMS.comisiones(droid)
   elif 'salir' == sOpcion or None == sOpcion: break
   elif isinstance(sOpcion, int) and 0 > int(sOpcion): break
-# elif 'codigo' == sOpcion:
-#   co, sNombre = COM.valProp(cog)
-#   if (0 < co):
-#     cog = co
-#     COM.mProp(sNombre, co)
-#     selFuncion(co, nOp)
-# elif 'nombre' == sOpcion:
-#   co, sNombre = COM.buscarNombre()
-#   if (0 < co):
-#     if co != cog:
-#       COM.mProp(sNombre, co)
-#       cog = co
-#     selFuncion(co, nOp)
   else:
     func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.

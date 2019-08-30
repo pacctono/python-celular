@@ -1,7 +1,13 @@
 # libComun: Rutinas comunes para ipaspudo.
 #-*- coding:ISO-8859-1 -*-
+import sys
 import types
 import json
+import socket
+import struct
+from urllib.request import urlopen
+from time import time, localtime, strftime, ctime
+
 from lib import ES, Const as CO, General as FG
 
 try:
@@ -22,42 +28,79 @@ else: droid = None
           "Cheque", "Codigo", "Nombre", "Monto", "Estado", "Fecha", "Concepto"
                ]
 '''
-lMenu = [
-          ['Calcular cuota', 'cuota'],                  # 0
-          ['Calcular comision', 'comisiones'],          # 1
-          ['Asesor', 'ASE.asesor'],
-          ['Todas las propiedades', 'PRO.propiedades'],
+lMenuLstPro = [
+          ['Propiedades X Estatus', 'PRO.lstXEstatus'],
+          ['Propiedades X Asesor', 'PRO.lstXAsesor'],
+          ['Propiedades X Mes', 'PRO.lstXMes'],
+        ]
+lMenuProEsp = [
           ['Propiedades X Estatus', 'PRO.xEstatus'],
           ['Propiedades X Nombre', 'PRO.xNombre'],
           ['Propiedades X Asesor', 'PRO.xAsesor'],
           ['Codigo de casa nacional', 'PRO.xCodigo'],
           ['Reporte en casa nacional', 'PRO.xReporte'],
-          ['Totales X Asesor', 'PRO.totAsesor'],        # 9
-          ['Totales X Mes', 'PRO.totMes'],              # 10
-          ['Totales X Estatus', 'PRO.totEst'],              # 10
-          ['Totales X Asesor X Mes', 'PRO.totAsesorMes'],   # 11
-          ['Totales X Mes X Asesor', 'PRO.totMesAsesor'],   # 11
-          ['Montos totales', 'PRO.totales'],            # 12
+        ]
+lMenuTot = [
+          ['Totales X Asesor', 'PRO.totAsesor'],
+          ['Totales X Mes', 'PRO.totMes'],
+          ['Totales X Estatus', 'PRO.totEst'],
+          ['Totales X Asesor X Mes', 'PRO.totAsesorMes'],
+          ['Totales X Mes X Asesor', 'PRO.totMesAsesor'],
+          ['Totales generales', 'PRO.totales'],
+        ]
+lMenu = [
+          ['Calcular cuota', 'cuota'],                  # 0
+          ['Calcular comision', 'comisiones'],          # 1
+          ['Actualizar datos', 'COM.actualizar'],
+          ['Cumpleaneros', 'ASE.cumpleanos'],           # 3
+          ['Asesor', 'ASE.asesor'],
+          ['Todas las propiedades', 'PRO.propiedades'],
+          ['Listar propiedades por ...', 'PRO.LstPropPor'],
+          ['Buscar una propiedad', 'PRO.buscProp'],
+          ['Totalizar por ...', 'PRO.totPor'],
           ['Salir', 'salir']
-	    ]
+	      ]
 
-dMsj  = {
-          "cedula":"Cedula de identidad",
-          "name":"Nombre",
-          "telefono":"Telefono",
-          "email":"Correo electronico",
-          "email_c21":"Correo electronico Century 21",
-          "licencia_mls":"Licencia MLS",
-          "fecha_ingreso":"Fecha de ingreso",
-          "fecha_nacimiento":"Fecha de nacimiento",
-          "sexo":"Sexo",
-          "estado_civil":"Estado civil",
-          "profesion":"Profesion",
-          "direccion":"Direccion",
-          "tCap":"Total captado",
-          "tCer":"Total cerrado",
-          "tCaptCer":"Total captado y cerrado",
-          "0":"Numero incremental",
+lSitios = ["Puente Real", "Portatil Barcelona", "Portatil Casa",
+			"Otro", "Salir"]
+lIPs    = ["192.168.0.101", "192.168.0.200", "192.168.1.200", ""]
+lDATA = [
+		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
+		 'asesores.txt',
+		 'estatus.txt',
+		 'estatus_sistema_c21.txt',
+		 'moneda.txt',
+		 'negociacion.txt',
+		 'propiedades.txt',
+		 'totales.txt',
+		]
+
+dMsj = {
+          "id":False,
+          "cedula":["Cedula de identidad", 'n', "", 0],               # Datos del asesor, como diccionario.
+          "name":["Nombre", 's', "", 0],
+          "telefono":["Telefono", 't', "", 0],
+          "email":["Correo electronico", 's', "", 0],
+          "email_c21":["Correo electronico Century 21", 's', "", 0],
+          "licencia_mls":["Licencia MLS", 's', "", 0],
+          "fecha_ingreso":["Fecha de ingreso", 'f', "", 0],
+          "fecha_nacimiento":["Fecha de nacimiento", 'f', "", 0],
+          "sexo":False,
+          "genero":["Sexo", 's', "", 0],
+          "estado_civil":False,
+          "edocivil":["Estado civil", 's', "", 0],
+          "profesion":["Profesion", 's', "", 0],
+          "direccion":["Direccion", 's', "", 0],
+          'is_admin':['Este usuario es administrador del sistema', 'b', True, 0],
+          'socio':['Este asesor es Socio', 'b', True, 0],
+          'activo':['Este asesor no esta activo en la oficina', 'b', False, 0],
+          'updated_at':['Datos del asesor modificados', 's', "", 0],
+#          'created_at':['Datos del asesor modificados', 's', "", 0],
+          'created_at':False,
+          "tCap":["Total captado", 'n', "22", 2],
+          "tCer":["Total cerrado", 'n', "22", 2],
+          "tCaptCer":["Total captado y cerrado", 'n', "22", 2],
+          "0":"Numero incremental",                     # Datos de la propiedad, como lista.
           "1":"Codigo casa nacional",
           "2":"fecha de reserva",
           "3":"fecha de firma",
@@ -111,49 +154,83 @@ dMsj  = {
           "51":"Comentarios"
         }
 
+def prepLnBool(desc, condAsesor, condArreglo=True):
+  # print(CO.ROJO + 'DESC EN <prepLnMsj>:' + CO.FIN, desc)
+  try:
+    if condAsesor:
+      color = CO.AMARI
+      desc = desc if condArreglo else ''
+    else:
+      color = CO.ROJO
+      desc = '' if condArreglo else desc
+    if '' == desc: return ''
+    return ("%s%s%s\n") % (color, desc, CO.FIN)
+  except:
+    print('ERROR en prepLnBool. Desc: ' + desc)
+    return ''
+# Funcion prepLnBool
 def prepLnCad(desc, cad, ln=''):
   try:
-    if ('' != cad): return ("%s" + desc + ":%s %" + ln + "s\n")\
-                        % (CO.AZUL, CO.FIN, cad)
+    if ln:
+      lng = int(ln) if isinstance(ln, str) else ln
+      if (0 < lng): cad = cad[0:int(lng)]
+    if ('' != cad): return ("%s%s:%s %" + ln + "s\n")\
+                        % (CO.AZUL, desc, CO.FIN, cad)
     else: return ''
-  except: return ''
+  except:
+    print('ERROR en prepLnCad: ' + desc)
+    return ''
 # Funcion prepLnCad
 def prepLnNum(desc, num, dec=0, ln=''):
+  # print(CO.ROJO + 'DESC EN <prepLnNum>:' + CO.FIN, desc, num, dec, ln)
   try:
-    if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
-                        % (CO.AZUL, CO.FIN, FG.formateaNumero(num, dec))
+    if (0 != num): return ("%s%s:%s %" + ln + "s\n")\
+                        % (CO.AZUL, desc, CO.FIN, FG.formateaNumero(num, dec))
     else: return ''
-  except: return ''
+  except:
+    print('ERROR en prepLnNum: ' + desc)
+    return ''
 # Funcion prepLnNum
 def prepLnFec(desc, fec, ln=''):
   try:
-    if ('' != fec): return ("%s" + desc + ":%s %" + ln + "s\n")\
-                        % (CO.AZUL, CO.FIN, FG.formateaFecha(fec))
+    if ln:
+      lng = int(ln) if isinstance(ln, str) else ln
+      if (0 < ln): fec = fec[0:int(ln)]
+    if ('' != fec): return ("%s%s:%s %" + ln + "s\n")\
+                        % (CO.AZUL, desc, CO.FIN, FG.formateaFecha(fec))
     else: return ''
-  except: return ''
+  except:
+    print('ERROR en prepLnFec: ' + desc)
+    return ''
 # Funcion prepLnFec
 def prepLnTel(desc, tel, ln=''):
   try:
-    if ('' != tel): return ("%s" + desc + ":%s %" + ln + "s\n")\
-                % (CO.AZUL, CO.FIN, FG.formateaNumeroTelefono(tel))
+    if ('' != tel): return ("%s%s:%s %" + ln + "s\n")\
+                % (CO.AZUL, desc, CO.FIN, FG.formateaNumeroTelefono(tel))
     else: return ''
-  except: return ''
+  except:
+    print('ERROR en prepLnTel: ' + desc)
+    return ''
 # Funcion prepLnTel
 def prepLnMon(desc, num, dec=0, mon='$', ln=''):
   try:
-    if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
-                        % (CO.AZUL, CO.FIN, FG.numeroMon(num, dec, mon))
+    if (0 != num): return ("%s%s:%s %" + ln + "s\n")\
+                  % (CO.AZUL, desc, CO.FIN, FG.numeroMon(num, dec, mon))
     else: return ''
-  except: return ''
+  except:
+    print('ERROR en prepLnMon: ' + desc)
+    return ''
 # Funcion prepLnMon
 def prepLnPorc(desc, num, dec=0, ln=''):
   try:
-    if (0 != num): return ("%s" + desc + ":%s %" + ln + "s\n")\
-                        % (CO.AZUL, CO.FIN, FG.numeroPorc(num, dec))
+    if (0 != num): return ("%s%s:%s %" + ln + "s\n")\
+                        % (CO.AZUL, desc, CO.FIN, FG.numeroPorc(num, dec))
     else: return ''
-  except: return ''
+  except:
+    print('ERROR en prepLnPorc: ' + desc)
+    return ''
 # Funcion prepLnPorc
-def prepLnMsj(dic, campo, tipo=0, lng='', dec=0):
+def prepLnMsj(dic, campo, *opcion):
   '''
     Prepara la linea a imprimir:
     dic: Diccionario desde donde se tomara el valor a imprimir.
@@ -162,46 +239,76 @@ def prepLnMsj(dic, campo, tipo=0, lng='', dec=0):
     lng: longitud de caracteres, minimo, a mostrar del campo.
     dec: numero de decimales, si el campo a imprimir es numerico.
   '''
-  if not dic[campo]: return ''
-  if (0 == tipo): sMsj = prepLnCad(dMsj[campo], dic[campo], lng)
-  elif (1 == tipo): sMsj = prepLnNum(dMsj[campo], dic[campo], dec, lng)
-  elif (2 == tipo): sMsj = prepLnFec(dMsj[campo], dic[campo][0:10], lng)
-  elif (3 == tipo): sMsj = prepLnTel(dMsj[campo], dic[campo], lng)
-  elif (4 == tipo): sMsj = prepLnMon(dMsj[campo], dic[campo], lng)
-  elif (5 == tipo): sMsj = prepLnPorc(dMsj[campo], dic[campo], lng)
-  else: sMsj = ''
-  return sMsj
+
+  # print(CO.AMARI + 'CAMPO EN <prepLnMsj>:' + CO.FIN, campo)
+  # print('dic:', dic)
+  # print('opcion:', opcion)
+  var = dMsj.get(campo, 'Ninguno')
+  if 'Ninguno' == var: return campo + ' no esta en el diccionario de mensajes (COM.dMsj).\n'
+  if not var: return ''
+  valor = dic.get(campo, 'NoExiste')
+  # print('campo:', campo, dic[campo], valor)
+  if 'NoExiste' == valor: return campo + ' no esta en el diccionario de este asesor.\n'
+  elif None == valor or '' == valor: return ''
+  try:
+    if isinstance(var, list):
+      desc = var[0]
+      tipo = opcion[0] if 0 < len(opcion) and opcion[0] else var[1]
+      lng  = opcion[1] if 1 < len(opcion) and opcion[1] else var[2]
+      dec  = opcion[2] if 2 < len(opcion) and opcion[2] else var[3]
+    else:
+      desc = var
+      tipo = tipo if tipo else 's'
+      lng  = lng if lng else ''
+      dec  = dec if dec else 0
+  except:
+    print('asesor:', dic)
+    print('campo: ' + campo, 'valor:', valor)
+    print('lista del diccionario:', var)
+    print('arreglo opcion:', opcion)
+    print('Descripcion:', desc, 'Tipo:', tipo, 'Lng:', lng, 'Decimales:', dec)
+    return
+  if ('b' == tipo):
+    msj = prepLnBool(desc, valor, lng)
+  elif ('s' == tipo):
+    msj = prepLnCad(desc, valor, lng)
+  elif ('n' == tipo):
+    msj = prepLnNum(desc, valor, dec, lng)
+  elif ('f' == tipo):
+    msj = prepLnFec(desc, valor, lng)
+  elif ('t' == tipo):
+    msj = prepLnTel(desc, valor, lng)
+  elif ('m' == tipo):
+    msj = prepLnMon(desc, valor, lng)
+  elif ('p' == tipo):
+    msj = prepLnPorc(desc, valor, lng)
+  else:
+    msj = ''
+  return msj
 # Funcion prepLnMsj
 def descEstatus(llave):
   global dEst
 
   return dEst.get(llave, 'Estatus no existe:'+llave)[0:20]
 # Funcion nombreAsesor
-def lFecha(k="Sinca", sig=""):
-  global dFecha
-  sFecha = sig + " " + dFecha.get(k, "No hay fecha.")
-  if "ServiFun" == sig: return sFecha[0:-3]
-  else: return sFecha
-# Funcion lFecha
-def noCodigo(co):
-  return "El codigo %s no fue encontrado\n" % FG.formateaNumero(co)
-# Funcion noCodigo
-def codigoI(coAnt):
+def selEstatus():
+  global dEst
 
-  while True:
-    co = ES.entradaNumero(droid, "CODIGO DE CASA NACIONAL",
-                "Codigo de la propiedad", str(coAnt), True, True, True)
-    if 0 == co: return -1
-    if co < 100000:
-      print('Debe introducir un número entero de 6 o más dígitos')
-    else: break
-  return co
-# Funcion codigoI
-def extraeNombre(fila):
-  ''' Extrae el nombre de una propiedad.
-      '''
-  return fila[5].strip(' "\t\n\r')
-# Funcion extraeNombre
+  lEst = [(dEst[key], key) for key in dEst]
+  st = FG.selOpcionMenu(lEst + [['Volver', 'v']], 'Estatus')
+  return st
+
+# Funcion selEstatus
+def selMes(lTMe):
+
+  nvaLst = []
+  for l in lTMe:
+    nvaLst.append([l[0][0:4]+' '+CO.meses[int(l[0][5:])], l[0]])
+  mes = FG.selOpcionMenu(nvaLst + [['Volver', 'v']], 'Mes')
+  if ('v' == mes): return 'v', 'v'
+
+  return mes[0:4], mes[5:]
+# Funcion selMes
 def nombreProp(fila):
   ''' Retorna el nombre de una propiedad.
       fila[0]: numero incremental.
@@ -213,144 +320,17 @@ def nombreProp(fila):
   '''
   return fila[5].strip(' "\t\n\r')
 # Funcion nombreProp
-def mNombre(co, lPro):
+def selOpcion(Menu, descr):
+  menu = Menu
 
-  sNombre = 'NO'
-  for l in lPro:
-    if (co != l[1]): continue
-    sNombre = l[5]
-    break
-  if ("NO" == sNombre):
-    sNombre = "NO ENCONTRE EL NOMBRE"
-    ES.alerta(droid, 'PROP ERROR', FG.formateaNumero(co) + ', ' + sNombre)
-  return sNombre
-# Funcion mNombre
-def valProp(coAnt = -1):
-
-  co = codigoI(coAnt)
-  try:
-    if 0 >= co: return -1, 'Zero o negativo'
-  except:
-    return -1, 'El codigo debe ser un número entero de 66 digitos.'
-
-  return co, mNombre(co)    # Devuelve una tupla
-# Funcion valSocio
-def mSocio(Nombre, co, bCadena=True):
-  global dPer
-
-  if (bCadena): l = Nombre.rstrip().split('|')	# Nombre, nucleo, fecha de nacimiento, Disponibilidad y Extension
-  else: l = Nombre[1:]
-
-  if (bCadena): sFecha = lFecha()
-  else: sFecha = Nombre[len(Nombre)-1]
-  st = CO.AMARI + sFecha + ' (Descargado:' + CO.FIN +\
-        lFecha('persona.txt', '') + ')' + "\n" + CO.AZUL +\
-        "Codigo:".rjust(21) + CO.FIN
-  if (bCadena): st += " %s" % (FG.formateaNumero(co))
-  else: st += " %s" % Nombre[0]
-  nJustDerecha = 21
-  if 0 < len(l) and '' != l[0]:
-    if len(l[0].rstrip(' \t\n\r')) > (CO.nCarLin - nJustDerecha - 1):	# Cars a justificar derecha + 1 espacio despues ':'.
-      nJustDerecha = CO.nCarLin - len(l[0].rstrip(' \t\n\r')) - 1
-    st += "\n"
-    st += CO.AZUL + "Nombre:".rjust(nJustDerecha) + CO.FIN + " %s" %\
-                                                      (l[0].rstrip(' \t\n\r'))
-  nJustDerecha = 21
-  if 1 < len(l) and '' != l[1]:
-    st += "\n" + CO.AZUL + "Nucleo:".rjust(nJustDerecha) + CO.FIN
-    if (bCadena): st += " %s" % (CO.dNucleo.get(l[1], 'ESTA ERRADO EN LA BD'))
-    else: st += " %s" % (l[1])
-  if 2 < len(l) and '' != l[2]:
-    st += "\n" + CO.AZUL + "Fecha de nacimiento:".rjust(nJustDerecha) + CO.FIN
-    if (bCadena): st += " %2s/%2s/%4s" % (l[2][0:2], l[2][2:4], l[2][4:])
-    else: st+= " %s" % (l[2])
-  if 3 < len(l) and '' != l[3]:
-    st += "\n"
-    st += CO.AZUL + "Disponibilidad:".rjust(nJustDerecha) + CO.FIN + " %s" %\
-                                                                        (l[3])
-  if 4 < len(l) and '' != l[4]:
-    st += "\n" + CO.AZUL + "Extension:".rjust(nJustDerecha) + CO.FIN
-    if (bCadena): st += " %s" % (CO.dExtension.get(l[4], 'ERRADA'))
-    else: st+= " %s" % (l[4])
-  if not bCadena:
-    st += "\n" + CO.AZUL + "Fe ingreso IPASPUDO:".rjust(nJustDerecha) +\
-                                                      CO.FIN + " %s" % (l[5])
-    st += "\n" + CO.AZUL + "Servicio funerario:".rjust(nJustDerecha) +\
-                                                      CO.FIN + " %s" % (l[6])
-  opc = ES.imprime(st)
-  return opc
-# Funcion mSocio
-def aSocio(lPer, co):    # Esta funcion no se utiliza.
-  global dPer
-
-  try:
-    sNombre = dPer.get(str(co), "NO")
-  except UnicodeError:
-    print('ERROR: ' + str(co) + '|' + json.dumps(lPer))
-    return False
-  if ("NO" == sNombre):
-    fPer = ES.abrir('persona.txt', 'a')
-  # Nombre, nucleo, fecha de nacimiento, Disponibilidad y Extension
-    if fPer:
-      try:
-        if (6 <= len(lPer)):
-          fPer.write(str(co) + ';' + lPer[1] + '|' + lPer[2][0:1] + '|' +\
-                        lPer[3] + '|' + lPer[4] + '|' + lPer[5][0:1] + "\n")
-      except:
-        pass
-      fPer.close()
-  return True
-# Funcion aSocio
-def mDividendo(co):
-  global dDiv
-  try:
-    sDiv = dDiv.get(str(co), "0")
-    if sDiv.isdigit(): rDividendo = float(int(sDiv)/100)
-    else: rDividendo = -1.00
-  except UnicodeError:
-    rDividendo = -2.00
-  return rDividendo
-# Funcion mDividendo
-def mBanco(cbn):
-  global dBanco
-  return dBanco.get(cbn, cbn)
-# Funcion mBanco
-def mConcepto(ccp):
-  global dConcepto
-  return dConcepto.get(ccp, "NO DESCRIPCION")
-# Funcion mConcepto
-def mEstado(sI= '0'):
-  lEstado = CO.lEstado   # Estado del cheque
-  i = int(sI)
-  if (0 > i) or (3 < i): return sI
-  else: return lEstado[i]
-# Funcion mEstado
-def creaOp(l):
-  return ("%-.6s %-.1s %-.25s %-.8s %-.10s" % (l[1], mEstado(l[7])[0:1],
-                      extraeNombre(l[3])[0:25], l[4][0:6]+l[4][8:10], l[6]))
-# Funcion creaOp
-def buscarNombre():
-  global dPer
-
-  nombre = ES.entradaNombre(droid, 'Nombre del socio')
-  if None == nombre:
-    return -10, None
-  nombres = []
-  codigos = []
-  try:
-    for k,v in dPer.items():
-      if 0 <= v.lower().find(nombre.lower()):
-        nombres.append(v)
-        codigos.append(k)
-  except UnicodeError: pass
-  if not nombres:
-    ES.alerta(droid, nombre, "No hubo coincidencias!")
-    return -10, None
-  indice = ES.entradaConLista(droid, 'SOCIOS ENCONTRADOS',
-                                              'Seleccione socio(a)', nombres)
-  if None == indice or 0 > indice: return -10, None
-  return int(codigos[indice]), nombres[indice]
-# Funcion buscarNombre
+  opc = FG.selOpcionMenu(menu + [['Volver', -1]], descr)
+  if isinstance(opc, int) and 0 > int(opc): return opc
+  else:
+    from c21 import Propiedades as PRO
+    func = eval(opc)	# Evaluar contenido de opc; el cual, debe ser una funcion conocida.
+    if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
+    else: return opc
+# Funcion BuscProp
 
 # Definir variables globales
 def prepararDiccionarios(dir=''):
@@ -365,6 +345,95 @@ def prepararDiccionarios(dir=''):
   dSC21 = ES.cargaJson(dir+'estatus_sistema_c21.txt')
   if not dSC21: dSC21 = {}
 # Funcion prepararDiccionarios
+def getNetworkIP():
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+	s.connect(('<broadcast>', 0))
+	return s.getsockname()[0]
+# Funcion getNetworkIP
+def obtenerIP(servidor):		# Es la unica rutina que consegui para obtener mi IP.
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.connect((servidor, 80))	# servidor puede ser cualquiera, no es necesario usar el seleccionado.
+	return s.getsockname()[0]	# el IP es el primer elemento de la tupla devuelta. El 2do elemento parece ser una puerta.
+# Funcion obtenerIP
+def actualizar():
+
+  ind = ES.entradaConLista(droid, 'Busqueda del servidor',\
+                  'Seleccione servidor', lSitios)		# Busca el servidor.
+  if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or \
+            (0 > ind):	# Se asegura de tener el indice correcto.
+    ES.muestraFin()
+    sys.exit()
+  IPServ = lIPs[ind]
+  if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
+    IPServ = ES.entradaNombre(droid, 'IP del servidor',
+                  'Introduzca IP del servidor', IPServ[0:10])
+  print("Obteniendo archivo desde %s (%s)." % (lSitios[ind], IPServ))
+  if droid:
+    decip = droid.wifiGetConnectionInfo().result['ip_address']
+    hexip = hex(decip).split('x')[1]
+    dirL = int(hexip, 16)
+    miDirIP = socket.inet_ntoa(struct.pack("<L", dirL))
+  else:
+    miDirIP = obtenerIP(IPServ)	# Esta rutina fue la unica que encontre para mi IP.
+
+  print("Mi direccion IP es: %s" % miDirIP)
+  try:
+    if IPServ[0:IPServ.rindex('.')] != miDirIP[0:miDirIP.rindex('.')]:	# Las tres primeras partes de ambos IPv4 deben ser iguales.
+      print("El servidor seleccionado %s es errado." % IPServ)
+      ES.muestraFin()
+      sys.exit()
+  except ValueError:						# La funcion rindex (busca indece desde el final de la cadena), no consigue el '.'.
+    print("ERROR EXTRA#O DE RED")									# Este error NUNCA deberia ocurrir.
+    ES.muestraFin()
+    sys.exit()
+
+# Se trata de saber, cuando se actualizo por ultima vez un archivo. En el nuevo control.txt,
+# ademas de la informacion del sistema, tambien se guardara la fecha de descarga de cada archivo.
+# dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibir el nuevo. No implementado 27/08/2019.
+
+  URL = "http://" + IPServ + '/c21pr/storage/'
+  bImpar  = True
+  dHoy = strftime("%Y%m%d", localtime())
+  for DATA in lDATA:
+    sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
+    print("%sLeyendo%s %s remoto." % (sColor, CO.FIN, DATA))
+    try:
+      data = urlopen(URL + DATA, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
+      bLeido = True												# No hubo error de lectura desde el servidor.
+    except:
+      print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA,
+                                CO.ROJO, CO.FIN))
+      bLeido = False
+    if bLeido:														# Si no hubo error de lectura desde el servidor.
+      try:
+        f = open(DIR + DATA, "w")
+        bAbierto = True											# No hubo error al abrir para escribir en archivo local.
+      except:
+        print("%sERROR AL TRATAR DE ABRIR%s %s%s %sPARA ESCRITURA.%s" % \
+                  (CO.ROJO, CO.FIN, DIR, DATA, CO.ROJO, CO.FIN))
+        bAbierto = False
+      if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
+        print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
+        try:
+          f.write(data)
+          bEscrito = True										# No hubo error escribiendo en el archivo local.
+        except:
+          print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN,
+                                      DATA))
+          bEscrito = False
+        finally:
+          f.close()
+        if bEscrito:
+          print("%s %sactualizado con%s %d lineas!" % (DATA,
+                  (CO.CYAN if 'heute.txt' == DATA else sColor),
+                            CO.FIN, ES.cLineas(DATA)))
+        # Fin if bEscrito
+      # Fin if bAbierto
+    # Fin if bLeido
+  # Fin for
+  ES.muestraFin()
+# Funcion actualizar
 
 #Variables globales
 iCodCN = 1                # Indice del codigo a Casa Nacional.
@@ -398,3 +467,55 @@ iCoCer = 36               # Indice de la comision del asesor cerrador.
 iNetos = 40               # Indice del neto.
 iStC21 = 48               # Indice del estatus del sistema Century 21.
 iRepCN = 49               # Indice del reporte a Casa Nacional.
+
+# Descripcion de las filas de propiedades.txt
+# fila[0]: numero incremental.
+# fila[1]: Codigo casa nacional.
+# fila[2]: fecha de reserva.
+# fila[3]: fecha de firma.
+# fila[4]: Negociacion: Venta o Alquiler.
+# fila[5]: Nombre de la propiedad.
+# fila[6]: Status.
+# fila[7]: Moneda.
+# fila[8]: Precio.
+# fila[9]: Comision.
+# fila[10]: Monto de la reserva sin IVA.
+# fila[11]: IVA.
+# fila[12]: Monto de la reserva con IVA.
+# fila[13]: Monto de compartido con otra oficina con IVA.
+# fila[14]: Monto de compartido con otra oficina sin IVA.
+# fila[15]: Lados.
+# fila[16]: Franquicia de reserva sin IVA.
+# fila[17]: Franquicia de reserva con IVA.
+# fila[18]: % Franquicia.
+# fila[19]: Franquicia a pagar reportada.
+# fila[20]: % reportado a casa nacional.
+# fila[21]: % Regalia.
+# fila[22]: Regalia.
+# fila[23]: Sanaf - 5%.
+# fila[24]: Bruto real de la oficina.
+# fila[25]: Base para honorario de los socios.
+# fila[26]: Base para honorario.
+# fila[27]: Id del asesor captador.
+# fila[28]: Nombre del asesor captador otra oficina.
+# fila[29]: % Comision del captador.
+# fila[30]: Comision del captador PrBr.
+# fila[31]: % Comision del gerente.
+# fila[32]: Comision del gerente.
+# fila[33]: Id del asesor cerrador.
+# fila[34]: Nombre del asesor cerrador otra oficina.
+# fila[35]: % Comision del cerrador PrBr.
+# fila[36]: Comision del cerrador.
+# fila[37]: % Bonificacion.
+# fila[38]: Bonificacion.
+# fila[39]: Comision bancaria.
+# fila[40]: Ingreso neto de la oficina.
+# fila[41]: Numero de recibo.
+# 42 y 43:  Pago y factura gerente.
+# 44 y 45:  Pago y factura asesores.
+# fila[46]: Pago otra oficina.
+# fila[47]: Pagado a Casa Nacional.
+# fila[48]: Status C21.
+# fila[49]: Reporte Casa Nacional.
+# fila[50]: Factura A&S.
+# fila[51]: Comentarios.
