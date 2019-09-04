@@ -116,7 +116,15 @@ while True:
   elif isinstance(sOpcion, int) and 0 > int(sOpcion): break
   else:
     func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
-    if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
+    if isinstance(func, types.FunctionType):
+      FG.limpiarPantalla()
+      tecla = func()	# Si la cadena evaluada es una funcion, ejecutela.
+      try:
+        if type(tecla) in (list, tuple): tecla = tecla[0]
+      except IndexError:
+        print(type(tecla), tecla)
+        break
+      if ('s' == tecla): break
     else: break
 # Fin while True
 

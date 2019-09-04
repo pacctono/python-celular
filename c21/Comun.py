@@ -24,10 +24,6 @@ if bMovil:
   droid = android.Android()
 else: droid = None
 
-'''lClasCheques = [
-          "Cheque", "Codigo", "Nombre", "Monto", "Estado", "Fecha", "Concepto"
-               ]
-'''
 lMenuLstPro = [
           ['Propiedades X Estatus', 'PRO.lstXEstatus'],
           ['Propiedades X Asesor', 'PRO.lstXAsesor'],
@@ -57,7 +53,7 @@ lMenu = [
           ['Todas las propiedades', 'PRO.propiedades'],
           ['Listar propiedades por ...', 'PRO.LstPropPor'],
           ['Buscar una propiedad', 'PRO.buscProp'],
-          ['Totalizar por ...', 'PRO.totPor'],
+          ['Estadisticas ...', 'PRO.totPor'],
           ['Salir', 'salir']
 	      ]
 
@@ -141,17 +137,18 @@ dMsj = {
           "38":"Bonificacion",
           "39":"Comision bancaria",
           "40":"Ingreso neto de la oficina",
-          "41":"Numero de recibo",
-          "42":"Forma de pago al gerente",
-          "43":"Factura gerente",
-          "44":"Forma de pago a los asesores",
-          "45":"Factura asesores",
-          "46":"Pago otra oficina",
-          "47":"Pagado a Casa Nacional",
-          "48":"Status C21",
-          "49":"Reporte Casa Nacional",
-          "50":"Factura A&S",
-          "51":"Comentarios"
+          "41":"Precio de venta real",
+          "42":"Numero de recibo",
+          "43":"Forma de pago al gerente",
+          "44":"Factura gerente",
+          "45":"Forma de pago a los asesores",
+          "46":"Factura asesores",
+          "47":"Pago otra oficina",
+          "48":"Pagado a Casa Nacional",
+          "49":"Status C21",
+          "50":"Reporte Casa Nacional",
+          "51":"Factura A&S",
+          "52":"Comentarios"
         }
 
 def prepLnBool(desc, condAsesor, condArreglo=True):
@@ -328,7 +325,7 @@ def selOpcion(Menu, descr):
   else:
     from c21 import Propiedades as PRO
     func = eval(opc)	# Evaluar contenido de opc; el cual, debe ser una funcion conocida.
-    if isinstance(func, types.FunctionType): func()	# Si la cadena evaluada es una funcion, ejecutela.
+    if isinstance(func, types.FunctionType): return func()	# Si la cadena evaluada es una funcion, ejecutela.
     else: return opc
 # Funcion BuscProp
 
@@ -362,7 +359,7 @@ def actualizar():
                   'Seleccione servidor', lSitios)		# Busca el servidor.
   if (None == ind) or (ind == (len(lSitios)-1)) or (len(lSitios) <= ind) or \
             (0 > ind):	# Se asegura de tener el indice correcto.
-    ES.muestraFin()
+    return ES.muestraFin()
     sys.exit()
   IPServ = lIPs[ind]
   if ((ind == (len(lSitios)-2)) or ('' == IPServ)):
@@ -381,11 +378,11 @@ def actualizar():
   try:
     if IPServ[0:IPServ.rindex('.')] != miDirIP[0:miDirIP.rindex('.')]:	# Las tres primeras partes de ambos IPv4 deben ser iguales.
       print("El servidor seleccionado %s es errado." % IPServ)
-      ES.muestraFin()
+      return ES.muestraFin()
       sys.exit()
   except ValueError:						# La funcion rindex (busca indece desde el final de la cadena), no consigue el '.'.
     print("ERROR EXTRA#O DE RED")									# Este error NUNCA deberia ocurrir.
-    ES.muestraFin()
+    return ES.muestraFin()
     sys.exit()
 
 # Se trata de saber, cuando se actualizo por ultima vez un archivo. En el nuevo control.txt,
@@ -432,7 +429,7 @@ def actualizar():
       # Fin if bAbierto
     # Fin if bLeido
   # Fin for
-  ES.muestraFin()
+  return ES.muestraFin()
 # Funcion actualizar
 
 #Variables globales
@@ -465,8 +462,9 @@ iNbCer = 34               # Indice del nombre del asesor cerrador. Inicialmente,
 iPoCer = 35               # Indice del porcentaje del asesor cerrador.
 iCoCer = 36               # Indice de la comision del asesor cerrador.
 iNetos = 40               # Indice del neto.
-iStC21 = 48               # Indice del estatus del sistema Century 21.
-iRepCN = 49               # Indice del reporte a Casa Nacional.
+iPrVRe = 41               # Indice del precio de venta real.
+iStC21 = 49               # Indice del estatus del sistema Century 21.
+iRepCN = 50               # Indice del reporte a Casa Nacional.
 
 # Descripcion de las filas de propiedades.txt
 # fila[0]: numero incremental.
@@ -510,12 +508,13 @@ iRepCN = 49               # Indice del reporte a Casa Nacional.
 # fila[38]: Bonificacion.
 # fila[39]: Comision bancaria.
 # fila[40]: Ingreso neto de la oficina.
-# fila[41]: Numero de recibo.
-# 42 y 43:  Pago y factura gerente.
-# 44 y 45:  Pago y factura asesores.
-# fila[46]: Pago otra oficina.
-# fila[47]: Pagado a Casa Nacional.
-# fila[48]: Status C21.
-# fila[49]: Reporte Casa Nacional.
-# fila[50]: Factura A&S.
-# fila[51]: Comentarios.
+# fila[41]: Precio de venta real.
+# fila[42]: Numero de recibo.
+# 43 y 44:  Pago y factura gerente.
+# 45 y 46:  Pago y factura asesores.
+# fila[47]: Pago otra oficina.
+# fila[48]: Pagado a Casa Nacional.
+# fila[49]: Status C21.
+# fila[50]: Reporte Casa Nacional.
+# fila[51]: Factura A&S.
+# fila[52]: Comentarios.

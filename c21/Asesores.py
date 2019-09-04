@@ -198,7 +198,7 @@ def asesor(bImp=True):
   tCap = tCer = 0.00
   nF = nV = tLados = 0
   bImpar = True
-  if ('S' == resp): st = PRO.titulo('Captado', 10, 'Cerrado', 10)
+  if ('S' == resp): st = PRO.titulo('Comision', 11)
   else: st = ''
   for l in PRO.lPro:
     if (40 < len(l)):
@@ -219,8 +219,8 @@ def asesor(bImp=True):
         tLados += l[iLados]
       if ('S' == resp):
         sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-        st += PRO.detalles(l, sColor, True, iCoCap, 10, iIdCap, id,
-                            iCoCer, 10, iIdCer, id)
+        st += PRO.detalles(l, sColor, True, iCoCap, iIdCap,
+                            iCoCer, iIdCer, id, 11)
   # Fin for
   st += CO.AMARI + 'Tiene ' + FG.formateaNumero(nF) +\
         ' negociaciones [' + FG.formateaNumero(nV) + ' validas].' +\
@@ -245,7 +245,7 @@ def asesor(bImp=True):
     sMsj += COM.prepLnMsj(dic, 'tCer', 'n', '22', 2)
     sMsj += COM.prepLnMsj(dic, 'tCaptCer', 'n', '12', 2)
     opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
-  return ind, opc
+  return opc, ind
 # FIN funcion asesor
 
 #Variables globales
@@ -278,6 +278,7 @@ iNbCer = COM.iNbCer
 iPoCer = COM.iPoCer
 iCoCer = COM.iCoCer
 iNetos = COM.iNetos
+iPrVRe = COM.iPrVRe
 iStC21 = COM.iStC21
 iRepCN = COM.iRepCN
 if __name__ == '__main__':

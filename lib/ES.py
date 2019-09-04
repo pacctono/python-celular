@@ -127,6 +127,7 @@ def entradaNumero(droid, titulo = 'Entrada de un valor numerico',
     while True:
       print(titulo)
       resultado = input(mensaje + '[' + str(porDefecto) + ']: ')
+      resultado = resultado.rstrip(' \t\n\r')
       if '' == resultado or None == resultado: resultado = str(porDefecto)
       if patron.match(resultado): break
   if None == resultado: return None
@@ -397,4 +398,5 @@ def muestraFin():
                                     strftime("%d/%m/%Y %H:%M:%S", localtime()))
   print("-+-+-+-+-+-+-+-+-+-+")
   print("Listo!")
+  return None
 # funcion muestraFin

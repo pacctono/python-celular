@@ -122,7 +122,7 @@ def numeroPorc(num, dec=0):
   try:
     if (0 != num): cad = formateaNumero(num, dec=3) + '%'
   except: pass
-  return cad
+  return cad if cad else '0.000%'
 # Funcion numeroPorc
 def numeroMon(num, dec=0, mon='$'):
   cad = ''
