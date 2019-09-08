@@ -91,8 +91,13 @@ dMsj = {
           'socio':['Este asesor es Socio', 'b', True, 0],
           'activo':['Este asesor no esta activo en la oficina', 'b', False, 0],
           'updated_at':['Datos del asesor modificados', 's', "", 0],
-#          'created_at':['Datos del asesor modificados', 's', "", 0],
           'created_at':False,
+          "pvr_captador":["Total pvr captado", 'n', "23", 2],
+          "pvr_cerrador":["Total pvr cerrado", 'n', "23", 2],
+          "precio_venta_real":["Total precio de venta real", 'n', "14", 2],
+          "comision_captador":["Total captado", 'n', "22", 2],
+          "comision_cerrador":["Total cerrado", 'n', "22", 2],
+          "comision":["Total captado y cerrado", 'n', "12", 2],
           "tCap":["Total captado", 'n', "22", 2],
           "tCer":["Total cerrado", 'n', "22", 2],
           "tCaptCer":["Total captado y cerrado", 'n', "22", 2],
@@ -296,13 +301,15 @@ def selEstatus():
   return st
 
 # Funcion selEstatus
-def selMes(lTMe):
+def selMes(lTMe, incluirTodos=False):
 
-  nvaLst = []
+  if incluirTodos: nvaLst = [['Todos', 't']]
+  else: nvaLst = []
   for l in lTMe:
     nvaLst.append([l[0][0:4]+' '+CO.meses[int(l[0][5:])], l[0]])
   mes = FG.selOpcionMenu(nvaLst + [['Volver', 'v']], 'Mes')
   if ('v' == mes): return 'v', 'v'
+  if ('t' == mes): return 't', 't'
 
   return mes[0:4], mes[5:]
 # Funcion selMes

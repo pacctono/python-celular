@@ -106,7 +106,13 @@ def detTotales(cad, lados, pvr, cap, cer, lCap, lCer, bImpar, tam=20,
         FG.formateaNumero(lCer) + ')').rjust(15) + CO.FIN + "\n"
 # Funcion detTotales
 def totTotales(tipoTot, tLados, tPvr, tCap, tCer, tLaCap, tLaCer,
-                tam=20, subrayar=False):
+                tam=20, subrayar=False, mTPrecioVentaRea=True):
+  '''
+    Muestra la linea de totales de los totales. Se subraya antes
+    del penultimo subtotal, si existe, antes del total de la oficina.
+    mTPrecioVentaReal indica si se debe mostrar el precio de venta real
+    de la oficina. En el caso de ambos lados en la oficina.
+  '''
   return CO.AMARI + (CO.SUBRAYADO if subrayar else '') +\
         tipoTot.ljust(tam) + FG.formateaNumero(tLados).rjust(4) +\
         FG.formateaNumero(tPvr, 2).rjust(14) +\
@@ -455,21 +461,21 @@ def totAsesor():
   for l in lTAs:
     try:
       bImpar, cad = detTotales(ASE.nombreAsesor(l[0], 1), l[22]+l[23],
-                          l[19], l[20], l[21], l[22], l[23], bImpar, 20)
+                          l[24]+l[25], l[20], l[21], l[22], l[23], bImpar, 20)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
       if (1 < int(l[0])):
-        tPrVeReal, tCap, tCer = tPrVeReal+l[19], tCap+l[20], tCer+l[21]
+        tPrVeReal, tCap, tCer = tPrVeReal+l[24]+l[25], tCap+l[20], tCer+l[21]
         tLaCap, tLaCer = tLaCap+l[22], tLaCer+l[23]
     except:
       print('ERROR totales:')
       print(l[1], l[20], l[21], l[22], l[23])
   try:
     st += totTotales('Total Oficina', tLaCap + tLaCer, tPrVeReal,\
-                                      tCap, tCer, tLaCap, tLaCer, 20)
+                          tCap, tCer, tLaCap, tLaCer, 20, False, False)
   except:
     print('ERROR linea totales:')
     print(tCap, tCer, tLaCap, tLaCer)
@@ -541,6 +547,13 @@ def totEst():
 def totAsesorMes():
   global lTAM
 
+# lNAs contiene listas de dos elementos: nombre y id real de cada asesor.
+# id va a obtener 0 o 2, 3, 4, 5, ... # id del ultimo asesor.
+  id  = FG.selOpcionMenu([['Todos', 0]] + ASE.lNAs + [['Volver', -2]],
+                                                            'Asesor')
+  if (0 > id): return id
+  todos = (0 == id)
+
   st = titTotales('Agno Mes', 16)
   bImpar = True
   tAsLados = tAsLaCap = tAsLaCer = 0
@@ -548,6 +561,8 @@ def totAsesorMes():
   tAsPvr = tAsCap = tAsCer = tPvr = tCap = tCer = 0.00
   idAse = 0
   for l in lTAM:
+    if not todos:
+      if (id != l[0]): continue    
     try:
       if (idAse != l[0]):
         if (0 < idAse):
@@ -558,17 +573,17 @@ def totAsesorMes():
         tAsLados = tAsLaCap = tAsLaCer = 0
         tAsPvr = tAsCap = tAsCer = 0.00
       bImpar, cad = detTotales(l[1][0:4]+' '+CO.meses[int(l[1][5:])],
-          l[23] + l[24], l[20], l[21], l[22], l[23], l[24], bImpar, 16)
+          l[23] + l[24], l[25]+l[26], l[21], l[22], l[23], l[24], bImpar, 16)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
-      tAsPvr, tAsCap, tAsCer = tAsPvr+l[20], tAsCap+l[21], tAsCer+l[22]
+      tAsPvr, tAsCap, tAsCer = tAsPvr+l[25]+l[26], tAsCap+l[21], tAsCer+l[22]
       tAsLaCap, tAsLaCer, tAsLados = tAsLaCap+l[23], tAsLaCer+l[24],\
                                 tAsLados+l[23]+l[24]
-      if (1 < int(l[0])):
-        tPvr, tCap, tCer = tPvr+l[20], tCap+l[21], tCer+l[22]
+      if todos and (1 < int(l[0])):
+        tPvr, tCap, tCer = tPvr+l[25]+l[26], tCap+l[21], tCer+l[22]
         tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24],\
                                   tLados+l[23]+l[24]
     except:
@@ -576,9 +591,10 @@ def totAsesorMes():
       print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23], l[24])
   try:
     st += totTotales('Total Asesor', tAsLaCap + tAsLaCer, tAsPvr,
-                      tAsCap, tAsCer, tAsLaCap, tAsLaCer, 16, True)
-    st += totTotales('Total Oficina', tLaCap + tLaCer, tPvr,
-                      tCap, tCer, tLaCap, tLaCer, 16)
+                      tAsCap, tAsCer, tAsLaCap, tAsLaCer, 16, todos)
+    if todos:
+      st += totTotales('Total Oficina', tLaCap + tLaCer, tPvr,
+                      tCap, tCer, tLaCap, tLaCer, 16, False, False)
   except:
     print('ERROR linea totales:')
     print(tAsLaCap, tAsLaCer, tAsPvr, tAsCap, tAsCer, tLados, tPvr,
@@ -589,6 +605,10 @@ def totAsesorMes():
 def totMesAsesor():
   global lTMA
 
+  agno, mes = COM.selMes(lTMe, True)
+  if ('v' == agno): return -1
+  todos = ('t' == agno)
+  
   st = titTotales('Asesor', 21)
   bImpar = True
   tMeLados = tMeLaCap = tMeLaCer = 0
@@ -596,6 +616,8 @@ def totMesAsesor():
   tMePvr = tMeCap = tMeCer = tPvr = tCap = tCer = 0.00
   idMes = ''
   for l in lTMA:
+    if not todos:
+      if (agno+'-'+mes.zfill(2)) != l[0]: continue
     try:
       if (idMes != l[0]):
         if ('' != idMes):
@@ -606,27 +628,29 @@ def totMesAsesor():
         tMeLados = tMeLaCap = tMeLaCer = 0
         tMePvr = tMeCap = tMeCer = 0.00
       bImpar, cad = detTotales(ASE.nombreAsesor(l[1], 1), l[23] + l[24],
-                        l[20], l[21], l[22], l[23], l[24], bImpar, 20)
+                        l[25]+l[26], l[21], l[22], l[23], l[24], bImpar, 20)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
       if (1 < int(l[1])):
-        tMePvr, tMeCap, tMeCer = tMePvr+l[20], tMeCap+l[21], tMeCer+l[22]
+        tMePvr, tMeCap, tMeCer = tMePvr+l[25]+l[26], tMeCap+l[21], tMeCer+l[22]
         tMeLaCap, tMeLaCer, tMeLados = tMeLaCap+l[23], tMeLaCer+l[24],\
                                   tMeLados+l[23]+l[24]
-        tPvr, tCap, tCer = tPvr+l[20], tCap+l[21], tCer+l[22]
-        tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24],\
+        if todos:
+          tPvr, tCap, tCer = tPvr+l[25]+l[26], tCap+l[21], tCer+l[22]
+          tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24],\
                                   tLados+l[23]+l[24]
     except:
       print('ERROR totales:')
       print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23], l[24])
   try:
     st += totTotales('Total mes ' + idMes, tMeLaCap + tMeLaCer,
-                  tMePvr, tMeCap, tMeCer, tMeLaCap, tMeLaCer, 20, True)
-    st += totTotales('Total Oficina', tLaCap + tLaCer, tPvr, tCap, tCer,
-                      tLaCap, tLaCer, 20)
+                  tMePvr, tMeCap, tMeCer, tMeLaCap, tMeLaCer, 20, todos)
+    if todos:
+      st += totTotales('Total Oficina', tLaCap + tLaCer, tPvr, tCap,
+                        tCer, tLaCap, tLaCer, 20, False, False)
   except:
     print('ERROR linea totales:')
     print(tMeLaCap, tMeLaCer, tMePvr, tMeCap, tMeCer, tLados, tPvr,

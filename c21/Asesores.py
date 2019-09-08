@@ -194,7 +194,6 @@ def asesor(bImp=True):
 
   resp = ES.siNo(droid, 'propiedades', 'Desea mostrar las propiedades'
                 ' de '+ lAse[id-1]['name'], False)
-  #print(resp)
   tCap = tCer = 0.00
   nF = nV = tLados = 0
   bImpar = True
@@ -226,24 +225,25 @@ def asesor(bImp=True):
         ' negociaciones [' + FG.formateaNumero(nV) + ' validas].' +\
         CO.FIN + '\n'
 
-  dic = {'tCap':tCap, 'tCer':tCer, 'tCaptCer':tCap+tCer}
   if bImp:
     if __name__ == '__main__':
       sMsj = ("%sID:%s %2d\n") % (CO.AZUL, CO.FIN, id)
     else: sMsj = ''
     ind  = id - 1
-# prepLnMsj(dic, campo, tipo=0, lng='', dec=0)
-    #print(lAse[ind])
+    dic = lAse[ind]
     for ll in COM.dMsj:
       if not COM.dMsj[ll]: continue
-      if 'tCap' == ll: break
-      sMsj += COM.prepLnMsj(lAse[ind], ll)
+      if 'tCap' == ll: break      # De aqui en adelante no son 'propiedades' (variables) del asesor.
+      if 'pvr_captador' == ll:
+        if (0 < nF): sMsj += st    # Las propiedades donde ha participado el asesor.
+      if ll in ('tCap', 'tCer', 'tCapCer'): continue  # Solo para verificar valores.
+      sMsj += COM.prepLnMsj(dic, ll)
 
-    if (0 < nF): sMsj += st    # Las propiedades donde ha participado el asesor.
-
-    sMsj += COM.prepLnMsj(dic, 'tCap', 'n', '22', 2)
-    sMsj += COM.prepLnMsj(dic, 'tCer', 'n', '22', 2)
-    sMsj += COM.prepLnMsj(dic, 'tCaptCer', 'n', '12', 2)
+    if not bMovil:
+      dic = {'tCap':tCap, 'tCer':tCer, 'tCaptCer':tCap+tCer}
+      sMsj += COM.prepLnMsj(dic, 'tCap', 'n', '22', 2)
+      sMsj += COM.prepLnMsj(dic, 'tCer', 'n', '22', 2)
+      sMsj += COM.prepLnMsj(dic, 'tCaptCer', 'n', '12', 2)
     opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
   return opc, ind
 # FIN funcion asesor

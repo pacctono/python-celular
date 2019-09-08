@@ -352,6 +352,7 @@ def imprime(st):
     nLineasPant = 25                # Numero de lineas a mostrar cada vez, por pantalla.
   nLinTecladoVirtual = 5            # # de lineas, aprox. que quita el teclado virtual en el celular.
   if bMovil: nLineasPant -= nLinTecladoVirtual
+  else: nLineasPant -= 2
   for linea in lineas:
     n += 1
     print(linea)
@@ -359,7 +360,7 @@ def imprime(st):
     if maxLong < (len(linea) - nCarEsp): maxLong = len(linea) - nCarEsp
     if (nLineasPant < n and nLineas > n):
       tecla = input('Presione <ENTER> para continuar o <s><ENTER> para terminar ...')
-      if (0 < len(tecla)): break
+      if (0 < len(tecla)) and ('s' == tecla): break
       n = 0
   maxLong = maxLong if maxLong < (CO.leenCarMostrar() - 1)\
                     else CO.leenCarMostrar() - 1

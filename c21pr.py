@@ -81,23 +81,24 @@ def selFuncion(ci, nOpcion=6):
         func = eval(lNuevoMenu[int(opc)][1])
       else: return False
 # Funcion selFuncion
+def cargar(esperar='Espere un momento, por favor...'):
+  if droid:
+    droid.dialogCreateHorizontalProgress('Century21 Puente Real', esperar, 100)
+    droid.dialogShow()
+    droid.dialogSetCurrentProgress(15)
+  else: print(esperar)
+  ASE.prepararListaDeAsesores()
+  PRO.prepararListaDePropiedades()
+  PRO.prepararListas()
+  if droid: droid.dialogSetCurrentProgress(60)
+  else: print('Listas listas!')
+  COM.prepararDiccionarios()
+  if droid: droid.dialogSetCurrentProgress(90)
+  else: print('Diccionarios listos!')
+  if droid: FG.limpiarPantalla()
+# Funcion cargar
 
-esperar = 'Espere un momento, por favor...'
-if droid:
-  droid.dialogCreateHorizontalProgress('Century21 Puente Real', esperar, 100)
-  droid.dialogShow()
-  droid.dialogSetCurrentProgress(15)
-else: print(esperar)
-ASE.prepararListaDeAsesores()
-PRO.prepararListaDePropiedades()
-PRO.prepararListas()
-if droid: droid.dialogSetCurrentProgress(60)
-else: print('Listas listas!')
-COM.prepararDiccionarios()
-if droid: droid.dialogSetCurrentProgress(90)
-else: print('Diccionarios listos!')
-
-FG.limpiarPantalla()
+cargar()
 ES.muestraInicio("Century21 Puente Real: J-40589955-7.")
 if droid: droid.dialogSetCurrentProgress(95)
 
@@ -117,8 +118,9 @@ while True:
   else:
     func = eval(sOpcion)	# Evaluar contenido de sOpcion; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType):
-      FG.limpiarPantalla()
+      if bMovil: FG.limpiarPantalla()     # Solo limpia pantalla, si se ejecuta desde un movil.
       tecla = func()	# Si la cadena evaluada es una funcion, ejecutela.
+      if (0 <= sOpcion.find('actualizar')): cargar()
       try:
         if type(tecla) in (list, tuple): tecla = tecla[0]
       except IndexError:
