@@ -1,4 +1,4 @@
-# libComun: Rutinas comunes para ipaspudo.
+# Comun: Rutinas comunes para la inmobiliaria.
 #-*- coding:ISO-8859-1 -*-
 import sys
 import types
@@ -59,7 +59,7 @@ lMenu = [
 
 lSitios = ["Puente Real", "Portatil Barcelona", "Portatil Casa",
 			"Otro", "Salir"]
-lIPs    = ["192.168.0.101", "192.168.0.200", "192.168.1.200", ""]
+lIPs    = ["192.168.0.220", "192.168.0.200", "192.168.1.200", ""]
 lDATA = [
 		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
 		 'asesores.txt',
@@ -71,91 +71,11 @@ lDATA = [
 		 'totales.txt',
 		]
 
-dMsj = {
-          "id":False,
-          "cedula":["Cedula de identidad", 'n', "", 0],               # Datos del asesor, como diccionario.
-          "name":["Nombre", 's', "", 0],
-          "telefono":["Telefono", 't', "", 0],
-          "email":["Correo electronico", 's', "", 0],
-          "email_c21":["Correo electronico Century 21", 's', "", 0],
-          "licencia_mls":["Licencia MLS", 's', "", 0],
-          "fecha_ingreso":["Fecha de ingreso", 'f', "", 0],
-          "fecha_nacimiento":["Fecha de nacimiento", 'f', "", 0],
-          "sexo":False,
-          "genero":["Sexo", 's', "", 0],
-          "estado_civil":False,
-          "edocivil":["Estado civil", 's', "", 0],
-          "profesion":["Profesion", 's', "", 0],
-          "direccion":["Direccion", 's', "", 0],
-          'is_admin':['Este usuario es administrador del sistema', 'b', True, 0],
-          'socio':['Este asesor es Socio', 'b', True, 0],
-          'activo':['Este asesor no esta activo en la oficina', 'b', False, 0],
-          'updated_at':['Datos del asesor modificados', 's', "", 0],
-          'created_at':False,
-          "pvr_captador":["Total pvr captado", 'n', "23", 2],
-          "pvr_cerrador":["Total pvr cerrado", 'n', "23", 2],
-          "precio_venta_real":["Total precio de venta real", 'n', "14", 2],
-          "comision_captador":["Total captado", 'n', "22", 2],
-          "comision_cerrador":["Total cerrado", 'n', "22", 2],
-          "comision":["Total captado y cerrado", 'n', "12", 2],
-          "tCap":["Total captado", 'n', "22", 2],
-          "tCer":["Total cerrado", 'n', "22", 2],
-          "tCaptCer":["Total captado y cerrado", 'n', "22", 2],
-          "0":"Numero incremental",                     # Datos de la propiedad, como lista.
-          "1":"Codigo casa nacional",
-          "2":"fecha de reserva",
-          "3":"fecha de firma",
-          "4":"Negociacion:",
-          "5":"Nombre de la propiedad",
-          "6":"Status",
-          "7":"Moneda",
-          "8":"Precio",
-          "9":"Comision",
-          "10":"Monto de la reserva sin IVA",
-          "11":"IVA",
-          "12":"Monto de la reserva con IVA",
-          "13":"Monto compartido con otra oficina con IVA",
-          "14":"Monto compartido con otra oficina sin IVA",
-          "15":"Lados",
-          "16":"Franquicia de reserva sin IVA",
-          "17":"Franquicia de reserva con IVA",
-          "18":"Porcentaje Franquicia",
-          "19":"Franquicia a pagar reportada",
-          "20":"Porcentaje reportado a casa nacional",
-          "21":"Porcentaje Regalia",
-          "22":"Regalia",
-          "23":"Sanaf - 5%",
-          "24":"Bruto real de la oficina",
-          "25":"Base para honorario de los socios",
-          "26":"Base para honorario",
-          "27":"Id del asesor captador",
-          "28":"Nombre del asesor captador",
-          "29":"Porcentaje Comision del captador",
-          "30":"Comision del captador PrBr",
-          "31":"Porcentaje Comision del gerente",
-          "32":"Comision del gerente",
-          "33":"Id del asesor cerrador",
-          "34":"Nombre del asesor cerrador",
-          "35":"Porcentaje Comision del cerrador PrBr",
-          "36":"Comision del cerrador",
-          "37":"Porcentaje Bonificacion",
-          "38":"Bonificacion",
-          "39":"Comision bancaria",
-          "40":"Ingreso neto de la oficina",
-          "41":"Precio de venta real",
-          "42":"Numero de recibo",
-          "43":"Forma de pago al gerente",
-          "44":"Factura gerente",
-          "45":"Forma de pago a los asesores",
-          "46":"Factura asesores",
-          "47":"Pago otra oficina",
-          "48":"Pagado a Casa Nacional",
-          "49":"Status C21",
-          "50":"Reporte Casa Nacional",
-          "51":"Factura A&S",
-          "52":"Comentarios"
-        }
-
+def muestraError(func, desc, cad, ln, dec=0):
+  print('ERROR en ' + func + ': ' + desc + ':' + type(desc))
+  print('ERROR en ' + func + ': ' + cad + ':' + type(cad))
+  print('ERROR en ' + func + ': ' + ln + ':' + type(ln))
+  print('ERROR en ' + func + ': ' + dec + ':' + type(dec))
 def prepLnBool(desc, condAsesor, condArreglo=True):
   # print(CO.ROJO + 'DESC EN <prepLnMsj>:' + CO.FIN, desc)
   try:
@@ -167,8 +87,8 @@ def prepLnBool(desc, condAsesor, condArreglo=True):
       desc = '' if condArreglo else desc
     if '' == desc: return ''
     return ("%s%s%s\n") % (color, desc, CO.FIN)
-  except:
-    print('ERROR en prepLnBool. Desc: ' + desc)
+  except TypeError:
+    muestraError('prepLnBool', desc, condAsesor, condArreglo)
     return ''
 # Funcion prepLnBool
 def prepLnCad(desc, cad, ln=''):
@@ -179,18 +99,18 @@ def prepLnCad(desc, cad, ln=''):
     if ('' != cad): return ("%s%s:%s %" + ln + "s\n")\
                         % (CO.AZUL, desc, CO.FIN, cad)
     else: return ''
-  except:
-    print('ERROR en prepLnCad: ' + desc)
+  except TypeError:
+    muestraError('prepLnCad', desc, cad, ln)
     return ''
 # Funcion prepLnCad
 def prepLnNum(desc, num, dec=0, ln=''):
-  # print(CO.ROJO + 'DESC EN <prepLnNum>:' + CO.FIN, desc, num, dec, ln)
+#  print(CO.ROJO + 'DESC EN <prepLnNum>:' + CO.FIN, desc, num, dec, ln)
   try:
     if (0 != num): return ("%s%s:%s %" + ln + "s\n")\
                         % (CO.AZUL, desc, CO.FIN, FG.formateaNumero(num, dec))
     else: return ''
-  except:
-    print('ERROR en prepLnNum: ' + desc)
+  except TypeError:
+    muestraError('prepLnNum', desc, num, ln, dec)
     return ''
 # Funcion prepLnNum
 def prepLnFec(desc, fec, ln=''):
@@ -199,10 +119,10 @@ def prepLnFec(desc, fec, ln=''):
       lng = int(ln) if isinstance(ln, str) else ln
       if (0 < ln): fec = fec[0:int(ln)]
     if ('' != fec): return ("%s%s:%s %" + ln + "s\n")\
-                        % (CO.AZUL, desc, CO.FIN, FG.formateaFecha(fec))
+                        % (CO.AZUL, desc, CO.FIN, fec)
     else: return ''
-  except:
-    print('ERROR en prepLnFec: ' + desc)
+  except TypeError:
+    muestraError('prepLnFec', desc, fec, ln)
     return ''
 # Funcion prepLnFec
 def prepLnTel(desc, tel, ln=''):
@@ -210,17 +130,17 @@ def prepLnTel(desc, tel, ln=''):
     if ('' != tel): return ("%s%s:%s %" + ln + "s\n")\
                 % (CO.AZUL, desc, CO.FIN, FG.formateaNumeroTelefono(tel))
     else: return ''
-  except:
-    print('ERROR en prepLnTel: ' + desc)
+  except TypeError:
+    muestraError('prepLnTel', desc, tel, ln)
     return ''
 # Funcion prepLnTel
-def prepLnMon(desc, num, dec=0, mon='$', ln=''):
+def prepLnMon(desc, num, dec=0, ln='', mon='$'):
   try:
     if (0 != num): return ("%s%s:%s %" + ln + "s\n")\
                   % (CO.AZUL, desc, CO.FIN, FG.numeroMon(num, dec, mon))
     else: return ''
-  except:
-    print('ERROR en prepLnMon: ' + desc)
+  except TypeError:
+    muestraError('prepLnMon', desc, num, ln, dec)
     return ''
 # Funcion prepLnMon
 def prepLnPorc(desc, num, dec=0, ln=''):
@@ -228,11 +148,11 @@ def prepLnPorc(desc, num, dec=0, ln=''):
     if (0 != num): return ("%s%s:%s %" + ln + "s\n")\
                         % (CO.AZUL, desc, CO.FIN, FG.numeroPorc(num, dec))
     else: return ''
-  except:
-    print('ERROR en prepLnPorc: ' + desc)
+  except TypeError:
+    muestraError('prepLnPorc', desc, num, ln, dec)
     return ''
 # Funcion prepLnPorc
-def prepLnMsj(dic, campo, *opcion):
+def prepLnMsj(dMsj, dic, campo, *opcion):
   '''
     Prepara la linea a imprimir:
     dic: Diccionario desde donde se tomara el valor a imprimir.
@@ -243,13 +163,16 @@ def prepLnMsj(dic, campo, *opcion):
   '''
 
   # print(CO.AMARI + 'CAMPO EN <prepLnMsj>:' + CO.FIN, campo)
-  # print('dic:', dic)
+  # print('dMsj:', dMsj[campo])
+  # print('dic:', dic[campo])
   # print('opcion:', opcion)
   var = dMsj.get(campo, 'Ninguno')
+  # if 'pcCom' == campo: print('dic:', dic[campo])
   if 'Ninguno' == var: return campo + ' no esta en el diccionario de mensajes (COM.dMsj).\n'
+  # if 'pcCom' == campo: print('dic:', dic[campo])
   if not var: return ''
   valor = dic.get(campo, 'NoExiste')
-  # print('campo:', campo, dic[campo], valor)
+  # if 'pcCom' == campo: print('campo:', campo, dic[campo], valor)
   if 'NoExiste' == valor: return campo + ' no esta en el diccionario de este asesor.\n'
   elif None == valor or '' == valor: return ''
   try:
@@ -271,35 +194,84 @@ def prepLnMsj(dic, campo, *opcion):
     print('Descripcion:', desc, 'Tipo:', tipo, 'Lng:', lng, 'Decimales:', dec)
     return
   if ('b' == tipo):
-    msj = prepLnBool(desc, valor, lng)
+    msj = prepLnBool(desc, valor, str(lng))
   elif ('s' == tipo):
-    msj = prepLnCad(desc, valor, lng)
+    msj = prepLnCad(desc, valor, str(lng))
   elif ('n' == tipo):
-    msj = prepLnNum(desc, valor, dec, lng)
+    msj = prepLnNum(desc, valor, dec, str(lng))
   elif ('f' == tipo):
-    msj = prepLnFec(desc, valor, lng)
+    msj = prepLnFec(desc, valor, str(lng))
   elif ('t' == tipo):
-    msj = prepLnTel(desc, valor, lng)
+    msj = prepLnTel(desc, valor, str(lng))
   elif ('m' == tipo):
-    msj = prepLnMon(desc, valor, lng)
+    if 'moneda' in dic:
+      msj = prepLnMon(desc, valor, dec, str(lng), dic['moneda'])
+    else: msj = prepLnMon(desc, valor, dec, str(lng))
   elif ('p' == tipo):
-    msj = prepLnPorc(desc, valor, lng)
+    msj = prepLnPorc(desc, valor, dec, str(lng))
   else:
     msj = ''
   return msj
 # Funcion prepLnMsj
+def descNegociacion(llave):
+  global dNeg
+  return dNeg.get(llave, 'Negociacion no existe:'+llave)[0:22]
+# Funcion descNegociacion
 def descEstatus(llave):
   global dEst
-
-  return dEst.get(llave, 'Estatus no existe:'+llave)[0:20]
-# Funcion nombreAsesor
+  return dEst.get(llave, 'Estatus no existe:'+llave)[0:30]
+# Funcion descEstatus
+def descEstatusC21(llave):
+  global dSC21
+  return dSC21.get(llave, 'Estatus sistema C21 no existe:'+llave)[0:31]
+# Funcion descEstatusC21
+def descTipo(llave):
+  global dTip
+  return dTip.get(llave, 'Tipo no existe:'+llave)[0:30]
+# Funcion descTipo
+def descCaracteristica(llave):
+  global dCar
+  return dCar.get(llave, 'Caracteristica no existe:'+llave)[0:30]
+# Funcion descCaracteristica
+def descCiudad(llave):
+  global dCiu
+  return dCiu.get(llave, 'Ciudad no existe:'+llave)[0:30]
+# Funcion descCiudad
+def descMunicipio(llave):
+  global dMun
+  return dMun.get(llave, 'Municipio no existe:'+llave)[0:30]
+# Funcion descMunicipio
+def descEstado(llave):
+  global dEdo
+  return dEdo.get(llave, 'Estado no existe:'+llave)[0:30]
+# Funcion descEstado
+def descDeseo(llave):
+  global dDes
+  return dDes.get(llave, 'Deseo no existe:'+llave)[0:30]
+# Funcion descDeseo
+def descZona(llave):
+  global dZon
+  return dZon.get(llave, 'Zona no existe:'+llave)[0:30]
+# Funcion descZona
+def descPrecio(llave):
+  global dPre
+  return dPre.get(llave, 'Precio no existe:'+llave)[0:30]
+# Funcion descPrecio
+def descOrigen(llave):
+  global dOri
+  return dOri.get(llave, 'Origen no existe:'+llave)[0:30]
+# Funcion descOrigen
+def descResultado(llave):
+  global dRes
+  return dRes.get(llave, 'Resultado no existe:'+llave)[0:30]
+# Funcion descResultado
 def selEstatus():
   global dEst
 
   lEst = [(dEst[key], key) for key in dEst]
   st = FG.selOpcionMenu(lEst + [['Volver', 'v']], 'Estatus')
-  return st
 
+  return st
 # Funcion selEstatus
 def selMes(lTMe, incluirTodos=False):
 
@@ -338,16 +310,37 @@ def selOpcion(Menu, descr):
 
 # Definir variables globales
 def prepararDiccionarios(dir=''):
-  global dNeg, dMon, dEst, dSC21
+  global dNeg, dTip, dCar, dCiu, dMun, dEdo, dEst, dMon, dSC21, dDes,\
+          dZon, dPre, dOri, dRes
 
   dNeg = ES.cargaJson(dir+'negociacion.txt')
   if not dNeg: dNeg = {}
-  dMon = ES.cargaJson(dir+'moneda.txt')
-  if not dMon: dMon = {}
+  dTip = ES.cargaJson(dir+'tipos.txt')
+  if not dTip: dTip = {}
+  dCar = ES.cargaJson(dir+'caracteristicas.txt')
+  if not dCar: dCar = {}
+  dCiu = ES.cargaJson(dir+'ciudads.txt')
+  if not dCiu: dCiu = {}
+  dMun = ES.cargaJson(dir+'municipios.txt')
+  if not dMun: dMun = {}
+  dEdo = ES.cargaJson(dir+'estados.txt')
+  if not dEdo: dEdo = {}
   dEst = ES.cargaJson(dir+'estatus.txt')
   if not dEst: dEst = {}
+  dMon = ES.cargaJson(dir+'moneda.txt')
+  if not dMon: dMon = {}
   dSC21 = ES.cargaJson(dir+'estatus_sistema_c21.txt')
   if not dSC21: dSC21 = {}
+  dDes = ES.cargaJson(dir+'deseos.txt')
+  if not dDes: dDes = {}
+  dZon = ES.cargaJson(dir+'zonas.txt')
+  if not dZon: dZon = {}
+  dPre = ES.cargaJson(dir+'precios.txt')
+  if not dPre: dPre = {}
+  dOri = ES.cargaJson(dir+'origens.txt')
+  if not dOri: dOri = {}
+  dRes = ES.cargaJson(dir+'resultados.txt')
+  if not dRes: dRes = {}
 # Funcion prepararDiccionarios
 def getNetworkIP():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -396,7 +389,7 @@ def actualizar():
 # ademas de la informacion del sistema, tambien se guardara la fecha de descarga de cada archivo.
 # dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibir el nuevo. No implementado 27/08/2019.
 
-  URL = "http://" + IPServ + '/c21pr/storage/'
+  URL = "http://" + IPServ + '/storage/'
   bImpar  = True
   dHoy = strftime("%Y%m%d", localtime())
   for DATA in lDATA:
@@ -438,90 +431,3 @@ def actualizar():
   # Fin for
   return ES.muestraFin()
 # Funcion actualizar
-
-#Variables globales
-iCodCN = 1                # Indice del codigo a Casa Nacional.
-iFeRes = 2                # Indice de la fecha de reserva.
-iFeFir = 3                # Indice de la fecha firma.
-iNegoc = 4                # Indice de la negociacion.
-iNombr = 5                # Indice del nombre de la propiedad.
-iStatu = 6                # Indice del estatus.
-iMoned = 7                # Indice de la moneda.
-iPreci = 8                # Indice del precio.
-iComis = 9                # Indice de la comision de la negociacion.
-iIVA   = 11               # Indice del IVA usado en la negociacion.
-iLados = 15               # Indice de lados.
-iFRsIv = 16               # Indice de la Franquicia de Reserva sin IVA.
-iFRcIv = 17               # Indice de la Franquicia de Reserva con IVA.
-iPoFra = 18               # Indice del porcentaje de franquicia.
-iFraPR = 19               # Indice de la Franquicia a Pagar Reportada.
-iPoRCN = 20               # Indice del porcentaje de Reporte a Casa Nacional.
-iPoReg = 21               # Indice del porcentaje de Regalia.
-iRegal = 22               # Indice de la regalia.
-iIdCap = 27               # Indice del userId del asesor captador.
-iNbCap = 28               # Indice del nombre del asesor captador. Inicialmente, cuando es de otra oficina.
-iPoCap = 29               # Indice del porcentaje del asesor captador.
-iCoCap = 30               # Indice de la comision del asesor captador.
-iPoGer = 31               # Indice del porcentaje del asesor gerente.
-iCoGer = 32               # Indice de la comision del gerente.
-iIdCer = 33               # Indice del userId del asesor cerrador.
-iNbCer = 34               # Indice del nombre del asesor cerrador. Inicialmente, cuando es de otra oficina.
-iPoCer = 35               # Indice del porcentaje del asesor cerrador.
-iCoCer = 36               # Indice de la comision del asesor cerrador.
-iNetos = 40               # Indice del neto.
-iPrVRe = 41               # Indice del precio de venta real.
-iStC21 = 49               # Indice del estatus del sistema Century 21.
-iRepCN = 50               # Indice del reporte a Casa Nacional.
-
-# Descripcion de las filas de propiedades.txt
-# fila[0]: numero incremental.
-# fila[1]: Codigo casa nacional.
-# fila[2]: fecha de reserva.
-# fila[3]: fecha de firma.
-# fila[4]: Negociacion: Venta o Alquiler.
-# fila[5]: Nombre de la propiedad.
-# fila[6]: Status.
-# fila[7]: Moneda.
-# fila[8]: Precio.
-# fila[9]: Comision.
-# fila[10]: Monto de la reserva sin IVA.
-# fila[11]: IVA.
-# fila[12]: Monto de la reserva con IVA.
-# fila[13]: Monto de compartido con otra oficina con IVA.
-# fila[14]: Monto de compartido con otra oficina sin IVA.
-# fila[15]: Lados.
-# fila[16]: Franquicia de reserva sin IVA.
-# fila[17]: Franquicia de reserva con IVA.
-# fila[18]: % Franquicia.
-# fila[19]: Franquicia a pagar reportada.
-# fila[20]: % reportado a casa nacional.
-# fila[21]: % Regalia.
-# fila[22]: Regalia.
-# fila[23]: Sanaf - 5%.
-# fila[24]: Bruto real de la oficina.
-# fila[25]: Base para honorario de los socios.
-# fila[26]: Base para honorario.
-# fila[27]: Id del asesor captador.
-# fila[28]: Nombre del asesor captador otra oficina.
-# fila[29]: % Comision del captador.
-# fila[30]: Comision del captador PrBr.
-# fila[31]: % Comision del gerente.
-# fila[32]: Comision del gerente.
-# fila[33]: Id del asesor cerrador.
-# fila[34]: Nombre del asesor cerrador otra oficina.
-# fila[35]: % Comision del cerrador PrBr.
-# fila[36]: Comision del cerrador.
-# fila[37]: % Bonificacion.
-# fila[38]: Bonificacion.
-# fila[39]: Comision bancaria.
-# fila[40]: Ingreso neto de la oficina.
-# fila[41]: Precio de venta real.
-# fila[42]: Numero de recibo.
-# 43 y 44:  Pago y factura gerente.
-# 45 y 46:  Pago y factura asesores.
-# fila[47]: Pago otra oficina.
-# fila[48]: Pagado a Casa Nacional.
-# fila[49]: Status C21.
-# fila[50]: Reporte Casa Nacional.
-# fila[51]: Factura A&S.
-# fila[52]: Comentarios.

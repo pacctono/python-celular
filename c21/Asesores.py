@@ -1,4 +1,4 @@
-# libPersonas: Modulo para leer socios de IPASPUDO.
+# Asesores: Modulo para manejar los asesores de la inmobiliaria.
 #-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
@@ -28,30 +28,53 @@ from c21 import Propiedades as PRO
 bMySQL = MySQL.bMySQL
 oMySQL = MySQL.cMySQL()
 
-# 'id':Id,
-# 'cedula':'Cedula de identidad',
-# 'name':'Nombre',
-# 'telefono':'Telefono',
-# 'email':'Correo electronico',
-# 'email_c21':'Correo electronico Century 21',
-# 'licencia_mls':'Licencia MLS',
-# 'fecha_ingreso':'Fecha de ingreso',
-# 'fecha_nacimiento':'Fecha de nacimiento',
-# 'sexo':'Sexo',
-# 'estado_civil':'Estado civil',
-# 'profesion':'Profesion',
-# 'direccion':'Direccion',
-# 'is_admin':'Administrador del sistema',
-# 'socio':'Socio',
-# 'activo':'Activo en la oficina',
-# 'updated_at':'Datos sel asesor modificados el',
-# 'created_at':'Datos sel asesor creados el',
+dMsj = {
+        "id":False,
+        "cedula":["Cedula de identidad", 'n', "", 0],               # Datos del asesor, como diccionario.
+        "name":["Nombre", 's', "", 0],
+        "telefono":["Telefono", 't', "", 0],
+        "email":["Correo electronico", 's', "", 0],
+        "email_c21":["Correo electronico Century 21", 's', "", 0],
+        "licencia_mls":["Licencia MLS", 's', "", 0],
+        "fecha_ingreso":False,
+        "fecIng":["Fecha de ingreso", 'f', "", 0],
+        "fecha_nacimiento":False,
+        "fecNac":["Fecha de nacimiento", 'f', "", 0],
+        "sexo":False,
+        "genero":["Sexo", 's', "", 0],
+        "estado_civil":False,
+        "edoCivil":["Estado civil", 's', "", 0],
+        "profesion":["Profesion", 's', "", 0],
+        "direccion":["Direccion", 's', "", 0],
+        'is_admin':['Este usuario es administrador del sistema', 'b', True, 0],
+        'socio':['Este asesor es Socio', 'b', True, 0],
+        'activo':['Este asesor no esta activo en la oficina', 'b', False, 0],
+        "ladosCaptador":["Total lados captado", 'n', "5", 0],
+        "ladosCerrador":["Total lados cerrado", 'n', "5", 0],
+        "lados":["Total lados", 'n', "13", 0],
+        "pvrCaptador":["Total pvr captador", 'n', "23", 2],
+        "pvrCerrador":["Total pvr cerrador", 'n', "23", 2],
+        "precioVentaReal":["Total precio de venta real", 'n', "15", 2],
+        "comisionCaptador":["Comision total captado", 'n', "22", 2],
+        "comisionCerrador":["Comision total cerrado", 'n', "22", 2],
+        "comision":["Comision total captado y cerrado", 'n', "12", 2],
+        "puntosCaptador":["Total puntos captado", 'n', "22", 2],
+        "puntosCerrador":["Total puntos cerrado", 'n', "22", 2],
+        "puntos":["Total puntos captado y cerrado", 'n', "12", 2],
+        'borrado':False,
+        'updated_at':False,
+        'actualizado':['Datos del asesor modificados', 's', "", 0],
+        'created_at':False,
+        'creado':False,
+        "tCap":["Total captado", 'n', "22", 2],
+        "tCer":["Total cerrado", 'n', "22", 2],
+        "tCaptCer":["Total captado y cerrado", 'n', "22", 2],
+      }
 
-# Preparar lista de asesores
 def prepararListaDeAsesores(dir=''):
   global lAse, lNAs
 
-  lAse = ES.cargaJson(dir+'asesores.txt')
+  lAse = ES.cargaListaJson(dir+'asesores.txt')
   if not lAse:
     lAse = []           # Lista de asesores.
     return
@@ -161,10 +184,10 @@ def cumpleanos(mostrar=True):
   st = ''
   indices = []
   for l in lAse:
-    if not l['fecha_nacimiento']: continue
-    fecNac = FG.formateaFecha(l['fecha_nacimiento'])
+    if not l['fecNac']: continue
+    fecNac = l['fecNac']
     anoNac, mesNac, diaNac, dSemNac =\
-                              FG.descomponeFecha(l['fecha_nacimiento'])
+                              FG.descomponeFecha(l['fecNac'])
     fecCump = date(proxAno, mesNac, diaNac)
     diaSem  = CO.semana[fecCump.weekday()]
     if fecCump == hoy:
@@ -192,38 +215,43 @@ def asesor(bImp=True):
   id = FG.selOpcionMenu(lNAs + [['Volver', -2]], 'Asesor')
   if (0 > id): return id
 
-  resp = ES.siNo(droid, 'propiedades', 'Desea mostrar las propiedades'
+  if __name__ != '__main__':    # No se ha creado la lista de Propiedades lPro. No he podido.
+    resp = ES.siNo(droid, 'propiedades', 'Desea mostrar las propiedades'
                 ' de '+ lAse[id-1]['name'], False)
-  tCap = tCer = 0.00
-  nF = nV = tLados = 0
-  bImpar = True
-  if ('S' == resp): st = PRO.titulo('Comision', 11)
-  else: st = ''
-  for l in PRO.lPro:
-    if (40 < len(l)):
-      if not (isinstance(l[iIdCap], int)) or not (isinstance(l[iIdCer], int)):
-        continue
-      if (id != l[iIdCap]) and (id != l[iIdCer]): continue
-      if ('S' != l[iStatu]) and (id == l[iIdCap]):
-        try:
-          tCap += float(l[iCoCap])
-        except: pass
-      if ('S' != l[iStatu]) and (id == l[iIdCer]):
-        try:
-          tCer += float(l[iCoCer])
-        except: pass
-      nF += 1
-      if ('S' != l[iStatu]):
-        nV += 1
-        tLados += l[iLados]
-      if ('S' == resp):
-        sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-        st += PRO.detalles(l, sColor, True, iCoCap, iIdCap,
-                            iCoCer, iIdCer, id, 11)
-  # Fin for
-  st += CO.AMARI + 'Tiene ' + FG.formateaNumero(nF) +\
-        ' negociaciones [' + FG.formateaNumero(nV) + ' validas].' +\
-        CO.FIN + '\n'
+    tCap = tCer = 0.00
+    nF = nV = tLados = 0
+    bImpar = True
+    if ('S' == resp):
+      st = PRO.titulo('Comision', 11)
+      for l in PRO.lPro:
+        if (40 < len(l)):
+          if not (isinstance(l['asCapId'], int)) or\
+              not (isinstance(l['asCerId'], int)):
+            continue
+          if (id != l['asCapId']) and (id != l['asCerId']): continue
+          if (l['estatus'] in ('P', 'C')) and (id == l['asCapId']):
+            try:
+              tCap += float(l['capPrbr'])
+            except: pass
+          if (l['estatus'] in ('P', 'C')) and (id == l['asCerId']):
+            try:
+              tCer += float(l['cerPrbr'])
+            except: pass
+          nF += 1
+          if (l['estatus'] in ('P', 'C')):
+            nV += 1
+            tLados += l['lados']
+      #    if ('S' == resp):
+          sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
+          st += PRO.detalles(l, sColor, True, 'capPrbr', 'asCapId',
+                                'cerPrbr', 'asCerId', id, 11)
+      # Fin for
+      st += CO.AMARI + 'Tiene ' + FG.formateaNumero(nF) +\
+            ' negociaciones [' + FG.formateaNumero(nV) + ' validas].' +\
+            CO.FIN + '\n'
+    # Fin if ('S' == resp):
+    else: st = ''
+  # Fin if __name__ != '__main__':
 
   if bImp:
     if __name__ == '__main__':
@@ -231,57 +259,30 @@ def asesor(bImp=True):
     else: sMsj = ''
     ind  = id - 1
     dic = lAse[ind]
-    for ll in COM.dMsj:
-      if not COM.dMsj[ll]: continue
+    for ll in dMsj:
+      if not dMsj[ll]: continue
       if 'tCap' == ll: break      # De aqui en adelante no son 'propiedades' (variables) del asesor.
-      if 'pvr_captador' == ll:
-        if (0 < nF): sMsj += st    # Las propiedades donde ha participado el asesor.
+      if 'pvrCaptador' == ll and __name__ != '__main__':    # No se ha creado la lista de Propiedades lPro. No he podido.
+        if (0 < nF): sMsj += st    # Si la respuesta sobre las propiedades fue 'Si', Despliega las propiedades donde ha participado el asesor.
       if ll in ('tCap', 'tCer', 'tCapCer'): continue  # Solo para verificar valores.
-      sMsj += COM.prepLnMsj(dic, ll)
+      sMsj += COM.prepLnMsj(dMsj, dic, ll)
 
-    if not bMovil:
+    if not bMovil and __name__ != '__main__':
       dic = {'tCap':tCap, 'tCer':tCer, 'tCaptCer':tCap+tCer}
-      sMsj += COM.prepLnMsj(dic, 'tCap', 'n', '22', 2)
-      sMsj += COM.prepLnMsj(dic, 'tCer', 'n', '22', 2)
-      sMsj += COM.prepLnMsj(dic, 'tCaptCer', 'n', '12', 2)
+      sMsj += COM.prepLnMsj(dMsj, dic, 'tCap', 'n', '22', 2)
+      sMsj += COM.prepLnMsj(dMsj, dic, 'tCer', 'n', '22', 2)
+      sMsj += COM.prepLnMsj(dMsj, dic, 'tCaptCer', 'n', '12', 2)
     opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
   return opc, ind
 # FIN funcion asesor
 
-#Variables globales
-iCodCN = COM.iCodCN
-iFeRes = COM.iFeRes
-iFeFir = COM.iFeFir
-iNegoc = COM.iNegoc
-iNombr = COM.iNombr
-iStatu = COM.iStatu
-iMoned = COM.iMoned
-iPreci = COM.iPreci
-iComis = COM.iComis
-iIVA   = COM.iIVA
-iLados = COM.iLados
-iFRsIv = COM.iFRsIv
-iFRcIv = COM.iFRcIv
-iPoFra = COM.iPoFra
-iFraPR = COM.iFraPR
-iPoRCN = COM.iPoRCN
-iPoReg = COM.iPoReg
-iRegal = COM.iRegal
-iIdCap = COM.iIdCap
-iNbCap = COM.iNbCap
-iPoCap = COM.iPoCap
-iCoCap = COM.iCoCap
-iPoGer = COM.iPoGer
-iCoGer = COM.iCoGer
-iIdCer = COM.iIdCer
-iNbCer = COM.iNbCer
-iPoCer = COM.iPoCer
-iCoCer = COM.iCoCer
-iNetos = COM.iNetos
-iPrVRe = COM.iPrVRe
-iStC21 = COM.iStC21
-iRepCN = COM.iRepCN
 if __name__ == '__main__':
   prepararListaDeAsesores("../data/")
-  PRO.prepararListaDePropiedades("../data/")
+#  PRO.prepararListaDePropiedades("../data/")
   asesor()
+#  st = ''
+#  i  = 0
+#  for k in lAse[0].keys():
+#    i += 1
+#    st += str(i) + ') ' + k + '\n'
+#  ES.imprime(st.rstrip(' \t\n\r'))

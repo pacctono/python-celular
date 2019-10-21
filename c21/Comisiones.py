@@ -1,4 +1,4 @@
-# libComisiones: Modulo para el manejo de las comisiones.
+# Comisiones: Modulo para el manejo de las comisiones.
 #-*- coding:ISO-8859-1 -*-
 import sys
 if __name__ == '__main__': sys.path.append('../')

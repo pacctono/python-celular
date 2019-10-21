@@ -23,6 +23,7 @@ else: droid = None
 from c21 import Propiedades as PRO
 from c21 import Comun as COM
 from c21 import Asesores as ASE
+from c21 import Cliente as Cli
 from c21 import Comisiones as CMS
 from lib import ES, Cuota as CU, General as FG
 
@@ -87,6 +88,7 @@ def cargar(esperar='Espere un momento, por favor...'):
     droid.dialogShow()
     droid.dialogSetCurrentProgress(15)
   else: print(esperar)
+  Cli.Cliente.prepararListaDeClientes()
   ASE.prepararListaDeAsesores()
   PRO.prepararListaDePropiedades()
   PRO.prepararListas()

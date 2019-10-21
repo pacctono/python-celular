@@ -1,4 +1,4 @@
-# libES: modulo para entrada y salida.
+# General: modulo para manejar rutinas generales.
 #-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
@@ -30,19 +30,23 @@ cambiarAPunto  = lambda cadena, cad=',': cadena.replace(cad, '.')
 formateaNumeroTelefono = lambda cad: (cad if (10!=len(cad)) else
                                 "0%s-%s-%s" % (cad[0:3], cad[3:6], cad[6:]))
 formateaFecha = lambda cad: (cad if (10>len(cad)) else
-                                "%s-%s-%s" % (cad[8:10], cad[5:7], cad[0:4]))
+                                "%s-%s-%s" % (cad[-2:], cad[5:7], cad[0:4]))
+formateaRif = lambda cad: (cad if (10!=len(cad)) else
+                                "%s-%s-%s" % (cad[0:1], cad[1:9], cad[-1:]))
 def descomponeFecha(fec):
   from datetime import date
 
-  ano = int(formateaFecha(fec)[-4:])
-  mes = int(formateaFecha(fec)[3:5])
-  dia = int(formateaFecha(fec)[0:2])
+  try:
+    ano = int(fec[-4:])
+    mes = int(fec[3:5])
+    dia = int(fec[0:2])
+  except ValueError:
+    ano = int(fec[0:4])
+    mes = int(fec[5:7])
+    dia = int(fec[-2:])
   diaSem = date(ano, mes, dia).weekday()
   return ano, mes, dia, diaSem
-#def formateaNumeroTelefono(sNum):
-#	if 10 != len(sNum): return sNum
-#	else: return "%s-%s-%s" % (sNum[0:3], sNum[3:6], sNum[6:])
-# funcion formateaNumeroTelefono
+# funcion formateaFecha
 
 def esEntero(v):
     v = str(v).strip()
@@ -120,14 +124,14 @@ def limpiarPantalla():
 def numeroPorc(num, dec=0):
   cad = ''
   try:
-    if (0 != num): cad = formateaNumero(num, dec=3) + '%'
+    if (0 != num): cad = formateaNumero(num, dec) + '%'
   except: pass
   return cad if cad else '0.000%'
 # Funcion numeroPorc
 def numeroMon(num, dec=0, mon='$'):
   cad = ''
   try:
-    if (0 != num): cad = mon + formateaNumero(num, dec=0)
+    if (0 != num): cad = mon + formateaNumero(num, dec)
   except: pass
   return cad
 # Funcion numeroMon

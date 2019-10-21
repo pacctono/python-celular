@@ -1,4 +1,4 @@
-# libPropiedades: Modulo de Propiedades para Century 21 Puente Real
+# Propiedades: Modulo de Propiedades para inmobiliaria.
 #-*- coding:ISO-8859-1 -*-
 from __future__ import print_function # Para poder usar 'print' de version 3.
 
@@ -23,23 +23,107 @@ if __name__ == '__main__': sys.path.append('../')
 from lib import ES, Const as CO, General as FG
 from c21 import Comun as COM
 from c21 import Asesores as ASE
+from c21 import Cliente as Cli
 
-# Definir variables globales
-def prepararListaDePropiedades(dir=''):
-  global iIdCap, iNbCap, iIdCer, iNbCer
+dMsj = {
+        'id':False,
+        'codigo':['Codigo MLS', 's', '', 0],
+        'nombre':["Nombre", 's', "", 0],
+        'negoc':['Tipo de negociacion', 's', '', 0],
+        'fecRes':['Fecha de reserva', 'f', '', 0],
+        'fecFir':['Fecha de la firma', 'f', '', 0],
+        'estatus':['Estatus', 's', '', 0],
+        'tipo_id':['Tipo', 's', '', 0],
+        'metraje':['Metraje', 'n', 7, 2],
+        'habits':['Habitaciones', 'n', 3, 0],
+        'banos':['Ba#os', 'n', 2, 0],
+        'niveles':['Niveles', 'n', 3, 0],
+        'puestos':['Puestos de estacionamiento', 'n', 3, 0],
+        'anoc':['A#o de construccion', 'n', 4, 0],
+        'caracteristica_id':['Caracteristicas', 's', '', 0],
+        'descr':['Descripcion', 's', '', 0],
+        'direc':['Direccion', 's', '', 0],
+        'ciudad_id':['Ciudad', 's', '', 0],
+        'codPos':['Codigo postal', 's', '', 0],
+        'municipio_id':['Municipio', 's', '', 0],
+        'estado_id':['Estado', 's', '', 0],
+        'cliente_id':['Cliente', 's', '', 0],
+        'user_id':['Usuario creador', 's', '', 0],
+        'moneda':False,
+        'precio':['Precio', 'm', 10, 2],
+        'comision':['Porcentaje de la comision', 'p', 5, 2],
+        'iva':['Impuesto al valor agregado', 'p', 5, 2],
+        'lados':['Lados', 'n', 1, 0],
+        'user_actualizo':False,
+        'user_borro':False,
+        'pcFrq':['Porcentaje para franquicia', 'p', 5, 3],
+        'pcReCaNa':['Porcentaje reportado a Casa Nacional', 'p', 5, 3],
+        'pcRega':['Porcentaje de Regalia', 'p', 5, 3],
+        'pcCom':['Porcentaje a Compartir entre Captador y Cerrador', 'p', 5, 3],
+        'pcCap':['Porcentaje del asesor Captador', 'p', 5, 3],
+        'pcGer':['Porcentaje del Gerente', 'p', 5, 3],
+        'pcCer':['Porcentaje del asesor Cerrador', 'p', 5, 3],
+        'pcBonif':['Porcentaje de bonificacion', 'p', 5, 3],
+        'comBanc':['Comision bancaria', 'n', 7, 2],
+        'nroRec':['Numero de recibo', 's', '', 0],
+        'asCapId':False,
+        'asCap':['Asesor Captador', 's', '', 0],
+        'asCerId':False,
+        'asCer':['Asesor Cerrador', 's', '', 0],
+        'pagGer':['Pago al Gerente', 's', '', 0],
+        'factGer':['Factura del Gerente', 's', '', 0],
+        'pagAses':['Pago a asesores', 's', '', 0],
+        'factAse':['Factura asesores', 's', '', 0],
+        'pagOtOf':['Pago a otra oficina', 's', '', 0],
+        'PagCaNa':['Pagado a Casa Nacional', 'b', True, 0],
+        'estaC21':['Estatus en el sistema Century 21', 's', '', 0],
+        'repCaNa':['Reporte de Casa Nacional', 's', '', 0],
+        'comens':['Comentarios', 's', '', 0],
+        'factAyS':['Factura A&S', 's', '', 0],
+        'resSIva':['Monto de reserva sin IVA', 'm', 8, 2],
+        'resCIva':['Monto de reserva con IVA', 'm', 8, 2],
+        'comCIva':['Monto compartido con IVA', 'm', 8, 2],
+        'comSIva':['Monto compartido sin IVA', 'm', 8, 2],
+        'frqSIva':['Monto de reserva de la franquicia sin IVA', 'm', 8, 2],
+        'frqCIva':['Monto de reserva de la franquicia con IVA', 'm', 8, 2],
+        'frqPaRe':['Monto de la franquicia a pagar reservada', 'm', 7, 2],
+        'regalia':['Monto de Regalia', 'm', 8, 2],
+        'sanaf5pc':['Sanaf 5%', 'm', 15, 2],
+        'ofBrRe':['Monto de la Oficina Bruto Real', 'm', 8, 2],
+        'baHoSoc':['Base para honorarios de socio', 'm', 9, 2],
+        'baPaHon':['Base para pagar honorarios', 'm', 12, 2],
+        'bonific':['Monto de bonificacion', 'm', 17, 2],
+        'capPrbr':['Monto de comision al Captador Prbr', 'm', 8, 2],
+        'cerPrbr':['Monto de comision al Cerrador Prbr', 'm', 8, 2],
+        'gerente':['Monto de comision al Gerente', 'm', 14, 2],
+        'ingNeOf':['Monto del ingreso neto de la oficina', 'm', 6, 2],
+        'pvrCap':['Precio de Venta Real para el Captador', 'm', 10, 2],
+        'pvrCer':['Precio de Venta Real para el Cerrador', 'm', 10, 2],
+        'prVeRe':['Precio de Venta Real para la Oficina', 'm', 11, 2],
+        'ptsCap':['Puntos del captador', 'n', 9, 2],
+        'ptsCer':['Puntos del cerrador', 'n', 9, 2],
+        'puntos':['Puntos de la oficina', 'n', 8, 2],
+        'borrado':False,
+        'creado':False,
+        'actualizado':False
+      }
+
+def prepararListaDePropiedades(dir='', mostrarSalida=False):
   global lPro
 
-  lPro = ES.cargaListaJson(dir+'propiedades.txt')
+  lPro = ES.cargaListaJson(dir+'propiedads.txt')
   if not lPro: lPro = []
   lAse = ASE.lAse
   for i in range(0, len(lPro)):
-    if not (isinstance(lPro[i][iIdCap], int)) or\
-       not (isinstance(lPro[i][iIdCer], int)):
+    if not (isinstance(lPro[i]['asCapId'], int)) or\
+       not (isinstance(lPro[i]['asCerId'], int)):
       continue
-    if (1 < lPro[i][iIdCap]):                         # El asesor captador es de la oficina.
-      lPro[i][iNbCap] = lAse[lPro[i][iIdCap]-1]['name']   # Colocar el nombre del asesor captador de la oficina.
-    if (1 < lPro[i][iIdCer]):                         # El asesor cerrador es de la oficina.
-      lPro[i][iNbCer] = lAse[lPro[i][iIdCer]-1]['name']   # Colocar el nombre del asesor cerrador de la oficina.
+# En las proximas cuatro lineas, me aseguro de que la llave ascap/ascer contenga el nombre correcto.
+    if (1 < lPro[i]['asCapId']):                         # El asesor captador es de la oficina.
+      lPro[i]['asCap'] = lAse[lPro[i]['asCapId']-1]['name']   # Colocar el nombre del asesor captador de la oficina.
+    if (1 < lPro[i]['asCerId']):                         # El asesor cerrador es de la oficina.
+      lPro[i]['asCer'] = lAse[lPro[i]['asCerId']-1]['name']   # Colocar el nombre del asesor cerrador de la oficina.
+  if mostrarSalida: print('**** Salida prepararListaDePropiedades() *')
 # Funcion prepararListaDePropiedades
 def titulo(*par):
   tCol = ''
@@ -52,12 +136,13 @@ def titulo(*par):
             tCol + CO.FIN + "\n"
 # Funcion titulo
 def detalles(l, sColor, bCaidas=True, *col):
-  if (10 == len(l[iFeRes])): fr = l[iFeRes][0:6] + l[iFeRes][-2:]
+#  print(l)    
+  if (10 == len(l['fecRes'])): fr = l['fecRes'][0:6] + l['fecRes'][-2:]
   else: fr = ''.ljust(8)
-  if (10 == len(l[iFeFir])): ff = l[iFeFir][0:6] +l[iFeFir][-2:]
+  if (10 == len(l['fecFir'])): ff = l['fecFir'][0:6] +l['fecFir'][-2:]
   else: ff = ''.ljust(8)
 #  print(col)
-  if ('S' == l[iStatu]):
+  if (l['estatus'] in ('S')):
     if not bCaidas: return ''
     sColor = CO.ROJO
 # Cada columna a agregar podria tener dos o seis campos; dos:
@@ -71,16 +156,16 @@ def detalles(l, sColor, bCaidas=True, *col):
   if (2 == len(col)):
     sCol = FG.formateaNumero(l[col[0]], 2).rjust(col[1])
   elif (6 == len(col)):
-    if ('S' != l[iStatu]):
+    if (l['estatus'] in ('P', 'C')):
       comi = 0.00    
       if (col[4] == l[col[1]]): comi += l[col[0]]
       if (col[4] == l[col[3]]): comi += l[col[2]]
       sCol = FG.formateaNumero(comi, 2).rjust(col[5])
     else: sCol = '0.00'.rjust(col[5])
-  return sColor + l[iCodCN].ljust(7) + fr.ljust(9) + ff.ljust(9) +\
-        l[iNombr][0:20].ljust(21) + str(l[iLados]).rjust(2) +\
-        (l[iMoned] + FG.formateaNumero(l[iPreci])).rjust(11) +\
-        FG.formateaNumero(l[iPrVRe]).rjust(14) +\
+  return sColor + l['codigo'].ljust(7) + fr.ljust(9) + ff.ljust(9) +\
+        l['nombre'][0:20].ljust(21) + str(l['lados']).rjust(2) +\
+        (l['moneda'] + FG.formateaNumero(l['precio'])).rjust(11) +\
+        FG.formateaNumero(l['prVeRe']).rjust(14) +\
         sCol + CO.FIN + "\n"
 # Funcion detalles
 def titTotales(tipo='Asesor', tam=20):
@@ -123,11 +208,7 @@ def totTotales(tipoTot, tLados, tPvr, tCap, tCer, tLaCap, tLaCer,
         FG.formateaNumero(tLaCer) + ')').rjust(15) + CO.FIN + "\n"
 # Funcion totTotales
 def mPropiedad(lCod, titOpc):
-  global iIdCap, iNbCap, iIdCer, iNbCer
-  global lPro
-  dNeg = COM.dNeg
-  dEst = COM.dEst
-  dSC21 = COM.dSC21
+  global lPro, dMsj
 
   if (0 == len(lCod)): return
   elif (1 == len(lCod)):
@@ -138,53 +219,76 @@ def mPropiedad(lCod, titOpc):
 
   prop = lPro[id]
   sMsj = ''
-  for n in range(0, len(prop)):
-    try:    
-      p = prop[n]
-      if (iMoned == n): mon = p
-      elif (iPreci == n):
-        sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 0, mon))
-      elif (iComis == n):
-        sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroPorc(p, 3) +\
-              CO.AZUL + ' IVA: ' + CO.FIN + FG.numeroPorc(prop[iIVA], 2))
-      elif (n in (iFRsIv, iFRcIv)):
-        sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 2, mon) +\
-                                ' [' + FG.numeroPorc(prop[iPoFra], 3) + ']')
-      elif (n == iFraPR):
-        sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 2, mon) +\
-                                ' [' + FG.numeroPorc(prop[iPoRCN], 3) + ']')
-      elif (n in (iRegal, iCoCap, iCoGer, iCoCer)):
-        sMsj += COM.prepLnCad(COM.dMsj[str(n)], FG.numeroMon(p, 2, mon) +\
-                                ' [' + FG.numeroPorc(prop[n-1], 3) + ']')
-      elif (n in (iIVA, iPoFra, iPoRCN, iPoReg, iPoCap, iPoGer, iPoCer)):
-        continue
-      elif (n in (iIdCap, iIdCer)):         # id del asesor captador y cerrador.
-        continue
-      elif (isinstance(p, str)):
-        if (iNegoc == n): p = dNeg.get(p, 'Codigo errado:'+p)
-        elif (iStatu == n): p = dEst.get(p, 'Codigo errado:'+p)
-        elif (iStC21 == n): p = dSC21.get(p, 'Codigo errado:'+p)
-        sMsj += COM.prepLnCad(COM.dMsj[str(n)], p)
-      elif (isinstance(p, int)):
-        sMsj += COM.prepLnNum(COM.dMsj[str(n)], p)
-      else: sMsj += COM.prepLnNum(COM.dMsj[str(n)], p, 2)
-    except KeyError:
-      print(n, p)
-      pass
+  moneda = prop['moneda']
+  try:
+    for k in dMsj:
+      val = prop[k]
+      if k in ('negoc', 'estatus', 'estaC21', 'tipo_id',\
+              'caracteristica_id', 'ciudad_id', 'municipio_id',\
+              'estado_id', 'cliente_id'):
+        if 'negoc' == k: cad  = COM.descNegociacion(val)
+        elif 'estatus' == k: cad  = COM.descEstatus(val)
+        elif 'estaC21' == k: cad  = COM.descEstatusC21(val)
+        elif 'tipo_id' == k: cad  = COM.descTipo(str(val))
+        elif 'caracteristica_id' == k:
+          cad  = COM.descCaracteristica(str(val))
+        elif 'ciudad_id' == k: cad  = COM.descCiudad(str(val))
+        elif 'municipio_id' == k: cad  = COM.descMunicipio(str(val))
+        elif 'estado_id' == k: cad  = COM.descEstado(str(val))
+        elif 'cliente_id' == k: cad  = Cli.Cliente.nombre(val)
+        else: cad = ':Descripcion no fue encontrada ?????'
+        desc = dMsj[k][0]
+        cad  = '[' + str(val) + '] ' + cad
+        sMsj += COM.prepLnCad(desc, cad)
+      elif k in ('iva', 'pcFrq', 'pcReCaNa', 'pcRega', 'pcCap',\
+                  'pcGer', 'pcCer', 'asCapId', 'asCerId'): continue
+      elif ('comision' == k):
+        sMsj += COM.prepLnCad(dMsj[k][0], FG.numeroPorc(val, 3) +\
+                              CO.AZUL + ' IVA: ' + CO.FIN +\
+                              FG.numeroPorc(prop['iva'], 2))
+      elif k in ('frqSIva', 'frqCIva'):
+        sMsj += COM.prepLnCad(dMsj[k][0],\
+                              FG.numeroMon(val, 2, moneda) + ' [' +\
+                              FG.numeroPorc(prop['pcFrq'], 3) + ']')
+      elif (k == 'frqPaRe'):
+        sMsj += COM.prepLnCad(dMsj[k][0], ' ' +\
+                              FG.numeroMon(val, 2, moneda) + ' [' +\
+                              FG.numeroPorc(prop['pcReCaNa'], 3) + ']')
+      elif ('regalia' == k):
+            sMsj += COM.prepLnCad(dMsj[k][0],\
+                              FG.numeroMon(val, 2, moneda) + ' [' +\
+                              FG.numeroPorc(prop['pcRega'], 3) + ']')
+      elif ('capPrbr' == k):
+            sMsj += COM.prepLnCad(dMsj[k][0],\
+                              FG.numeroMon(val, 2, moneda) + ' [' +\
+                              FG.numeroPorc(prop['pcCap'], 3) + ']')
+      elif ('gerente' == k):
+            sMsj += COM.prepLnCad(dMsj[k][0],\
+                              FG.numeroMon(val, 2, moneda) + ' [' +\
+                              FG.numeroPorc(prop['pcGer'], 3) + ']')
+      elif ('cerPrbr' == k):
+        sMsj += COM.prepLnCad(dMsj[k][0],\
+                              FG.numeroMon(val, 2, moneda) + ' [' +\
+                              FG.numeroPorc(prop['pcCer'], 3) + ']')
+      else: sMsj += COM.prepLnMsj(dMsj, prop, k)
+    # Fin for k in dMsj
+  except KeyError:
+    print('Propblemas con la llave:' + k + ', su valor es:' + val)
+    pass
   tec = ES.imprime(sMsj.rstrip(' \t\n\r'))
   return tec
 # Funcion mPropiedad
 def propiedades(bCaidas=True):
   '''Lee los datos de propiedades y los despliega
-      fila[0]: numero incremental.
-      fila[1]: Codigo casa nacional.
-      fila[2]: fecha de reserva.
-      fila[3]: fecha de firma.
-      fila[4]: Negociacion: Venta o Alquiler.
-      fila[5]: Nombre de la propiedad.
-      fila[6]: Status.
-      fila[7]: Moneda.
-      fila[8]: Precio.
+      fila['id']: numero incremental.
+      fila['codigo']: Codigo casa nacional.
+      fila['fecRes']: fecha de reserva.
+      fila['fecFir']: fecha de firma.
+      fila['negoc']: Negociacion: Venta o Alquiler.
+      fila['nombre']: Nombre de la propiedad.
+      fila['estatus']: Status.
+      fila['moneda']: Moneda.
+      fila['precio']: Precio.
   '''
   global lPro
 
@@ -193,15 +297,15 @@ def propiedades(bCaidas=True):
   bImpar = True
   st = titulo("Neto ofic.", 11)
   for l in lPro:
-    if ('S' != l[iStatu]):
+    if (l['estatus'] in ('P', 'C')):
       nV += 1
-      tLados += l[iLados]
-      tPrecios += l[iPreci]
-      tPrVeReal += l[iPrVRe]
-      tNetos += l[iNetos]
+      tLados += l['lados']
+      tPrecios += l['precio']
+      tPrVeReal += l['prVeRe']
+      tNetos += l['ingNeOf']
     sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-    st += detalles(l, sColor, bCaidas, iNetos, 11)
-# Fin for
+    st += detalles(l, sColor, bCaidas, 'ingNeOf', 11)
+  # Fin for
   st += CO.AMARI + 'TOTALES:'.ljust(45) +\
         FG.formateaNumero(tLados).rjust(3) +\
         FG.formateaNumero(tPrecios).rjust(11) +\
@@ -213,7 +317,6 @@ def propiedades(bCaidas=True):
   return ES.imprime(st.rstrip(' \t\n\r'))
 # funcion propiedades
 def lstXEstatus():
-  global iStatu, iNetos
   global lPro
 
   est = COM.selEstatus()
@@ -221,7 +324,7 @@ def lstXEstatus():
 
   nvaLst = []
   for l in lPro:
-    if (est != l[iStatu]): continue
+    if (est != l['estatus']): continue
     nvaLst.append(l)
   # for l in lPro
 
@@ -232,12 +335,12 @@ def lstXEstatus():
   st += titulo("Neto ofic.", 11)
   for l in nvaLst:
     sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-    st += detalles(l, sColor, True, iNetos, 11)
+    st += detalles(l, sColor, True, 'ingNeOf', 11)
     nV += 1
-    tLados += l[iLados]
-    tPrecios += l[iPreci]
-    tPrVeReal += l[iPrVRe]
-    tNetos += l[iNetos]
+    tLados += l['lados']
+    tPrecios += l['precio']
+    tPrVeReal += l['prVeRe']
+    tNetos += l['ingNeOf']
   # for l in nvaLst
   st += CO.AMARI + 'TOTALES:'.ljust(45) +\
         FG.formateaNumero(tLados).rjust(3) +\
@@ -249,7 +352,6 @@ def lstXEstatus():
   return ES.imprime(st.rstrip(' \t\n\r'))
 # Funcion lstXEstatus
 def lstXAsesor():
-  global iIdCap, iIdCer, iCoCap, iCoCer
   global lPro
 
   id = FG.selOpcionMenu(ASE.lNAs + [['Volver', -2]], 'Asesor')
@@ -257,9 +359,9 @@ def lstXAsesor():
 
   nvaLst = []
   for l in lPro:
-    if not (isinstance(l[iIdCap], int)) or \
-       not (isinstance(l[iIdCer], int)) or \
-       ((id != l[iIdCap]) and (id != l[iIdCer])):
+    if not (isinstance(l['asCapId'], int)) or \
+       not (isinstance(l['asCerId'], int)) or \
+       ((id != l['asCapId']) and (id != l['asCerId'])):
       continue
     nvaLst.append(l)
   # for l in lPro
@@ -271,18 +373,18 @@ def lstXAsesor():
   st += titulo("Comision", 10)
   for l in nvaLst:
     sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-    st += detalles(l, sColor, True, iCoCap, iIdCap,
-                        iCoCer, iIdCer, id, 10)
-    if ('S' == l[iStatu]): continue
+    st += detalles(l, sColor, True, 'capPrbr', 'asCapId',
+                        'cerPrbr', 'asCerId', id, 10)
+    if (l['estatus'] not in ('P', 'C')): continue
     nV += 1
-    tLados += l[iLados]
-    tPrecios += l[iPreci]
-    tPrVeReal += l[iPrVRe]
-    if (id == l[iIdCap]):
-      try: tCap += float(l[iCoCap])    
+    tLados += l['lados']
+    tPrecios += l['precio']
+    tPrVeReal += l['prVeRe']
+    if (id == l['asCapId']):
+      try: tCap += float(l['capPrbr'])    
       except: pass
-    if (id == l[iIdCer]):
-      try: tCer += float(l[iCoCer])    
+    if (id == l['asCerId']):
+      try: tCer += float(l['cerPrbr'])    
       except: pass
   # Fin for
   st += CO.AMARI + 'TOTALES:'.ljust(45) +\
@@ -304,13 +406,13 @@ def lstXMes():
   
   nvaLst = []
   for l in lPro:
-    if ('00' == mes) and (("" == l[iFeRes]) or ("" == l[iFeFir])):
+    if ('00' == mes) and (("" == l['fecRes']) or ("" == l['fecFir'])):
       nvaLst.append(l)
       continue
-    if (("" != l[iFeFir]) and (10 == len(l[iFeFir])) and\
-        (agno == l[iFeFir][-4:]) and (mes == l[iFeFir][3:5])) or\
-       (("" != l[iFeRes]) and (10 == len(l[iFeRes])) and\
-        (agno == l[iFeRes][-4:]) and (mes == l[iFeRes][3:5])):
+    if (("" != l['fecFir']) and (10 == len(l['fecFir'])) and\
+        (agno == l['fecFir'][-4:]) and (mes == l['fecFir'][3:5])) or\
+       (("" != l['fecRes']) and (10 == len(l['fecRes'])) and\
+        (agno == l['fecRes'][-4:]) and (mes == l['fecRes'][3:5])):
       nvaLst.append(l)
   # for l in lPro
   nV = tLados = 0
@@ -320,13 +422,13 @@ def lstXMes():
   st += titulo("Neto ofic.", 11)
   for l in nvaLst:
     sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
-    st += detalles(l, sColor, True, iNetos, 11)
-    if ('S' != l[iStatu]):
+    st += detalles(l, sColor, True, 'ingNeOf', 11)
+    if (l['estatus'] in ('P', 'C')):
       nV += 1
-      tLados += l[iLados]
-      tPrecios += l[iPreci]
-      tPrVeReal += l[iPrVRe]
-      tNetos += l[iNetos]
+      tLados += l['lados']
+      tPrecios += l['precio']
+      tPrVeReal += l['prVeRe']
+      tNetos += l['ingNeOf']
   # for l in nvaLst
   st += CO.AMARI + 'TOTALES:'.ljust(45) +\
         FG.formateaNumero(tLados).rjust(3) +\
@@ -341,7 +443,6 @@ def LstPropPor():
   return COM.selOpcion(COM.lMenuLstPro, 'Listar propiedades')
 # Funcion LstPropPor
 def xEstatus():
-  global iCodCN, iNombr, iStatu
   global lPro
 
   st = COM.selEstatus()
@@ -349,15 +450,14 @@ def xEstatus():
 
   lCod = []
   for l in lPro:
-    if (st != l[iStatu]): continue
-    lst = (l[iCodCN]+'-'+l[iNombr], l[0]-1)
+    if (st != l['estatus']): continue
+    lst = (l['codigo']+'-'+l['nombre'], l['id']-1)
     lCod.append(lst)
   # for l in lPro
 
   return mPropiedad(lCod, COM.dEst[st])
 # Funcion xEstatus
 def xNegociacion():
-  global iCodCN, iNombr, iStatu
   global lPro
   lNeg = [(COM.dNeg[key], key) for key in COM.dNeg]
 
@@ -366,34 +466,32 @@ def xNegociacion():
 
   lCod = []
   for l in lPro:
-    if (ng != l[iNegoc]): continue
-    lst = (l[iCodCN]+'-'+l[iNombr], l[0]-1)
+    if (ng != l['negoc']): continue
+    lst = (l['codigo']+'-'+l['nombre'], l['id']-1)
     lCod.append(lst)
   # for l in lPro
 
   return mPropiedad(lCod, COM.dNeg[ng])
 # Funcion xNegociacion
 def xNombre():
-  global iNombr, iStatu, iCodCN
   global lPro
 
   cod = ES.entradaNombre(droid, 'Nombre de la propiedad',
-                      'Introduzca el nombre o parte de el', lPro[0][iNombr])
+                      'Introduzca el nombre o parte de el', lPro[0]['nombre'])
   lCod = []
   for l in lPro:
-    nombre = l[iNombr]
-    if (l[iNombr]) and (0 <= nombre.lower().find(cod.lower())):
-#   if (l[iNombr]) and (cod.lower() in nombre.lower()):
-      if ('S' == l[iStatu]): caida = 'Caida: '
+    nombre = l['nombre']
+    if (l['nombre']) and (0 <= nombre.lower().find(cod.lower())):
+#   if (l['nombre']) and (cod.lower() in nombre.lower()):
+      if ('S' == l['estatus']): caida = 'Caida: '
       else: caida = ''
-      lst = (caida+l[iCodCN]+'-'+l[iNombr], l[0]-1)
+      lst = (caida+l['codigo']+'-'+l['nombre'], l['id']-1)
       lCod.append(lst)
   # for l in lPro
 
   return mPropiedad(lCod, 'Nombre de la propiedad:'+cod)
 # Funcion xNombre
 def xAsesor():
-  global iIdCap, iIdCer, iStatu, iCodCN, iNombr
   global lPro
 
   id = FG.selOpcionMenu(ASE.lNAs + [['Volver', -2]], 'Asesor')
@@ -401,13 +499,13 @@ def xAsesor():
 
   lCod = []
   for l in lPro:
-    if not (isinstance(l[iIdCap], int)) or \
-       not (isinstance(l[iIdCer], int)):
+    if not (isinstance(l['asCapId'], int)) or \
+       not (isinstance(l['asCerId'], int)):
       continue
-    if (id != l[iIdCap]) and (id != l[iIdCer]): continue
-    if ('S' == l[iStatu]): caida = 'Caida: '
+    if (id != l['asCapId']) and (id != l['asCerId']): continue
+    if ('S' == l['estatus']): caida = 'Caida: '
     else: caida = ''
-    lst = (caida+l[iCodCN]+'-'+l[iNombr], l[0]-1)
+    lst = (caida+l['codigo']+'-'+l['nombre'], l['id']-1)
     lCod.append(lst)
   # for l in lPro
 
@@ -418,14 +516,14 @@ def xCodigo():
   global lPro
 
   codigo = ES.entradaNumero(droid, 'Codigo de Casa Nacional',
-                      'Introduzca el codigo o parte de el', lPro[0][iCodCN])
+                      'Introduzca el codigo o parte de el', lPro[0]['codigo'])
   cod = str(codigo).rstrip(' \t\n\r')
   lCod = []
   for l in lPro:
-    if cod in l[iCodCN]:
-      if ('S' == l[iStatu]): caida = 'Caida: '
+    if cod in l['codigo']:
+      if ('S' == l['estatus']): caida = 'Caida: '
       else: caida = ''
-      lst = (caida+l[iCodCN]+'-'+l[iNombr], l[0]-1)
+      lst = (caida+l['codigo']+'-'+l['nombre'], l['id']-1)
       lCod.append(lst)
   # for l in lPro
 
@@ -435,14 +533,14 @@ def xReporte():
   global lPro
 
   cod = ES.entradaNombre(droid, 'Reporte de Casa Nacional',
-                'Introduzca el reporte o parte de el', lPro[0][iRepCN])
+                'Introduzca el reporte o parte de el', lPro[0]['repCaNa'])
   lCod = []
-  #print(cod, lPro[0][iRepCN])
+  #print(cod, lPro[0]['repCaNa'])
   for l in lPro:
-    if (l[iRepCN]) and (cod in l[iRepCN]):
-      if ('S' == l[iStatu]): caida = 'Caida: '
+    if (l['repCaNa']) and (cod in l['repCaNa']):
+      if ('S' == l['estatus']): caida = 'Caida: '
       else: caida = ''
-      lst = (caida+l[iRepCN]+'-'+l[iNombr], l[0]-1)
+      lst = (caida+l['repCaNa']+'-'+l['nombre'], l['id']-1)
       lCod.append(lst)
   # for l in lPro
 
@@ -452,6 +550,17 @@ def buscProp():
   return COM.selOpcion(COM.lMenuProEsp, 'Buscar una propiedad especifica')
 # Funcion BuscProp
 def totAsesor():
+  ''' Agregar 1, correspondiente a el 'id' del asesor.
+      0:filas, 1:tPrecio, 2:tLados, 3:tCompartidoConIva,
+      4:tFranquiciaSinIva, 5:tFranquiciaConIva, 6:tFranquiciaPagarR,
+      7:tRegalia, 8:tSanaf5PorCiento, 9:tOficinaBrutoReal,
+      10:tBaseHonorariosSo, 11:tBaseParaHonorari, 12:tCaptadorPrbr,
+      13:tGerente, 14:tCerradorPrbr, 15:tBonificaciones,
+      16:tComisionBancaria, 17:tIngresoNetoOfici, 18:tPrecioVentaReal,
+      19:tPuntos, 20:tCaptadorPrbrSel, 21:tCerradorPrbrSel,
+      22:tLadosCap, 23:tLadosCer, 24:tPvrCaptadorPrbrSel,
+      25:tPvrCerradorPrbrSel, 26:tPuntosCaptador, 27:tPuntosCerrador
+  '''
   global lTAs
 
   st = titTotales('Asesor', 20)
@@ -460,19 +569,23 @@ def totAsesor():
   tPrVeReal = tCap = tCer = 0.00
   for l in lTAs:
     try:
-      bImpar, cad = detTotales(ASE.nombreAsesor(l[0], 1), l[22]+l[23],
-                          l[24]+l[25], l[20], l[21], l[22], l[23], bImpar, 20)
+      bImpar, cad = detTotales(ASE.nombreAsesor(l[0], 1), l[23]+l[24],
+                          l[25]+l[26], l[21], l[22], l[23], l[24], bImpar, 20)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
-      if (1 < int(l[0])):
-        tPrVeReal, tCap, tCer = tPrVeReal+l[24]+l[25], tCap+l[20], tCer+l[21]
-        tLaCap, tLaCer = tLaCap+l[22], tLaCer+l[23]
+      if (1 < int(l[0])):   # l[0] es el 'id' del asesor.
+        tPrVeReal, tCap, tCer = tPrVeReal+l[25]+l[26], tCap+l[21], tCer+l[22]
+        tLaCap, tLaCer = tLaCap+l[23], tLaCer+l[24]
     except:
-      print('ERROR totales:')
-      print(l[1], l[20], l[21], l[22], l[23])
+      print('ERROR totales:', ASE.nombreAsesor(l[0], 1) + ' => ',
+            'filas:', l[1], '; Precio:', l[2], '; lados:', l[3],
+            '; PVR:', l[19], '; Puntos:', l[20], '; asesor Cap:', l[21],
+            '; asesor Cer:', l[22], '; lados Cap:', l[23],
+            '; lados Cer:', l[24], '; PVR Cap:', l[25],
+            '; PVR Cer:', l[26], sep='')
   try:
     st += totTotales('Total Oficina', tLaCap + tLaCer, tPrVeReal,\
                           tCap, tCer, tLaCap, tLaCer, 20, False, False)
@@ -483,6 +596,17 @@ def totAsesor():
   return opc
 # Funcion totAsesor
 def totMes():
+  ''' Agregar 1, correspondiente al 'agno-mes'.
+      0:filas, 1:tPrecio, 2:tLados, 3:tCompartidoConIva,
+      4:tFranquiciaSinIva, 5:tFranquiciaConIva, 6:tFranquiciaPagarR,
+      7:tRegalia, 8:tSanaf5PorCiento, 9:tOficinaBrutoReal,
+      10:tBaseHonorariosSo, 11:tBaseParaHonorari, 12:tCaptadorPrbr,
+      13:tGerente, 14:tCerradorPrbr, 15:tBonificaciones,
+      16:tComisionBancaria, 17:tIngresoNetoOfici, 18:tPrecioVentaReal,
+      19:tPuntos, 20:tCaptadorPrbrSel, 21:tCerradorPrbrSel,
+      22:tLadosCap, 23:tLadosCer, 24:tPvrCaptadorPrbrSel,
+      25:tPvrCerradorPrbrSel, 26:tPuntosCaptador, 27:tPuntosCerrador
+  '''
   global lTMe
 
   st = titTotales('Agno Mes', 17)
@@ -492,17 +616,17 @@ def totMes():
   for l in lTMe:
     try:
       bImpar, cad = detTotales(l[0][0:4]+' '+CO.meses[int(l[0][5:])],
-                    l[3], l[19], l[13], l[15], l[22], l[23], bImpar, 17)
+                    l[3], l[19], l[13], l[15], l[23], l[24], bImpar, 17)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
       tPrVeReal, tCap, tCer = tPrVeReal+l[19], tCap+l[13], tCer+l[15]
-      tLaCap, tLaCer, tLados = tLaCap+l[22], tLaCer+l[23], tLados+l[3]
+      tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24], tLados+l[3]
     except:
       print('ERROR totales:')
-      print(l[1], l[3], l[13], l[15], l[22], l[23])
+      print(l[1], l[3], l[13], l[15], l[23], l[24])
   try:
     st += totTotales('Total Oficina', tLados, tPrVeReal, tCap, tCer,
                       tLaCap, tLaCer, 17)
@@ -513,6 +637,17 @@ def totMes():
   return opc
 # Funcion totMes
 def totEst():
+  ''' Agregar 1, correspondiente al 'estatus'.
+      0:filas, 1:tPrecio, 2:tLados, 3:tCompartidoConIva,
+      4:tFranquiciaSinIva, 5:tFranquiciaConIva, 6:tFranquiciaPagarR,
+      7:tRegalia, 8:tSanaf5PorCiento, 9:tOficinaBrutoReal,
+      10:tBaseHonorariosSo, 11:tBaseParaHonorari, 12:tCaptadorPrbr,
+      13:tGerente, 14:tCerradorPrbr, 15:tBonificaciones,
+      16:tComisionBancaria, 17:tIngresoNetoOfici, 18:tPrecioVentaReal,
+      19:tPuntos, 20:tCaptadorPrbrSel, 21:tCerradorPrbrSel,
+      22:tLadosCap, 23:tLadosCer, 24:tPvrCaptadorPrbrSel,
+      25:tPvrCerradorPrbrSel, 26:tPuntosCaptador, 27:tPuntosCerrador
+  '''
   global lTEs
 
   st = titTotales('Estatus', 20)
@@ -522,19 +657,19 @@ def totEst():
   for l in lTEs:
     try:
       bImpar, cad = detTotales(COM.descEstatus(l[0]), l[3], l[19],
-                                l[13], l[15], l[22], l[23], bImpar,
+                                l[13], l[15], l[23], l[24], bImpar,
                                 20, CO.ROJO if ('S'==l[0]) else False)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
-      if ('S' != l[0]):
+      if (l[0] in ('P', 'C')):
         tPrVeReal, tCap, tCer = tPrVeReal+l[19], tCap+l[13], tCer+l[15]
-        tLaCap, tLaCer, tLados = tLaCap+l[22], tLaCer+l[23], tLados+l[3]
+        tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24], tLados+l[3]
     except:
       print('ERROR totales:')
-      print(l[1], l[3], l[19], l[13], l[15], l[22], l[23])
+      print(l[1], l[3], l[19], l[13], l[15], l[23], l[24])
   try:
     st += totTotales('Total Oficina', tLados, tPrVeReal, tCap, tCer,\
                       tLaCap, tLaCer, 20)
@@ -545,6 +680,17 @@ def totEst():
   return opc
 # Funcion totEst
 def totAsesorMes():
+  ''' 0:'id' del asesor, 1:'agno-mes'.
+      2:filas, 3:tPrecio, 4:tLados, 5:tCompartidoConIva,
+      6:tFranquiciaSinIva, 7:tFranquiciaConIva, 8:tFranquiciaPagarR,
+      9:tRegalia, 10:tSanaf5PorCiento, 11:tOficinaBrutoReal,
+      12:tBaseHonorariosSo, 13:tBaseParaHonorari, 14:tCaptadorPrbr,
+      15:tGerente, 16:tCerradorPrbr, 17:tBonificaciones,
+      18:tComisionBancaria, 19:tIngresoNetoOfici, 20:tPrecioVentaReal,
+      21:tPuntos, 22:tCaptadorPrbrSel, 23:tCerradorPrbrSel,
+      24:tLadosCap, 25:tLadosCer, 26:tPvrCaptadorPrbrSel,
+      27:tPvrCerradorPrbrSel, 28:tPuntosCaptador, 29:tPuntosCerrador
+  '''
   global lTAM
 
 # lNAs contiene listas de dos elementos: nombre y id real de cada asesor.
@@ -573,22 +719,25 @@ def totAsesorMes():
         tAsLados = tAsLaCap = tAsLaCer = 0
         tAsPvr = tAsCap = tAsCer = 0.00
       bImpar, cad = detTotales(l[1][0:4]+' '+CO.meses[int(l[1][5:])],
-          l[23] + l[24], l[25]+l[26], l[21], l[22], l[23], l[24], bImpar, 16)
+                              l[24] + l[25], l[26]+l[27], l[22],\
+                              l[23], l[24], l[25], bImpar, 16)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
-      tAsPvr, tAsCap, tAsCer = tAsPvr+l[25]+l[26], tAsCap+l[21], tAsCer+l[22]
-      tAsLaCap, tAsLaCer, tAsLados = tAsLaCap+l[23], tAsLaCer+l[24],\
-                                tAsLados+l[23]+l[24]
+      tAsPvr, tAsCap, tAsCer = tAsPvr+l[26]+l[27], tAsCap+l[22],\
+                                tAsCer+l[23]
+      tAsLaCap, tAsLaCer, tAsLados = tAsLaCap+l[24], tAsLaCer+l[25],\
+                                tAsLados+l[24]+l[25]
       if todos and (1 < int(l[0])):
-        tPvr, tCap, tCer = tPvr+l[25]+l[26], tCap+l[21], tCer+l[22]
-        tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24],\
-                                  tLados+l[23]+l[24]
+        tPvr, tCap, tCer = tPvr+l[26]+l[27], tCap+l[22], tCer+l[23]
+        tLaCap, tLaCer, tLados = tLaCap+l[24], tLaCer+l[25],\
+                                  tLados+l[24]+l[25]
     except:
       print('ERROR totales:')
-      print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23], l[24])
+      print(l[0], l[1], l[2], l[3], l[22], l[23], l[24], l[25], l[26],\
+            l[27])
   try:
     st += totTotales('Total Asesor', tAsLaCap + tAsLaCer, tAsPvr,
                       tAsCap, tAsCer, tAsLaCap, tAsLaCer, 16, todos)
@@ -603,6 +752,17 @@ def totAsesorMes():
   return opc
 # Funcion totAsesorMes
 def totMesAsesor():
+  ''' 0:'agno-mes', 1:'id' del asesor,
+      2:filas, 3:tPrecio, 4:tLados, 5:tCompartidoConIva,
+      6:tFranquiciaSinIva, 7:tFranquiciaConIva, 8:tFranquiciaPagarR,
+      9:tRegalia, 10:tSanaf5PorCiento, 11:tOficinaBrutoReal,
+      12:tBaseHonorariosSo, 13:tBaseParaHonorari, 14:tCaptadorPrbr,
+      15:tGerente, 16:tCerradorPrbr, 17:tBonificaciones,
+      18:tComisionBancaria, 19:tIngresoNetoOfici, 20:tPrecioVentaReal,
+      21:tPuntos, 22:tCaptadorPrbrSel, 23:tCerradorPrbrSel,
+      24:tLadosCap, 25:tLadosCer, 26:tPvrCaptadorPrbrSel,
+      27:tPvrCerradorPrbrSel, 28:tPuntosCaptador, 29:tPuntosCerrador
+  '''
   global lTMA
 
   agno, mes = COM.selMes(lTMe, True)
@@ -627,24 +787,26 @@ def totMesAsesor():
         st += CO.CYAN + l[0] + CO.FIN + '\n'
         tMeLados = tMeLaCap = tMeLaCer = 0
         tMePvr = tMeCap = tMeCer = 0.00
-      bImpar, cad = detTotales(ASE.nombreAsesor(l[1], 1), l[23] + l[24],
-                        l[25]+l[26], l[21], l[22], l[23], l[24], bImpar, 20)
+      bImpar, cad = detTotales(ASE.nombreAsesor(l[1], 1), l[24] + l[25],
+                        l[26]+l[27], l[22], l[23], l[24], l[25], bImpar, 20)
       st += cad
     except TypeError:
       print('ERROR detalle:')
       print(l)
     try:
       if (1 < int(l[1])):
-        tMePvr, tMeCap, tMeCer = tMePvr+l[25]+l[26], tMeCap+l[21], tMeCer+l[22]
-        tMeLaCap, tMeLaCer, tMeLados = tMeLaCap+l[23], tMeLaCer+l[24],\
-                                  tMeLados+l[23]+l[24]
+        tMePvr, tMeCap, tMeCer = tMePvr+l[26]+l[27], tMeCap+l[22],\
+                                  tMeCer+l[23]
+        tMeLaCap, tMeLaCer, tMeLados = tMeLaCap+l[24], tMeLaCer+l[25],\
+                                  tMeLados+l[24]+l[25]
         if todos:
-          tPvr, tCap, tCer = tPvr+l[25]+l[26], tCap+l[21], tCer+l[22]
-          tLaCap, tLaCer, tLados = tLaCap+l[23], tLaCer+l[24],\
-                                  tLados+l[23]+l[24]
+          tPvr, tCap, tCer = tPvr+l[26]+l[27], tCap+l[22], tCer+l[23]
+          tLaCap, tLaCer, tLados = tLaCap+l[24], tLaCer+l[25],\
+                                  tLados+l[24]+l[25]
     except:
       print('ERROR totales:')
-      print(l[0], l[1], l[2], l[3], l[20], l[21], l[22], l[23], l[24])
+      print(l[0], l[1], l[2], l[3], l[22], l[23], l[24], l[25], l[26],\
+            l[27])
   try:
     st += totTotales('Total mes ' + idMes, tMeLaCap + tMeLaCer,
                   tMePvr, tMeCap, tMeCer, tMeLaCap, tMeLaCer, 20, todos)
@@ -662,6 +824,16 @@ def totPor():
   return COM.selOpcion(COM.lMenuTot, 'Totalizar')
 # Funcion totPor
 def totales():
+  ''' 0:filas, 1:tPrecio, 2:tLados, 3:tCompartidoConIva,
+      4:tFranquiciaSinIva, 5:tFranquiciaConIva, 6:tFranquiciaPagarR,
+      7:tRegalia, 8:tSanaf5PorCiento, 9:tOficinaBrutoReal,
+      10:tBaseHonorariosSo, 11:tBaseParaHonorari, 12:tCaptadorPrbr,
+      13:tGerente, 14:tCerradorPrbr, 15:tBonificaciones,
+      16:tComisionBancaria, 17:tIngresoNetoOfici, 18:tPrecioVentaReal,
+      19:tPuntos, 20:tCaptadorPrbrSel, 21:tCerradorPrbrSel,
+      22:tLadosCap, 23:tLadosCer, 24:tPvrCaptadorPrbrSel,
+      25:tPvrCerradorPrbrSel, 26:tPuntosCaptador, 27:tPuntosCerrador
+  '''
   global lTot
 
   if not lTot: return
@@ -679,6 +851,7 @@ def totales():
   sMsj += COM.prepLnNum("Comisiones bancarias", lTot[16], 2)
   sMsj += COM.prepLnNum("Ingreso neto de la oficina", lTot[17], 2)
   sMsj += COM.prepLnNum("Precio de venta real", lTot[18], 2)
+  sMsj += COM.prepLnNum("Puntos", lTot[19], 2)
   opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
 
   return opc
@@ -706,53 +879,40 @@ def prepararListas(dir=''):
 # Funcion prepararListas
 
 #Variables globales
-iCodCN = COM.iCodCN
-iFeRes = COM.iFeRes
-iFeFir = COM.iFeFir
-iNegoc = COM.iNegoc
-iNombr = COM.iNombr
-iStatu = COM.iStatu
-iMoned = COM.iMoned
-iPreci = COM.iPreci
-iComis = COM.iComis
-iIVA   = COM.iIVA
-iLados = COM.iLados
-iFRsIv = COM.iFRsIv
-iFRcIv = COM.iFRcIv
-iPoFra = COM.iPoFra
-iFraPR = COM.iFraPR
-iPoRCN = COM.iPoRCN
-iPoReg = COM.iPoReg
-iRegal = COM.iRegal
-iIdCap = COM.iIdCap
-iNbCap = COM.iNbCap
-iPoCap = COM.iPoCap
-iCoCap = COM.iCoCap
-iPoGer = COM.iPoGer
-iCoGer = COM.iCoGer
-iIdCer = COM.iIdCer
-iNbCer = COM.iNbCer
-iPoCer = COM.iPoCer
-iCoCer = COM.iCoCer
-iNetos = COM.iNetos
-iPrVRe = COM.iPrVRe
-iStC21 = COM.iStC21
-iRepCN = COM.iRepCN
 if __name__ == '__main__':
-  lng = 52
+  lng = 80
   COM.prepararDiccionarios('../data/')
   ASE.prepararListaDeAsesores('../data/')
-  prepararListaDePropiedades('../data/')
+  prepararListaDePropiedades('../data/', True)
   prepararListas('../data/')
+  print('**** propiedades() ****')
   propiedades()
+  print('**** totAsesor() ****')
   totAsesor()
+  print('**** totMes() ****')
   totMes()
+  print('**** totEst() ****')
   totEst()
+  print('**** totAsesorMes() ****')
   totAsesorMes()
+  print('**** totMesAsesor() ****')
   totMesAsesor()
+  print('**** totales() ****')
   totales()
+  print('**** Las llaves de propiedades ****')
+  st = ln = ''
+  i  = 0
+  for k in lPro[0].keys():
+    i += 1
+    st += str(i) + ') ' + k + '\n'
+    ln += k + ' '
+  ES.imprime(st.rstrip(' \t\n\r'))
+  ES.imprime(ln.rstrip(' \t\n\r'))
   print('**** Las propiedades con longitud diferente a %d: ****' % lng)
   for l in lPro:
-    if (40 < len(l)) and (52 != len(l)):
-      print(l[0], l[iCodCN], l[41], l[42], l[43], l[44], l[45], l[46], l[47],
-            l[iStC21], l[iRepCN], l[50], l[51], sep='|')
+    if (40 < len(l)) and (lng != len(l)):
+      print(l['id'], l['codigo'], l['prVeRe'], l['nroRec'], l['pagGer'],
+            l['factGer'], l['pagAses'], l['factAse'], l['pagOtOf'],
+            l['estaC21'], l['repCaNa'], l['repCaNa'], l['factAyS'],
+            len(l), sep='|')
+  else: print('* NO HAY *')

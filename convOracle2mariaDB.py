@@ -189,7 +189,7 @@ if bMovil:
   else: sCed = str(iCed)
 else:
   try:
-    f = ES.abrir(nombArchEntCompleto, 'r', 'latin-1')
+    f = ES.abrir(nombArchEntCompleto, 'r', 'latin-1', True)
   except:
     f = False
 if not f:

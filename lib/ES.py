@@ -267,7 +267,7 @@ def cargaJson(aNb):
     obj = json.loads(cad)
   except: pass
   finally: f.close()
-  if 'obj' in locals(): return obj
+  if 'obj' in locals(): return obj  # Probar si una varible existe, en ambito local. Tambien, globals().
   else: return False      # Si 'obj' no esta entre las variables locales de la funcion, no ha sido definida.
 # funcion cargaJson
 def cargaListaJson(aNb):
