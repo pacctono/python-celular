@@ -569,7 +569,7 @@ def totAsesor():
   tPrVeReal = tCap = tCer = 0.00
   for l in lTAs:
     try:
-      bImpar, cad = detTotales(ASE.nombreAsesor(l[0], 1), l[23]+l[24],
+      bImpar, cad = detTotales(ASE.nombreAsesor(l[0]), l[23]+l[24],
                           l[25]+l[26], l[21], l[22], l[23], l[24], bImpar, 20)
       st += cad
     except TypeError:
@@ -580,7 +580,7 @@ def totAsesor():
         tPrVeReal, tCap, tCer = tPrVeReal+l[25]+l[26], tCap+l[21], tCer+l[22]
         tLaCap, tLaCer = tLaCap+l[23], tLaCer+l[24]
     except:
-      print('ERROR totales:', ASE.nombreAsesor(l[0], 1) + ' => ',
+      print('ERROR totales:', ASE.nombreAsesor(l[0]) + ' => ',
             'filas:', l[1], '; Precio:', l[2], '; lados:', l[3],
             '; PVR:', l[19], '; Puntos:', l[20], '; asesor Cap:', l[21],
             '; asesor Cer:', l[22], '; lados Cap:', l[23],
@@ -715,7 +715,7 @@ def totAsesorMes():
           st += totTotales('Total Asesor', tAsLaCap + tAsLaCer, tAsPvr,
                             tAsCap, tAsCer, tAsLaCap, tAsLaCer, 16)
         idAse = l[0]
-        st += CO.CYAN + ASE.nombreAsesor(l[0], 1) + CO.FIN + '\n'
+        st += CO.CYAN + ASE.nombreAsesor(l[0]) + CO.FIN + '\n'
         tAsLados = tAsLaCap = tAsLaCer = 0
         tAsPvr = tAsCap = tAsCer = 0.00
       bImpar, cad = detTotales(l[1][0:4]+' '+CO.meses[int(l[1][5:])],
@@ -787,7 +787,7 @@ def totMesAsesor():
         st += CO.CYAN + l[0] + CO.FIN + '\n'
         tMeLados = tMeLaCap = tMeLaCer = 0
         tMePvr = tMeCap = tMeCer = 0.00
-      bImpar, cad = detTotales(ASE.nombreAsesor(l[1], 1), l[24] + l[25],
+      bImpar, cad = detTotales(ASE.nombreAsesor(l[1]), l[24] + l[25],
                         l[26]+l[27], l[22], l[23], l[24], l[25], bImpar, 20)
       st += cad
     except TypeError:

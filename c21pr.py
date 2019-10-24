@@ -23,7 +23,10 @@ else: droid = None
 from c21 import Propiedades as PRO
 from c21 import Comun as COM
 from c21 import Asesores as ASE
+from c21 import Contacto as Con
 from c21 import Cliente as Cli
+from c21 import Turno as Tur
+from c21 import Agenda as Age
 from c21 import Comisiones as CMS
 from lib import ES, Cuota as CU, General as FG
 
@@ -62,45 +65,51 @@ def selFuncionInicial(nOpciones=7):		# nOpciones: Primeras opciones de lMenu a d
   return FG.selOpcionMenu(
             COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
 # Funcion selFuncionInicial(nOpciones)
-def selFuncion(ci, nOpcion=6):
-  ''' Menu desplegado al suministrar un codigo o al encontrar el codigo de una
-      parte de un nombre suministrado.
-  '''
-  lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las opciones generales + la opcion 'Volver'.
-  sTitulo    = str(ci) + ':' + COM.nombreProp(COM.mNombre(ci))	# Titulo a desplegar con las opciones.
-  while True:
-    try:
-      func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
-    except:
-      return False
-    while True:
-      if isinstance(func, types.FunctionType):
-        opc = func(ci)	    # Si la cadena evaluada es una funcion, ejecutela.
-        if FG.esEntero(opc): opc = str(opc)
-        if '' == opc or None == opc or not opc.isdigit() or (opc.isdigit() and
-                        (0 > int(opc) or len(lNuevoMenu) <= int(opc))): break
-        func = eval(lNuevoMenu[int(opc)][1])
-      else: return False
+#def selFuncion(ci, nOpcion=6):
+#  ''' Menu desplegado al suministrar un codigo o al encontrar el codigo de una
+#      parte de un nombre suministrado.
+#  '''
+#  lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las opciones generales + la opcion 'Volver'.
+#  sTitulo    = str(ci) + ':' + COM.nombreProp(COM.mNombre(ci))	# Titulo a desplegar con las opciones.
+#  while True:
+#    try:
+#      func = eval(FG.selOpcionMenu(lNuevoMenu, sTitulo))	# Evaluar contenido de res['name']; el cual, debe ser una funcion conocida.
+#    except:
+#      return False
+#    while True:
+#      if isinstance(func, types.FunctionType):
+#        opc = func(ci)	    # Si la cadena evaluada es una funcion, ejecutela.
+#        if FG.esEntero(opc): opc = str(opc)
+#        if '' == opc or None == opc or not opc.isdigit() or (opc.isdigit() and
+#                        (0 > int(opc) or len(lNuevoMenu) <= int(opc))): break
+#        func = eval(lNuevoMenu[int(opc)][1])
+#      else: return False
 # Funcion selFuncion
-def cargar(esperar='Espere un momento, por favor...'):
-  if droid:
-    droid.dialogCreateHorizontalProgress('Century21 Puente Real', esperar, 100)
-    droid.dialogShow()
-    droid.dialogSetCurrentProgress(15)
-  else: print(esperar)
+def cargar(mostrar=False, esperar='Espere un momento, por favor...'):
+  if mostrar:    
+    if droid:
+      droid.dialogCreateHorizontalProgress('Century21 Puente Real', esperar, 100)
+      droid.dialogShow()
+      droid.dialogSetCurrentProgress(15)
+    else: print(esperar)
+  Con.Contacto.prepararListaDeContactos()
   Cli.Cliente.prepararListaDeClientes()
+  Age.Agenda.prepararListaDeAgendas()
+  Tur.Turno.prepararListaDeTurnos()
   ASE.prepararListaDeAsesores()
   PRO.prepararListaDePropiedades()
-  PRO.prepararListas()
-  if droid: droid.dialogSetCurrentProgress(60)
-  else: print('Listas listas!')
+  PRO.prepararListas()      # totales en propiedades.
+  if mostrar:    
+    if droid: droid.dialogSetCurrentProgress(60)
+    else: print('Listas listas!')
   COM.prepararDiccionarios()
-  if droid: droid.dialogSetCurrentProgress(90)
-  else: print('Diccionarios listos!')
-  if droid: FG.limpiarPantalla()
+  if mostrar:    
+    if droid: droid.dialogSetCurrentProgress(90)
+    else: print('Diccionarios listos!')
+  if droid and mostrar: FG.limpiarPantalla()
 # Funcion cargar
 
-cargar()
+cargar(True)
 ES.muestraInicio("Century21 Puente Real: J-40589955-7.")
 if droid: droid.dialogSetCurrentProgress(95)
 

@@ -85,14 +85,15 @@ def prepararListaDeAsesores(dir=''):
     lNAs.append([l['name'], l['id']])
   return
 # Funcion prepararListaDeAsesores
-def nombreAsesor(i, restar=0):
+def nombreAsesor(i):
   global lAse
 
-  try: i = int(i) - restar
-  except: return 'Indice no es numero'
-  if (0 > i) or (len(lAse) <= i):
-    return 'Indice(' + str(i) + ') nombr err'
-  return lAse[int(i)].get('name', 'Nombre no encontrado')
+  try: i = int(i)
+  except: return 'Indice:' + i + ', no es numero'
+  for l in lAse:
+    if (i == l['id']): break
+  else: return 'Indice(' + str(i) + ") nombre ERROR: 'id' no se encuentra."
+  return l.get('name', 'Nombre no encontrado')
 # Funcion nombreAsesor
 def poblarLstAsesores(ci, nb, nu='', fnac='P', ds='No', ex='N'):
       return {'ci':ci, 'nb':nb, 'nu':nu, 'fnac':fnac, 'dsp':ds, 'ex':ex}	# Codigo, desc,
@@ -280,9 +281,9 @@ if __name__ == '__main__':
   prepararListaDeAsesores("../data/")
 #  PRO.prepararListaDePropiedades("../data/")
   asesor()
-#  st = ''
-#  i  = 0
-#  for k in lAse[0].keys():
-#    i += 1
-#    st += str(i) + ') ' + k + '\n'
-#  ES.imprime(st.rstrip(' \t\n\r'))
+  st = ''
+  i  = 0
+  for k in lAse[0].keys():
+    i += 1
+    st += str(i) + ') ' + k + '\n'
+  ES.imprime(st.rstrip(' \t\n\r'))

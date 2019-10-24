@@ -86,15 +86,16 @@ class Cliente:
     dic  = Cliente.dic
     sMsj = ''
     for campo in dic:
-        if dic[campo]:
+        if dic[campo] and hasattr(self, campo):
             sMsj += COM.prepLnMsj(dic, self, campo)
-    opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
+    if sMsj: opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
 # Fin de class Cliente
 
 if __name__ == '__main__':
   Cliente.prepararListaDeClientes("../data/")
 #  PRO.prepararListaDePropiedades("../data/")
-  lCli = Cliente.lCli
   cliente = Cliente(0)
-  if None != cliente: cliente.muestra()
-  print(Cliente.nombre(1))
+  cliente.muestra()
+  cliente = Cliente(1)
+  cliente.muestra()
+  print(Cliente.nombre(2))

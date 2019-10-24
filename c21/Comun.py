@@ -57,18 +57,33 @@ lMenu = [
           ['Salir', 'salir']
 	      ]
 
-lSitios = ["Puente Real", "Portatil Barcelona", "Portatil Casa",
+lSitios = ["Puente Real", "Portatil Barcelona", "Portatil Casa", "Virtualbox",
 			"Otro", "Salir"]
-lIPs    = ["192.168.0.220", "192.168.0.200", "192.168.1.200", ""]
+lIPs    = ["192.168.0.220", "192.168.0.200", "192.168.0.200", "192.168.0.205", ""]
 lDATA = [
 		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
+     'agendas.txt',
 		 'asesores.txt',
+     'caracteristicas.txt',
+     'ciudads.txt',
+     'clientes.txt',
+     'contactos.txt',
+     'deseos.txt',
+     'estados.txt',
 		 'estatus.txt',
 		 'estatus_sistema_c21.txt',
 		 'moneda.txt',
+     'municipios.txt',
 		 'negociacion.txt',
+     'origens.txt',
+     'precios.txt',
 		 'propiedades.txt',
+     'propiedads.txt',
+     'resultados.txt',
+     'tipos.txt',
 		 'totales.txt',
+     'turnos.txt',
+     'zonas.txt',
 		]
 
 def muestraError(func, desc, cad, ln, dec=0):
@@ -285,17 +300,6 @@ def selMes(lTMe, incluirTodos=False):
 
   return mes[0:4], mes[5:]
 # Funcion selMes
-def nombreProp(fila):
-  ''' Retorna el nombre de una propiedad.
-      fila[0]: numero incremental.
-      fila[1]: Codigo casa nacional.
-      fila[2]: fecha de reserva.
-      fila[3]: fecha de firma.
-      fila[4]: Negociacion: Venta o Alquiler.
-      fila[5]: Nombre de la propiedad.
-  '''
-  return fila[5].strip(' "\t\n\r')
-# Funcion nombreProp
 def selOpcion(Menu, descr):
   menu = Menu
 
@@ -389,7 +393,7 @@ def actualizar():
 # ademas de la informacion del sistema, tambien se guardara la fecha de descarga de cada archivo.
 # dControl = ES.cargaDicc("control.txt")	# Diccionario de control, antes de recibir el nuevo. No implementado 27/08/2019.
 
-  URL = "http://" + IPServ + '/storage/'
+  URL = "http://" + IPServ + ':8080/storage/'
   bImpar  = True
   dHoy = strftime("%Y%m%d", localtime())
   for DATA in lDATA:
