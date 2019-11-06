@@ -24,67 +24,10 @@ if bMovil:
   droid = android.Android()
 else: droid = None
 
-lMenuLstPro = [
-          ['Propiedades X Estatus', 'PRO.lstXEstatus'],
-          ['Propiedades X Asesor', 'PRO.lstXAsesor'],
-          ['Propiedades X Mes', 'PRO.lstXMes'],
-        ]
-lMenuProEsp = [
-          ['Propiedades X Estatus', 'PRO.xEstatus'],
-          ['Propiedades X Nombre', 'PRO.xNombre'],
-          ['Propiedades X Asesor', 'PRO.xAsesor'],
-          ['Codigo de casa nacional', 'PRO.xCodigo'],
-          ['Reporte en casa nacional', 'PRO.xReporte'],
-        ]
-lMenuTot = [
-          ['Totales X Asesor', 'PRO.totAsesor'],
-          ['Totales X Mes', 'PRO.totMes'],
-          ['Totales X Estatus', 'PRO.totEst'],
-          ['Totales X Asesor X Mes', 'PRO.totAsesorMes'],
-          ['Totales X Mes X Asesor', 'PRO.totMesAsesor'],
-          ['Totales generales', 'PRO.totales'],
-        ]
-lMenu = [
-          ['Calcular cuota', 'cuota'],                  # 0
-          ['Calcular comision', 'comisiones'],          # 1
-          ['Actualizar datos', 'COM.actualizar'],
-          ['Cumpleaneros', 'ASE.cumpleanos'],           # 3
-          ['Asesor', 'ASE.asesor'],
-          ['Todas las propiedades', 'PRO.propiedades'],
-          ['Listar propiedades por ...', 'PRO.LstPropPor'],
-          ['Buscar una propiedad', 'PRO.buscProp'],
-          ['Estadisticas ...', 'PRO.totPor'],
-          ['Salir', 'salir']
-	      ]
-
 lSitios = ["Puente Real", "Portatil Barcelona", "Portatil Casa", "Virtualbox",
-			"Otro", "Salir"]
+			"Otro", "Volver"]
 lIPs    = ["192.168.0.220", "192.168.0.200", "192.168.0.200", "192.168.0.205", ""]
-lDATA = [
-		 'control.txt',			# Por procesamiento posterior, este archivo, SIEMPRE, debe estar primero.
-     'agendas.txt',
-		 'asesores.txt',
-     'caracteristicas.txt',
-     'ciudads.txt',
-     'clientes.txt',
-     'contactos.txt',
-     'deseos.txt',
-     'estados.txt',
-		 'estatus.txt',
-		 'estatus_sistema_c21.txt',
-		 'moneda.txt',
-     'municipios.txt',
-		 'negociacion.txt',
-     'origens.txt',
-     'precios.txt',
-		 'propiedades.txt',
-     'propiedads.txt',
-     'resultados.txt',
-     'tipos.txt',
-		 'totales.txt',
-     'turnos.txt',
-     'zonas.txt',
-		]
+CONTROL = 'control.txt'
 
 def muestraError(func, desc, cad, ln, dec=0):
   print('ERROR en ' + func + ': ' + desc + ':' + type(desc))
@@ -306,7 +249,11 @@ def selOpcion(Menu, descr):
   opc = FG.selOpcionMenu(menu + [['Volver', -1]], descr)
   if isinstance(opc, int) and 0 > int(opc): return opc
   else:
-    from c21 import Propiedades as PRO
+    if (0 == opc.find('PRO')): from c21 import Propiedades as PRO
+    elif (0 == opc.find('Con')): from c21.Contacto import Contacto as Con
+    elif (0 == opc.find('Cli')): from c21.Cliente import Cliente as Cli
+    elif (0 == opc.find('Tur')): from c21.Turno import Turno as Tur
+    elif (0 == opc.find('Age')): from c21.Agenda import Agenda as Age
     func = eval(opc)	# Evaluar contenido de opc; el cual, debe ser una funcion conocida.
     if isinstance(func, types.FunctionType): return func()	# Si la cadena evaluada es una funcion, ejecutela.
     else: return opc
@@ -395,40 +342,57 @@ def actualizar():
 
   URL = "http://" + IPServ + ':8080/storage/'
   bImpar  = True
-  dHoy = strftime("%Y%m%d", localtime())
-  for DATA in lDATA:
+  data = urlopen(URL + CONTROL, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
+  if None == data:
+    print('ERROR. No hubo carga.')
+    sys.exit()
+  f = open(DIR + CONTROL, "w")
+  if f:
+    archivos = data.split('\n')
+    fechaGrabado = archivos.pop(0)
+    f.write('Datos grabados: ' + fechaGrabado)
+    ahora = strftime("\nDatos descargados: %a, %d/%m/%Y %-l:%M:%S %p\n", localtime())
+    f.write(ahora)
+    f.close()
+  else:
+    print('ERROR. No se pudo escribir en el archivo.')
+    sys.exit()
+  for nombreArchivo in archivos:
+#    if nombreArchivo[5:6].isdigit(): continue      # La primera linea es una fecha. El primer caracter es un digito.    
+    nombreArchivo = nombreArchivo.rstrip(' \t\n\r')
+    if not nombreArchivo: continue
     sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE, CO.AZUL)
-    print("%sLeyendo%s %s remoto." % (sColor, CO.FIN, DATA))
+    print("%sLeyendo%s %s remoto." % (sColor, CO.FIN, nombreArchivo))
     try:
-      data = urlopen(URL + DATA, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
+      data = urlopen(URL + nombreArchivo, None, 10).read().decode('ISO-8859-1')	# None, ningun parametro es enviado al servidor; 10, timeout.
       bLeido = True												# No hubo error de lectura desde el servidor.
     except:
-      print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, DATA,
+      print("%sERROR LEYENDO%s %s %sREMOTO.%s" % (CO.ROJO, CO.FIN, nombreArchivo,
                                 CO.ROJO, CO.FIN))
       bLeido = False
     if bLeido:														# Si no hubo error de lectura desde el servidor.
       try:
-        f = open(DIR + DATA, "w")
+        f = open(DIR + nombreArchivo, "w")
         bAbierto = True											# No hubo error al abrir para escribir en archivo local.
       except:
         print("%sERROR AL TRATAR DE ABRIR%s %s%s %sPARA ESCRITURA.%s" % \
-                  (CO.ROJO, CO.FIN, DIR, DATA, CO.ROJO, CO.FIN))
+                  (CO.ROJO, CO.FIN, DIR, nombreArchivo, CO.ROJO, CO.FIN))
         bAbierto = False
       if bAbierto:												# Si no hubo error al abrir para escribir en archivo local.
-        print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, DATA))
+        print("%sEscribiendo%s %s local..." % (sColor, CO.FIN, nombreArchivo))
         try:
           f.write(data)
           bEscrito = True										# No hubo error escribiendo en el archivo local.
         except:
           print("%sERROR AL TRATAR DE ESCRIBIR%s %s." % (CO.ROJO, CO.FIN,
-                                      DATA))
+                                      nombreArchivo))
           bEscrito = False
         finally:
           f.close()
         if bEscrito:
-          print("%s %sactualizado con%s %d lineas!" % (DATA,
-                  (CO.CYAN if 'heute.txt' == DATA else sColor),
-                            CO.FIN, ES.cLineas(DATA)))
+          print("%s %sactualizado con%s %d lineas!" % (nombreArchivo,
+                  (CO.CYAN if 'heute.txt' == nombreArchivo else sColor),
+                            CO.FIN, ES.cLineas(nombreArchivo)))
         # Fin if bEscrito
       # Fin if bAbierto
     # Fin if bLeido

@@ -23,12 +23,30 @@ else: droid = None
 from c21 import Propiedades as PRO
 from c21 import Comun as COM
 from c21 import Asesores as ASE
-from c21 import Contacto as Con
-from c21 import Cliente as Cli
-from c21 import Turno as Tur
-from c21 import Agenda as Age
+from c21.Contacto import Contacto as Con
+from c21.Cliente import Cliente as Cli
+from c21.Turno import Turno as Tur
+from c21.Agenda import Agenda as Age
 from c21 import Comisiones as CMS
 from lib import ES, Cuota as CU, General as FG
+
+lMenu = [
+          ['Calcular cuota', 'cuota'],                  # 0
+          ['Calcular comision', 'comisiones'],          # 1
+          ['Actualizar datos', 'COM.actualizar'],
+          ['Cumpleaneros', 'ASE.cumpleanos'],           # 3
+          ['Asesor', 'ASE.asesor'],
+          ['Propiedades', 'PRO.propiedades'],
+          ['Contactos', 'Con.contactos'],
+          ['Clientes', 'Cli.clientes'],
+          ['Turnos', 'Tur.turnos'],
+          ['Agenda', 'Age.agendas'],
+#          ['Todas las propiedades', 'PRO.propiedades'],
+#          ['Listar propiedades por ...', 'PRO.LstPropPor'],
+#          ['Buscar una propiedad', 'PRO.buscProp'],
+#          ['Estadisticas ...', 'PRO.totPor'],
+          ['Salir', 'salir']
+	      ]
 
 def leeValXDefecto():
 
@@ -63,13 +81,13 @@ def selFuncionInicial(nOpciones=7):		# nOpciones: Primeras opciones de lMenu a d
     <Nombre> ..... y <Salir>. '''
 
   return FG.selOpcionMenu(
-            COM.lMenu[0:nOpciones] + COM.lMenu[(len(COM.lMenu)-1):], 'Inicio')
+            lMenu[0:nOpciones] + lMenu[(len(lMenu)-1):], 'Inicio')
 # Funcion selFuncionInicial(nOpciones)
 #def selFuncion(ci, nOpcion=6):
 #  ''' Menu desplegado al suministrar un codigo o al encontrar el codigo de una
 #      parte de un nombre suministrado.
 #  '''
-#  lNuevoMenu = COM.lMenu[nOpcion:(len(COM.lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las opciones generales + la opcion 'Volver'.
+#  lNuevoMenu = lMenu[nOpcion:(len(lMenu)-1)]+[['Volver', '-11']]	# lMenu sin las opciones generales + la opcion 'Volver'.
 #  sTitulo    = str(ci) + ':' + COM.nombreProp(COM.mNombre(ci))	# Titulo a desplegar con las opciones.
 #  while True:
 #    try:
@@ -86,16 +104,18 @@ def selFuncionInicial(nOpciones=7):		# nOpciones: Primeras opciones de lMenu a d
 #      else: return False
 # Funcion selFuncion
 def cargar(mostrar=False, esperar='Espere un momento, por favor...'):
+  global control
+
   if mostrar:    
     if droid:
       droid.dialogCreateHorizontalProgress('Century21 Puente Real', esperar, 100)
       droid.dialogShow()
       droid.dialogSetCurrentProgress(15)
     else: print(esperar)
-  Con.Contacto.prepararListaDeContactos()
-  Cli.Cliente.prepararListaDeClientes()
-  Age.Agenda.prepararListaDeAgendas()
-  Tur.Turno.prepararListaDeTurnos()
+  Con.prepararListaDeContactos()
+  Cli.prepararListaDeClientes()
+  Age.prepararListaDeAgendas()
+  Tur.prepararListaDeTurnos()
   ASE.prepararListaDeAsesores()
   PRO.prepararListaDePropiedades()
   PRO.prepararListas()      # totales en propiedades.
@@ -103,22 +123,26 @@ def cargar(mostrar=False, esperar='Espere un momento, por favor...'):
     if droid: droid.dialogSetCurrentProgress(60)
     else: print('Listas listas!')
   COM.prepararDiccionarios()
+  fc = open(DIR + COM.CONTROL, 'r')
+  if fc: control = fc.read()
+  else: control = ''
   if mostrar:    
-    if droid: droid.dialogSetCurrentProgress(90)
+    if droid: droid.dialogSetCurrentProgress(95)
     else: print('Diccionarios listos!')
   if droid and mostrar: FG.limpiarPantalla()
 # Funcion cargar
 
 cargar(True)
 ES.muestraInicio("Century21 Puente Real: J-40589955-7.")
-if droid: droid.dialogSetCurrentProgress(95)
+print(control)
+if droid: droid.dialogSetCurrentProgress(98)
 
 cog, sUXD, sCXD = leeValXDefecto()
 if droid:
   droid.dialogSetCurrentProgress(100)
   droid.dialogDismiss()
 
-nOp = len(COM.lMenu) - 1
+nOp = len(lMenu) - 1
 while True:
   sOpcion = selFuncionInicial(nOp)
 

@@ -23,6 +23,13 @@ from lib import ES, Const as CO, General as FG
 from c21 import Comun as COM
 from c21 import Asesores as ASE
 
+lMenu = [
+          ['Todas los contactos', 'Con.todosContactos'],
+          ['Listar contactos por ...', 'Con.LstContPor'],
+          ['Buscar un contacto', 'Con.buscCont'],
+          ['Estadisticas ...', 'Con.totPor'],
+	      ]
+
 class Contacto:
   lCon = []    
   dic = {
@@ -128,6 +135,28 @@ class Contacto:
                                 eval(func))
         else: sMsj += COM.prepLnMsj(dic, self, campo)
     if sMsj: opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
+  @staticmethod
+  def todosContactos():
+    return
+  # Metodo todosContactos
+  @staticmethod
+  def LstContPor():
+    return
+  # Metodo LstContPor
+  @staticmethod
+  def buscCont():
+    return
+  # Metodo buscCont
+  @staticmethod
+  def totPor():
+    return
+  # Metodo totPor
+  @staticmethod
+  def contactos():
+    global lMenu
+    op = ''
+    while ('' == op): op = COM.selOpcion(lMenu, 'Menu de contactos')
+  # Funcion contactos
 # Fin de class Contacto
 
 if __name__ == '__main__':

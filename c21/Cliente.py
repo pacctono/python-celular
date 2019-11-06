@@ -22,6 +22,13 @@ if __name__ == '__main__': sys.path.append('../')
 from lib import ES, Const as CO, General as FG
 from c21 import Comun as COM
 
+lMenu = [
+          ['Todas los clientes', 'Cli.todosClientes'],
+          ['Listar clientes por ...', 'Cli.LstCliPor'],
+          ['Buscar un cliente', 'Cli.buscCli'],
+          ['Estadisticas ...', 'Cli.totPor'],
+	      ]
+
 class Cliente:
   lCli = []    
   dic = {
@@ -46,6 +53,11 @@ class Cliente:
       print('ERROR: No se ha encontrado la llave:' + str(id) +\
             ' en la lista de clientes.')
       return None
+    for campo in reg:
+      if (campo in ('actualizado', 'borrado')):
+        setattr(self, 'fecha_' + campo, reg[campo])
+      else: setattr(self, campo, reg[campo])
+    '''
     self.id = reg['id']
     self.cedula   = reg['cedula']
     self.rif      = reg['rif']
@@ -61,6 +73,7 @@ class Cliente:
     self.fecha_actualizado = reg['actualizado']
     self.user_borro = reg['user_borro']
     self.fecha_borrado = reg['borrado']
+    '''
   @staticmethod
   def prepararListaDeClientes(dir=''):
     lCli = ES.cargaListaJson(dir+'clientes.txt')
@@ -89,6 +102,28 @@ class Cliente:
         if dic[campo] and hasattr(self, campo):
             sMsj += COM.prepLnMsj(dic, self, campo)
     if sMsj: opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
+  @staticmethod
+  def todosClientes():
+    return
+  # Metodo todosClientes
+  @staticmethod
+  def LstCliPor():
+    return
+  # Metodo LstCliPor
+  @staticmethod
+  def buscCli():
+    return
+  # Metodo buscCli
+  @staticmethod
+  def totPor():
+    return
+  # Metodo totPor
+  @staticmethod
+  def clientes():
+    global lMenu
+    op = ''
+    while ('' == op): op = COM.selOpcion(lMenu, 'Menu de clientes')
+  # Funcion clientes
 # Fin de class Cliente
 
 if __name__ == '__main__':

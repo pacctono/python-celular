@@ -184,7 +184,10 @@ def cumpleanos(mostrar=True):
   titulo = CO.CYAN + 'Proximos cumpleaneros' + CO.FIN + '\n'
   st = ''
   indices = []
-  for l in lAse:
+#  lClas = sorted(lAse, key = lambda k: k['fecha_nacimiento'])  # Problemas con valures null.
+  lClas = sorted(lAse, key = lambda k: (k['fecha_nacimiento'][5:10] \
+                        if k['fecha_nacimiento'] else ''))
+  for l in lClas:
     if not l['fecNac']: continue
     fecNac = l['fecNac']
     anoNac, mesNac, diaNac, dSemNac =\
@@ -192,15 +195,19 @@ def cumpleanos(mostrar=True):
     fecCump = date(proxAno, mesNac, diaNac)
     diaSem  = CO.semana[fecCump.weekday()]
     if fecCump == hoy:
-      indices.append([l['name'], fecCump])
+      indices.append([l['id'], l['name'], fecCump])
       if mostrar:
         st += CO.AMARI + l['name'] + ': ' + 'HOY, ' + diaSem + ' ' +\
               fecNac[0:2] + ' de ' + CO.meses[mesNac] + CO.FIN + '\n'
+      # FIN if mostrar
     elif hoy < fecCump <= enUnMes:
       if mostrar:
         sColor, bImpar = ES.colorLinea(bImpar, CO.VERDE)
         st += sColor + l['name'] + ': ' + diaSem + ' ' +\
               fecNac[0:2] + ' de ' + CO.meses[mesNac] + CO.FIN + '\n'
+      # FIN if mostrar
+    # FIN if fecCump == hoy
+  # FIN for l in lClas
   if mostrar:
     if (st): st = titulo + st
     else: st = CO.CYAN + 'No hay cumpleaneros proximamente.' +\

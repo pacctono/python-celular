@@ -23,6 +23,13 @@ from lib import ES, Const as CO, General as FG
 from c21 import Comun as COM
 from c21 import Asesores as ASE
 
+lMenu = [
+          ['Todas las citas', 'Age.todasAgendas'],
+          ['Listar citas por ...', 'Age.LstAgePor'],
+          ['Buscar un cita', 'Age.buscAge'],
+          ['Estadisticas ...', 'Age.totPor'],
+	      ]
+
 class Agenda:
   lAge = []    
   dic = {
@@ -45,6 +52,11 @@ class Agenda:
       print('ERROR: Esta llave:' + str(index) + 'esta fuera de rango.')
       return None
     reg = Agenda.lAge[index]
+    for campo in reg:
+      if (campo in ('actualizado', 'borrado')):
+        setattr(self, 'fecha_' + campo, reg[campo])
+      else: setattr(self, campo, reg[campo])
+    '''
     self.user_id     = reg['user_id']
     self.contacto_id = reg['contacto_id']
     self.fecha       = reg['fecha']
@@ -54,6 +66,7 @@ class Agenda:
     self.telefono    = reg['telefono']
     self.direccion   = reg['direccion']
     self.email       = reg['email']
+    '''
   @staticmethod
   def prepararListaDeAgendas(dir=''):
     lAge = ES.cargaListaJson(dir+'agendas.txt')
@@ -80,6 +93,28 @@ class Agenda:
                                 ASE.nombreAsesor(val))
         else: sMsj += COM.prepLnMsj(dic, self, campo)
     if sMsj: opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
+  @staticmethod
+  def todasAgendas():
+    return
+  # Metodo todasAgendas
+  @staticmethod
+  def LstAgePor():
+    return
+  # Metodo LstAgePor
+  @staticmethod
+  def buscAge():
+    return
+  # Metodo buscAge
+  @staticmethod
+  def totPor():
+    return
+  # Metodo totPor
+  @staticmethod
+  def agendas():
+    global lMenu
+    op = ''
+    while ('' == op): op = COM.selOpcion(lMenu, 'Menu de citas')
+  # Funcion agendas
 # Fin de class Agenda
 
 if __name__ == '__main__':

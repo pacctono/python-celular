@@ -23,6 +23,13 @@ from lib import ES, Const as CO, General as FG
 from c21 import Comun as COM
 from c21 import Asesores as ASE
 
+lMenu = [
+          ['Todas los turnos', 'Tur.todosTurnos'],
+          ['Listar turnos por ...', 'Tur.LstTurPor'],
+          ['Buscar un turno', 'Tur.buscTur'],
+          ['Estadisticas ...', 'Tur.totPor'],
+	      ]
+
 class Turno:
   lTur = []    
   dic = {
@@ -46,6 +53,11 @@ class Turno:
       print('ERROR: No se ha encontrado la llave:' + str(id) +\
             ' en la lista de turnos.')
       return None
+    for campo in reg:
+      if (campo in ('actualizado', 'borrado')):
+        setattr(self, 'fecha_' + campo, reg[campo])
+      else: setattr(self, campo, reg[campo])
+    '''
     self.id = reg['id']
     self.user_id        = reg['user_id']
     self.fecha          = reg['fecha']
@@ -53,6 +65,7 @@ class Turno:
     self.creado         = reg['creado']
     self.user_actualizo = reg['user_actualizo']
     self.user_borro     = reg['user_borro']
+    '''
   @staticmethod
   def prepararListaDeTurnos(dir=''):
     lTur = ES.cargaListaJson(dir+'turnos.txt')
@@ -79,6 +92,28 @@ class Turno:
                                 ASE.nombreAsesor(val))
         else: sMsj += COM.prepLnMsj(dic, self, campo)
     if sMsj: opc = ES.imprime(sMsj.rstrip(' \t\n\r'))
+  @staticmethod
+  def todosTurnos():
+    return
+  # Metodo todosTurnos
+  @staticmethod
+  def LstTurPor():
+    return
+  # Metodo LstTurPor
+  @staticmethod
+  def buscTur():
+    return
+  # Metodo buscTur
+  @staticmethod
+  def totPor():
+    return
+  # Metodo totPor
+  @staticmethod
+  def turnos():
+    global lMenu
+    op = ''
+    while ('' == op): op = COM.selOpcion(lMenu, 'Menu de turnos')
+  # Funcion turnos
 # Fin de class Turno
 
 if __name__ == '__main__':

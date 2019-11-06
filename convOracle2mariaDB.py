@@ -217,6 +217,11 @@ for linea in f:
       linea = '-- ' + linea.replace(sufijoEntrada, sufijoSalida)  # Comentar linea.
     else: continue
   if 'commit' in linea.lower(): continue    # commit
+  if '_cajas' in linea.lower():
+    indCajas = linea.lower().find('_cajas')
+    linTemp  = linea[0:indCajas]
+    if ((len(linea)-6) <= len(linTemp)): linea = linTemp
+    else: linea = linTemp + linea[(indCajas+6):]
   if 'NOMINA' in linea: linea = linea.replace('NOMINA', 'nomina')
   if 'PERSONAL' in linea:
     linea = linea.replace('PERSONAL', 'personal')

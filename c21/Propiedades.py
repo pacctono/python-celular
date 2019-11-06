@@ -25,6 +25,32 @@ from c21 import Comun as COM
 from c21 import Asesores as ASE
 from c21 import Cliente as Cli
 
+lMenu = [
+          ['Todas las propiedades', 'PRO.todasPropiedades'],
+          ['Listar propiedades por ...', 'PRO.LstPropPor'],
+          ['Buscar una propiedad', 'PRO.buscProp'],
+          ['Estadisticas ...', 'PRO.totPor'],
+	      ]
+lMenuLstPro = [
+          ['Propiedades X Estatus', 'PRO.lstXEstatus'],
+          ['Propiedades X Asesor', 'PRO.lstXAsesor'],
+          ['Propiedades X Mes', 'PRO.lstXMes'],
+        ]
+lMenuProEsp = [
+          ['Propiedades X Estatus', 'PRO.xEstatus'],
+          ['Propiedades X Nombre', 'PRO.xNombre'],
+          ['Propiedades X Asesor', 'PRO.xAsesor'],
+          ['Codigo de casa nacional', 'PRO.xCodigo'],
+          ['Reporte en casa nacional', 'PRO.xReporte'],
+        ]
+lMenuTot = [
+          ['Totales X Asesor', 'PRO.totAsesor'],
+          ['Totales X Mes', 'PRO.totMes'],
+          ['Totales X Estatus', 'PRO.totEst'],
+          ['Totales X Asesor X Mes', 'PRO.totAsesorMes'],
+          ['Totales X Mes X Asesor', 'PRO.totMesAsesor'],
+          ['Totales generales', 'PRO.totales'],
+        ]
 dMsj = {
         'id':False,
         'codigo':['Codigo MLS', 's', '', 0],
@@ -33,6 +59,7 @@ dMsj = {
         'fecRes':['Fecha de reserva', 'f', '', 0],
         'fecFir':['Fecha de la firma', 'f', '', 0],
         'estatus':['Estatus', 's', '', 0],
+        'exclu':['Exclusividad', 'b', True, 0],
         'tipo_id':['Tipo', 's', '', 0],
         'metraje':['Metraje', 'n', 7, 2],
         'habits':['Habitaciones', 'n', 3, 0],
@@ -207,6 +234,14 @@ def totTotales(tipoTot, tLados, tPvr, tCap, tCer, tLaCap, tLaCer,
         (FG.formateaNumero(tCer, 2) + '(' +\
         FG.formateaNumero(tLaCer) + ')').rjust(15) + CO.FIN + "\n"
 # Funcion totTotales
+def getPropiedad(id):
+  global lPro
+
+  for p in lPro:
+    #print(p)    
+    if (id == p['id']): return p
+  else: return None
+# Funcion getPropiedad
 def mPropiedad(lCod, titOpc):
   global lPro, dMsj
 
@@ -217,7 +252,8 @@ def mPropiedad(lCod, titOpc):
     id = FG.selOpcionMenu(lCod + [['Volver', -2]], titOpc)
     if (0 > id): return id
 
-  prop = lPro[id]
+  prop = getPropiedad(id)
+  if None == prop: return None
   sMsj = ''
   moneda = prop['moneda']
   try:
@@ -278,7 +314,7 @@ def mPropiedad(lCod, titOpc):
   tec = ES.imprime(sMsj.rstrip(' \t\n\r'))
   return tec
 # Funcion mPropiedad
-def propiedades(bCaidas=True):
+def todasPropiedades(bCaidas=True):
   '''Lee los datos de propiedades y los despliega
       fila['id']: numero incremental.
       fila['codigo']: Codigo casa nacional.
@@ -315,7 +351,7 @@ def propiedades(bCaidas=True):
         FG.formateaNumero(nV) + ' validas].'
 
   return ES.imprime(st.rstrip(' \t\n\r'))
-# funcion propiedades
+# funcion todasPropiedades
 def lstXEstatus():
   global lPro
 
@@ -440,7 +476,8 @@ def lstXMes():
   return ES.imprime(st.rstrip(' \t\n\r'))
 # Funcion lstXMes
 def LstPropPor():
-  return COM.selOpcion(COM.lMenuLstPro, 'Listar propiedades')
+  global lMenuLstPro
+  return COM.selOpcion(lMenuLstPro, 'Listar propiedades')
 # Funcion LstPropPor
 def xEstatus():
   global lPro
@@ -547,7 +584,8 @@ def xReporte():
   return mPropiedad(lCod, 'Reporte CN:'+cod)
 # Funcion xReporte
 def buscProp():
-  return COM.selOpcion(COM.lMenuProEsp, 'Buscar una propiedad especifica')
+  global lMenuProEsp
+  return COM.selOpcion(lMenuProEsp, 'Buscar una propiedad especifica')
 # Funcion BuscProp
 def totAsesor():
   ''' Agregar 1, correspondiente a el 'id' del asesor.
@@ -821,7 +859,8 @@ def totMesAsesor():
   return opc
 # Funcion totMesAsesor
 def totPor():
-  return COM.selOpcion(COM.lMenuTot, 'Totalizar')
+  global lMenuTot
+  return COM.selOpcion(lMenuTot, 'Totalizar')
 # Funcion totPor
 def totales():
   ''' 0:filas, 1:tPrecio, 2:tLados, 3:tCompartidoConIva,
@@ -856,6 +895,11 @@ def totales():
 
   return opc
 # Funcion totales
+def propiedades(bCaidas=True):
+  global lMenu
+  op = ''
+  while ('' == op): op = COM.selOpcion(lMenu, 'Menu de propiedades')
+# Funcion propiedades
 def prepararListas(dir=''):
   global lTot, lTAs, lTMe, lTEs, lTAM, lTMA
 
@@ -908,7 +952,8 @@ if __name__ == '__main__':
     ln += k + ' '
   ES.imprime(st.rstrip(' \t\n\r'))
   ES.imprime(ln.rstrip(' \t\n\r'))
-  print('**** Las propiedades con longitud diferente a %d: ****' % lng)
+  lng = 81  # Cada linea tiene 81 llaves.
+  print('**** Las propiedades con longitud diferente a %d: llaves ****' % lng)
   for l in lPro:
     if (40 < len(l)) and (lng != len(l)):
       print(l['id'], l['codigo'], l['prVeRe'], l['nroRec'], l['pagGer'],
